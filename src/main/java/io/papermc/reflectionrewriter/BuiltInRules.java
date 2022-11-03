@@ -9,7 +9,7 @@ import org.objectweb.asm.Type;
 public final class BuiltInRules {
     private final String proxy;
     private final RewriteRule classRule;
-    // TODO MethodHandles$Lookup: findVarHandle, findStaticGetter, findStaticSetter, findStaticVarHandle, bind
+    // TODO MethodHandles$Lookup: findVarHandle, findStaticVarHandle, bind
     private final RewriteRule methodHandlesLookupRule;
     private final RewriteRule lambdaMetafactoryRule;
     // TODO ConstantBootstraps: fieldVarHandle, staticFieldVarHandle
@@ -17,7 +17,6 @@ public final class BuiltInRules {
     // TODO Enums (google), EnumUtils (commons), any other enum and reflection utils bundled with Paper
     private final RewriteRule methodTypeRule;
     private final RewriteRule enumRule;
-    // TODO jdk.internal.Unsafe#objectFieldOffset (and defineClass?)
     // TODO ClassLoader#defineClass?
 
     public BuiltInRules(final String proxyClassName, final ClassInfoProvider classInfoProvider) {
@@ -88,7 +87,7 @@ public final class BuiltInRules {
                 if (((name.equals("findStatic") || name.equals("findVirtual")) && descriptor.equals("(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;"))
                     || (name.equals("findClass") && descriptor.equals("(Ljava/lang/String;)Ljava/lang/Class;"))
                     || (name.equals("findSpecial") && descriptor.equals("(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/Class;)Ljava/lang/invoke/MethodHandle;"))
-                    || ((name.equals("findGetter") || name.equals("findSetter")) && descriptor.equals("(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/invoke/MethodHandle;"))) {
+                    || ((name.equals("findGetter") || name.equals("findSetter") || name.equals("findStaticGetter") || name.equals("findStaticSetter")) && descriptor.equals("(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/invoke/MethodHandle;"))) {
                     final String redirectedDescriptor = "(Ljava/lang/invoke/MethodHandles$Lookup;" + descriptor.substring(1);
                     return InvokeStaticRewrite.staticRedirect(this.proxy, name, redirectedDescriptor);
                 }
