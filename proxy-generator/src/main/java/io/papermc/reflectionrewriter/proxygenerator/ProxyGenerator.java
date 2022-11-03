@@ -64,40 +64,23 @@ public final class ProxyGenerator {
         // Header
         classWriter.visit(V17, ACC_PUBLIC | ACC_FINAL | ACC_SUPER, generatedClassName, null, "java/lang/Object", null);
         // INSTANCE field
-        instanceField(discover, classWriter);
+        instanceField(classWriter, discover);
         // Private default constructor
         constructor(classWriter);
         // public static void init(proxyInstance)
-        initMethod(generatedClassName, discover, classWriter);
+        initMethod(classWriter, generatedClassName, discover);
         // proxy methods
         for (final MethodInfo method : discover.methods) {
-            final MethodVisitor visitor = classWriter.visitMethod(ACC_PUBLIC | ACC_STATIC, method.name, method.descriptor, method.signature, method.exceptions);
-            visitor.visitCode();
-            visitor.visitFieldInsn(GETSTATIC, generatedClassName, "INSTANCE", "L" + discover.name + ";");
-            final Type methodType = Type.getType(method.descriptor);
-            int locals = 0;
-            for (final Type argumentType : methodType.getArgumentTypes()) {
-                visitor.visitVarInsn(argumentType.getOpcode(ILOAD), locals);
-                locals++;
-            }
-            visitor.visitMethodInsn(INVOKEVIRTUAL, discover.name, method.name, method.descriptor, false);
-            visitor.visitInsn(methodType.getReturnType().getOpcode(IRETURN));
-            visitor.visitMaxs(locals + 1, locals);
-            visitor.visitEnd();
+            proxyMethod(classWriter, generatedClassName, discover, method);
         }
         // done
         classWriter.visitEnd();
         return classWriter.toByteArray();
     }
 
-    private static void initMethod(final String generatedClassName, final DiscoverMethodsVisitor discover, final ClassWriter classWriter) {
-        final MethodVisitor methodVisitor = classWriter.visitMethod(ACC_PUBLIC | ACC_STATIC, "init", "(L" + discover.name + ";)V", null, null);
-        methodVisitor.visitCode();
-        methodVisitor.visitVarInsn(ALOAD, 0);
-        methodVisitor.visitFieldInsn(PUTSTATIC, generatedClassName, "INSTANCE", "L" + discover.name + ";");
-        methodVisitor.visitInsn(RETURN);
-        methodVisitor.visitMaxs(1, 1);
-        methodVisitor.visitEnd();
+    private static void instanceField(final ClassWriter classWriter, final DiscoverMethodsVisitor discover) {
+        final FieldVisitor fieldVisitor = classWriter.visitField(ACC_PRIVATE | ACC_STATIC, "INSTANCE", "L" + discover.name + ";", null, null);
+        fieldVisitor.visitEnd();
     }
 
     private static void constructor(final ClassWriter classWriter) {
@@ -113,9 +96,30 @@ public final class ProxyGenerator {
         methodVisitor.visitEnd();
     }
 
-    private static void instanceField(final DiscoverMethodsVisitor discover, final ClassWriter classWriter) {
-        final FieldVisitor fieldVisitor = classWriter.visitField(ACC_PRIVATE | ACC_STATIC, "INSTANCE", "L" + discover.name + ";", null, null);
-        fieldVisitor.visitEnd();
+    private static void initMethod(final ClassWriter classWriter, final String generatedClassName, final DiscoverMethodsVisitor discover) {
+        final MethodVisitor methodVisitor = classWriter.visitMethod(ACC_PUBLIC | ACC_STATIC, "init", "(L" + discover.name + ";)V", null, null);
+        methodVisitor.visitCode();
+        methodVisitor.visitVarInsn(ALOAD, 0);
+        methodVisitor.visitFieldInsn(PUTSTATIC, generatedClassName, "INSTANCE", "L" + discover.name + ";");
+        methodVisitor.visitInsn(RETURN);
+        methodVisitor.visitMaxs(1, 1);
+        methodVisitor.visitEnd();
+    }
+
+    private static void proxyMethod(final ClassWriter classWriter, final String generatedClassName, final DiscoverMethodsVisitor discover, final MethodInfo method) {
+        final MethodVisitor visitor = classWriter.visitMethod(ACC_PUBLIC | ACC_STATIC, method.name, method.descriptor, method.signature, method.exceptions);
+        visitor.visitCode();
+        visitor.visitFieldInsn(GETSTATIC, generatedClassName, "INSTANCE", "L" + discover.name + ";");
+        final Type methodType = Type.getType(method.descriptor);
+        int locals = 0;
+        for (final Type argumentType : methodType.getArgumentTypes()) {
+            visitor.visitVarInsn(argumentType.getOpcode(ILOAD), locals);
+            locals++;
+        }
+        visitor.visitMethodInsn(INVOKEVIRTUAL, discover.name, method.name, method.descriptor, false);
+        visitor.visitInsn(methodType.getReturnType().getOpcode(IRETURN));
+        visitor.visitMaxs(locals + 1, locals);
+        visitor.visitEnd();
     }
 
     private record MethodInfo(String name, String descriptor, String signature, String[] exceptions) {
