@@ -62,6 +62,7 @@ public interface ReflectionProxy {
 
     // Begin Enums
     // todo discovery visitor also needs to visit ReflectionProxy so we can avoid needing to implement both of these and have one be a default method
+    // todo would also allow having an abstract class with methods like mapClassName that implements forName, etc
     <E extends Enum<E>> E valueOf(Class<E> enumClass, String name);
 
     <E extends Enum<E>> E valueOf(String name, Class<E> enumClass);

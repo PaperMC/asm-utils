@@ -17,7 +17,7 @@ public final class BuiltInRules {
     // TODO Enums (google), EnumUtils (commons), any other enum and reflection utils bundled with Paper
     private final RewriteRule methodTypeRule;
     private final RewriteRule enumRule;
-    // TODO ClassLoader#defineClass?
+    // TODO ClassLoader/MethodHandles.Lookup#defineClass?
 
     public BuiltInRules(final String proxyClassName, final ClassInfoProvider classInfoProvider) {
         this.proxy = proxyClassName;
