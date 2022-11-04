@@ -148,7 +148,12 @@ public final class ProxyGenerator {
         }
     }
 
-    private record MethodInfo(String name, String descriptor, String signature, String[] exceptions) {
+    private record MethodInfo(
+            String name,
+            String descriptor,
+            @Nullable String signature,
+            String @Nullable [] exceptions
+    ) {
         // need to override equals and hashcode because of useless array default
 
         @Override
