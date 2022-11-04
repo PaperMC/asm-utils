@@ -1,5 +1,6 @@
 package io.papermc.reflectionrewriter.proxygenerator;
 
+import java.io.StringReader;
 import java.lang.invoke.CallSite;
 import java.lang.invoke.ConstantBootstraps;
 import java.lang.invoke.LambdaConversionException;
@@ -7,6 +8,7 @@ import java.lang.invoke.LambdaMetafactory;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.invoke.TypeDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -33,7 +35,7 @@ public abstract class AbstractReflectionProxy implements ReflectionProxy {
 
     protected final String mapClassOrArrayName(final String name) {
         Objects.requireNonNull(name, "name");
-        if (name.isBlank()) {
+        if (name.isBlank() || !name.contains("L")) {
             return name;
         }
 
@@ -209,18 +211,23 @@ public abstract class AbstractReflectionProxy implements ReflectionProxy {
 
     // Begin MethodType
     @Override
-    public MethodType fromMethodDescriptorString(final String descriptor, final ClassLoader loader) throws IllegalArgumentException, TypeNotPresentException {
-        if (!descriptor.startsWith("(") || // also generates NPE if needed
-            descriptor.indexOf(')') < 0 ||
-            descriptor.indexOf('.') >= 0) {
-            throw new IllegalArgumentException("Not a valid method descriptor: " + descriptor);
+    public MethodType fromMethodDescriptorString(String descriptor, final ClassLoader loader) throws IllegalArgumentException, TypeNotPresentException {
+        final StringBuilder desc = new StringBuilder();
+        while (!descriptor.isEmpty()) {
+            final char c = descriptor.charAt(0);
+            desc.append(c);
+            descriptor = descriptor.substring(1);
+            if (c == 'L') {
+                final int endIndex = descriptor.indexOf(";");
+                if (endIndex == -1) {
+                    throw new IllegalArgumentException(descriptor + " is not a valid descriptor");
+                }
+                final String className = this.mapClassName(descriptor.substring(0, endIndex));
+                descriptor = descriptor.substring(endIndex);
+                desc.append(className);
+            }
         }
-        final Type methodType = Type.getType(descriptor);
-        final List<Class<?>> params = new ArrayList<>();
-        for (final Type t : methodType.getArgumentTypes()) {
-            params.add(this.mappedJavaType(t, loader));
-        }
-        return MethodType.methodType(this.mappedJavaType(methodType.getReturnType(), loader), params);
+        return MethodType.fromMethodDescriptorString(desc.toString(), loader);
     }
     // End MethodType
 }
