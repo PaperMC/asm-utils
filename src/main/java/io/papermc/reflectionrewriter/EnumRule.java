@@ -56,7 +56,11 @@ public final class EnumRule {
                 // Rewrite SomeEnum.valueOf(String)
                 final @Nullable ClassInfo info = this.classInfoProvider.info(owner);
                 if (info != null && info.isEnum()) {
-                    this.increaseMaxStack++; // Increase max stack size for this method by one for the class parameter
+                    // Increase max stack size for this method by one for the class parameter
+                    // Note that in some cases this does not actually have to be increased (which we cannot track here),
+                    // but a larger max stack size than needed should not create any problems
+                    this.increaseMaxStack++;
+
                     super.visitLdcInsn(Type.getType("L" + owner + ";")); // Add the class as a parameter
                     super.visitMethodInsn(Opcodes.INVOKESTATIC, this.proxy, name, "(Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Enum;", false);
                     super.visitTypeInsn(Opcodes.CHECKCAST, owner); // Make sure we have the right type
