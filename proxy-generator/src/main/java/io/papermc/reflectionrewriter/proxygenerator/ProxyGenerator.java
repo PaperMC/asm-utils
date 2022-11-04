@@ -1,6 +1,5 @@
 package io.papermc.reflectionrewriter.proxygenerator;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -53,15 +52,15 @@ public final class ProxyGenerator {
     private ProxyGenerator() {
     }
 
-    public static byte[] generateProxy(final byte[] proxyImplementation, final String generatedClassName) throws IOException {
+    public static byte[] generateProxy(final byte[] proxyImplementation, final String generatedClassName) {
         return generateProxy(new ClassReader(proxyImplementation), generatedClassName);
     }
 
-    public static byte[] generateProxy(final Class<?> proxyImplementation, final String generatedClassName) throws IOException {
+    public static byte[] generateProxy(final Class<?> proxyImplementation, final String generatedClassName) {
         return generateProxy(classReader(proxyImplementation.getName()), generatedClassName);
     }
 
-    public static byte[] generateProxy(final ClassReader reader, final String generatedClassName) throws IOException {
+    public static byte[] generateProxy(final ClassReader reader, final String generatedClassName) {
         // Discover methods we need to generate static proxies for
 
         // First, scan provided impl class for non-static public methods and impl name
@@ -144,10 +143,10 @@ public final class ProxyGenerator {
 
     private static ClassReader classReader(final String className) {
         try (final @Nullable InputStream is = ProxyGenerator.class.getClassLoader().getResourceAsStream(className.replace('.', '/') + ".class")) {
-            Objects.requireNonNull(is);
+            Objects.requireNonNull(is, () -> "Class '" + className + "'");
             return new ClassReader(is);
         } catch (final Exception ex) {
-            throw new RuntimeException(ex);
+            throw new RuntimeException("Failed to read class '" + className + "'", ex);
         }
     }
 
