@@ -73,19 +73,11 @@ public final class ProxyGenerator {
         final String generatedClassName,
         final ClassReader... parents
     ) {
-        final DiscoverMethodsVisitor scanImpl = new DiscoverMethodsVisitor(Opcodes.ASM9, null);
-        proxyImplementation.accept(scanImpl, 0);
-        return generateProxy(scanImpl, generatedClassName, parents);
-    }
-
-    private static byte[] generateProxy(
-        final DiscoverMethodsVisitor scanImpl,
-        final String generatedClassName,
-        final ClassReader... parents
-    ) {
         // Discover methods we need to generate static proxies for
 
-        // Use results from scanning impl class
+        // Scan impl class for methods & impl class name
+        final DiscoverMethodsVisitor scanImpl = new DiscoverMethodsVisitor(Opcodes.ASM9, null);
+        proxyImplementation.accept(scanImpl, 0);
         final Set<MethodInfo> methods = new HashSet<>(scanImpl.methods);
         final String proxy = scanImpl.name;
 
