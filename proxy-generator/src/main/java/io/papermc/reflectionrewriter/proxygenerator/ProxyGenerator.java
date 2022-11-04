@@ -50,6 +50,9 @@ public final class ProxyGenerator {
     }
      */
 
+    private ProxyGenerator() {
+    }
+
     public static byte[] generateProxy(final byte[] proxyImplementation, final String generatedClassName) throws IOException {
         return generateProxy(new ClassReader(proxyImplementation), generatedClassName);
     }
@@ -149,10 +152,10 @@ public final class ProxyGenerator {
     }
 
     private record MethodInfo(
-            String name,
-            String descriptor,
-            @Nullable String signature,
-            String @Nullable [] exceptions
+        String name,
+        String descriptor,
+        @Nullable String signature,
+        String @Nullable [] exceptions
     ) {
         // need to override equals and hashcode because of useless array default
 
@@ -166,9 +169,9 @@ public final class ProxyGenerator {
             }
             final MethodInfo that = (MethodInfo) o;
             return this.name.equals(that.name)
-                    && this.descriptor.equals(that.descriptor)
-                    && Objects.equals(this.signature, that.signature)
-                    && Arrays.equals(this.exceptions, that.exceptions);
+                && this.descriptor.equals(that.descriptor)
+                && Objects.equals(this.signature, that.signature)
+                && Arrays.equals(this.exceptions, that.exceptions);
         }
 
         @Override

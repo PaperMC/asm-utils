@@ -11,6 +11,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.framework.qual.DefaultQualifier;
 
 @DefaultQualifier(NonNull.class)
+@SuppressWarnings("checkstyle:MethodName")
 public interface ReflectionProxy {
     // Begin standard reflection
     Class<?> forName(String name) throws ClassNotFoundException;
