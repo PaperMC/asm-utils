@@ -1,6 +1,7 @@
 package io.papermc.reflectionrewriter.proxygenerator;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,7 +55,7 @@ public final class ProxyGenerator {
     }
 
     public static byte[] generateProxy(final Class<?> proxyImplementation, final String generatedClassName) throws IOException {
-        return generateProxy(new ClassReader(proxyImplementation.getName()), generatedClassName);
+        return generateProxy(classReader(proxyImplementation.getName()), generatedClassName);
     }
 
     public static byte[] generateProxy(final ClassReader reader, final String generatedClassName) throws IOException {
@@ -69,7 +70,7 @@ public final class ProxyGenerator {
         // Next, scan the ReflectionProxy interface
         // This allows indirect implementation to work (i.e. Impl extends AbstractBase; AbstractBase implements ReflectionProxy)
         // as well as default methods
-        final ClassReader interfaceReader = new ClassReader(ReflectionProxy.class.getName());
+        final ClassReader interfaceReader = classReader(ReflectionProxy.class.getName());
         final DiscoverMethodsVisitor scanInterface = new DiscoverMethodsVisitor(Opcodes.ASM9, null);
         interfaceReader.accept(scanInterface, 0);
         methods.addAll(scanInterface.methods);
@@ -136,6 +137,15 @@ public final class ProxyGenerator {
         visitor.visitInsn(methodType.getReturnType().getOpcode(IRETURN));
         visitor.visitMaxs(locals + 1, locals);
         visitor.visitEnd();
+    }
+
+    private static ClassReader classReader(final String className) {
+        try (final @Nullable InputStream is = ProxyGenerator.class.getClassLoader().getResourceAsStream(className.replace('.', '/') + ".class")) {
+            Objects.requireNonNull(is);
+            return new ClassReader(is);
+        } catch (final Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     private record MethodInfo(String name, String descriptor, String signature, String[] exceptions) {
