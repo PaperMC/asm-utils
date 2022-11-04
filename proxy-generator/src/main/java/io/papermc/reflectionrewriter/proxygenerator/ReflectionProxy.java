@@ -10,6 +10,13 @@ import java.lang.reflect.Method;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.framework.qual.DefaultQualifier;
 
+/**
+ * Interface with all the methods needed for the default rules to function.
+ *
+ * <p>Since the proxy methods must all be static, {@link ProxyGenerator}
+ * should be used to generate a class with a static field holding an instance
+ * of your proxy, and static methods redirecting to that instance.</p>
+ */
 @DefaultQualifier(NonNull.class)
 @SuppressWarnings("checkstyle:MethodName") // These methods have their names copied from the method we are proxying
 public interface ReflectionProxy {
@@ -54,22 +61,26 @@ public interface ReflectionProxy {
     // End LambdaMetafactory
 
     // Begin ConstantBootstraps
-    <E extends Enum<E>> E enumConstant(MethodHandles.Lookup lookup, String name, Class<E> type);
-
     Object getStaticFinal(MethodHandles.Lookup lookup, String name, Class<?> type, Class<?> declaringClass);
 
     Object getStaticFinal(MethodHandles.Lookup lookup, String name, Class<?> type);
     // End ConstantBootstraps
 
-    // Begin Enums
-    <E extends Enum<E>> E valueOf(Class<E> enumClass, String name);
-
-    default <E extends Enum<E>> E valueOf(final String name, final Class<E> enumClass) {
-        return this.valueOf(enumClass, name);
-    }
-    // End Enums
-
     // Begin MethodType
     MethodType fromMethodDescriptorString(String descriptor, ClassLoader loader) throws IllegalArgumentException, TypeNotPresentException;
     // End MethodType
+
+    /**
+     * Has required methods for the non-default enum rule. Implement in addition to
+     * {@link ReflectionProxy} if using the enum rule.
+     */
+    interface EnumReflectionProxy {
+        <E extends Enum<E>> E enumConstant(MethodHandles.Lookup lookup, String name, Class<E> type);
+
+        <E extends java.lang.Enum<E>> E valueOf(Class<E> enumClass, String name);
+
+        default <E extends java.lang.Enum<E>> E valueOf(final String name, final Class<E> enumClass) {
+            return this.valueOf(enumClass, name);
+        }
+    }
 }

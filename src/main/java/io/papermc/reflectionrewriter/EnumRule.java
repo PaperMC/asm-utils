@@ -10,6 +10,33 @@ import org.objectweb.asm.Type;
  * Rule for rewriting enum valueOf calls. Not normally needed
  * as all common remapping software only remaps enum field names,
  * not the ldc insn for the name of the enum constant.
+ *
+ * <p>This rule expects the following methods to be present
+ * on your reflection proxy class.</p>
+ *
+ * <pre>
+ * public static &#60;E extends Enum&#60;E>> E enumConstant(
+ *     final MethodHandles.Lookup lookup,
+ *     final String name,
+ *     final Class&#60;E> type
+ * ) {
+ *     // Implementation ...
+ * }
+ *
+ * public static &#60;E extends Enum&#60;E>> E valueOf(
+ *     final Class&#60;E> enumClass,
+ *     final String name
+ * ) {
+ *     // Implementation...
+ * }
+ *
+ * public static &#60;E extends Enum&#60;E>> E valueOf(
+ *     final String name,
+ *     final Class&#60;E> enumClass
+ * ) {
+ *     return valueOf(enumClass, name);
+ * }
+ * </pre>
  */
 public final class EnumRule {
     private EnumRule() {
@@ -20,7 +47,19 @@ public final class EnumRule {
         final ClassInfoProvider classInfoProvider,
         final Predicate<String> ownerPredicate
     ) {
-        return new RewriteRule((api, parent) -> new EnumMethodVisitor(api, parent, proxyClassName, classInfoProvider, ownerPredicate));
+        final RewriteRule enumConstantRule = RewriteRule.methodVisitorBuilder(builder -> builder.visitBoth(InvokeStaticRewrite.forOwner(
+            "java/lang/invoke/ConstantBootstraps",
+            (parent0, owner, name, descriptor, isInterface) -> {
+                if (name.equals("enumConstant") && descriptor.equals("(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Enum;")) {
+                    return InvokeStaticRewrite.staticRedirect(proxyClassName, name, descriptor);
+                }
+                return null;
+            }
+        )));
+        return new RewriteRule((api, parent) -> enumConstantRule.methodVisitorFactory().createVisitor(
+            api,
+            new EnumMethodVisitor(api, parent, proxyClassName, classInfoProvider, ownerPredicate)
+        ));
     }
 
     public static RewriteRule minecraft(

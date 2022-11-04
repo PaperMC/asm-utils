@@ -38,44 +38,65 @@ import static org.objectweb.asm.Opcodes.PUTSTATIC;
 import static org.objectweb.asm.Opcodes.RETURN;
 import static org.objectweb.asm.Opcodes.V17;
 
+/**
+ * Generates holder classes for reflection proxy instances.
+ */
 @DefaultQualifier(NonNull.class)
 public final class ProxyGenerator {
-    /*
-    public static void main(String[] args) throws Exception {
-        final File file = new File("test.class");
-        final byte[] generated = generateProxy(Test.class, "io/papermc/paper/Test123");
-        file.getAbsoluteFile().getParentFile().mkdirs();
-        Files.write(file.toPath(), generated);
-    }
-     */
-
     private ProxyGenerator() {
     }
 
-    public static byte[] generateProxy(final byte[] proxyImplementation, final String generatedClassName) {
-        return generateProxy(new ClassReader(proxyImplementation), generatedClassName);
-    }
-
+    /**
+     * Generate a holder class for the provided reflection proxy implementation.
+     *
+     * <p>The holder class is constituted of an {@code INSTANCE} field for holding an instance
+     * of the reflection proxy implementation, a {@code public static void init(ProxyImplClass proxyImplClassInstance)}
+     * method to be called with reflection to initialize the holder, and for every public method on the implementation
+     * class and it's parent classes/interfaces, a static copy of the method which invokes the same method on it's
+     * {@code INSTANCE}.</p>
+     *
+     * @param proxyImplementation proxy implementation class
+     * @param generatedClassName  name for generated class
+     * @return generated class bytes
+     */
     public static byte[] generateProxy(final Class<?> proxyImplementation, final String generatedClassName) {
-        return generateProxy(classReader(proxyImplementation.getName()), generatedClassName);
+        final Set<Class<?>> parents = findParents(proxyImplementation);
+        return generateProxy(
+            classReader(proxyImplementation.getName()),
+            generatedClassName,
+            parents.stream().map(p -> classReader(p.getName())).toArray(ClassReader[]::new)
+        );
     }
 
-    public static byte[] generateProxy(final ClassReader reader, final String generatedClassName) {
+    public static byte[] generateProxy(
+        final ClassReader proxyImplementation,
+        final String generatedClassName,
+        final ClassReader... parents
+    ) {
+        final DiscoverMethodsVisitor scanImpl = new DiscoverMethodsVisitor(Opcodes.ASM9, null);
+        proxyImplementation.accept(scanImpl, 0);
+        return generateProxy(scanImpl, generatedClassName, parents);
+    }
+
+    private static byte[] generateProxy(
+        final DiscoverMethodsVisitor scanImpl,
+        final String generatedClassName,
+        final ClassReader... parents
+    ) {
         // Discover methods we need to generate static proxies for
 
-        // First, scan provided impl class for non-static public methods and impl name
-        final DiscoverMethodsVisitor scanImpl = new DiscoverMethodsVisitor(Opcodes.ASM9, null);
-        reader.accept(scanImpl, 0);
+        // Use results from scanning impl class
         final Set<MethodInfo> methods = new HashSet<>(scanImpl.methods);
         final String proxy = scanImpl.name;
 
-        // Next, scan the ReflectionProxy interface
+        // Next, scan the parents
         // This allows indirect implementation to work (i.e. Impl extends AbstractBase; AbstractBase implements ReflectionProxy)
         // as well as default methods
-        final ClassReader interfaceReader = classReader(ReflectionProxy.class.getName());
-        final DiscoverMethodsVisitor scanInterface = new DiscoverMethodsVisitor(Opcodes.ASM9, null);
-        interfaceReader.accept(scanInterface, 0);
-        methods.addAll(scanInterface.methods);
+        for (final ClassReader parent : parents) {
+            final DiscoverMethodsVisitor scanInterface = new DiscoverMethodsVisitor(Opcodes.ASM9, null);
+            parent.accept(scanInterface, 0);
+            methods.addAll(scanInterface.methods);
+        }
 
         // Generate our proxy
         final ClassWriter classWriter = new ClassWriter(0);
@@ -139,6 +160,24 @@ public final class ProxyGenerator {
         visitor.visitInsn(methodType.getReturnType().getOpcode(IRETURN));
         visitor.visitMaxs(locals + 1, locals);
         visitor.visitEnd();
+    }
+
+    private static Set<Class<?>> findParents(final Class<?> clazz) {
+        final Set<Class<?>> ret = new HashSet<>();
+        findParents(ret, clazz);
+        return ret;
+    }
+
+    private static void findParents(final Set<Class<?>> ret, final Class<?> clazz) {
+        final @Nullable Class<?> superClass = clazz.getSuperclass();
+        if (superClass != null && superClass != Object.class) {
+            ret.add(superClass);
+            findParents(ret, superClass);
+        }
+        for (final Class<?> iface : clazz.getInterfaces()) {
+            ret.add(iface);
+            findParents(ret, iface);
+        }
     }
 
     private static ClassReader classReader(final String className) {
