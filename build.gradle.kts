@@ -1,16 +1,19 @@
 plugins {
-    `java-library`
-    `maven-publish`
+    val indraVer = "3.0.1"
+    id("net.kyori.indra") version indraVer
+    id("net.kyori.indra.checkstyle") version indraVer
+    id("net.kyori.indra.publishing") version indraVer
 }
 
 allprojects {
-    plugins.apply("java-library")
-    plugins.apply("maven-publish")
+    plugins.apply("net.kyori.indra")
+    plugins.apply("net.kyori.indra.checkstyle")
+    plugins.apply("net.kyori.indra.publishing")
 
-    java {
-        toolchain.languageVersion.set(JavaLanguageVersion.of(17))
-        withSourcesJar()
-        withJavadocJar()
+    indra {
+        javaVersions {
+            target(17)
+        }
     }
 
     repositories {
@@ -25,20 +28,5 @@ allprojects {
         val checker = "org.checkerframework:checker-qual:3.25.0"
         compileOnlyApi(checker)
         testCompileOnly(checker)
-    }
-
-    publishing.publications.create<MavenPublication>("maven") {
-        from(components["java"])
-    }
-
-    tasks.withType<JavaCompile> {
-        options.encoding = Charsets.UTF_8.name()
-        options.release.set(17)
-    }
-    tasks.withType<Javadoc> {
-        options.encoding = Charsets.UTF_8.name()
-    }
-    tasks.withType<ProcessResources> {
-        filteringCharset = Charsets.UTF_8.name()
     }
 }

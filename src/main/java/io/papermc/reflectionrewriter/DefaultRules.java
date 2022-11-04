@@ -2,6 +2,7 @@ package io.papermc.reflectionrewriter;
 
 import java.util.List;
 
+@SuppressWarnings("checkstyle:UnnecessaryParentheses") // Parens add clarity when reading
 public final class DefaultRules {
     private final String proxy;
     private final RewriteRule classRule;
