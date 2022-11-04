@@ -31,7 +31,7 @@ public abstract class AbstractReflectionProxy implements ReflectionProxy {
 
     protected abstract String mapFieldName(Class<?> clazz, String name);
 
-    private String mapClassName0(final String name) {
+    protected final String mapClassOrArrayName(final String name) {
         Objects.requireNonNull(name, "name");
         if (name.isBlank()) {
             return name;
@@ -59,7 +59,8 @@ public abstract class AbstractReflectionProxy implements ReflectionProxy {
         return this.mapClassName(name);
     }
 
-    private Class<?> mappedJavaType(
+    // todo: rewrite this method & fromMethodDescriptorString without using ASM
+    protected final Class<?> mappedJavaType(
         final Type type,
         final ClassLoader loader
     ) throws TypeNotPresentException {
@@ -85,7 +86,7 @@ public abstract class AbstractReflectionProxy implements ReflectionProxy {
         };
     }
 
-    private Class<?> forNameTypeNotPresentException(final String name, final ClassLoader loader) {
+    protected final Class<?> forNameTypeNotPresentException(final String name, final ClassLoader loader) {
         try {
             return this.forName(name, false, loader);
         } catch (final ClassNotFoundException ex) {
@@ -101,19 +102,19 @@ public abstract class AbstractReflectionProxy implements ReflectionProxy {
     // Begin standard reflection
     @Override
     public Class<?> forName(final String name) throws ClassNotFoundException {
-        return Class.forName(this.mapClassName0(name), true, callerClassLoader());
+        return Class.forName(this.mapClassOrArrayName(name), true, callerClassLoader());
     }
 
     @Override
     public Class<?> forName(final String name, final boolean initialize, final ClassLoader loader) throws ClassNotFoundException {
-        return Class.forName(this.mapClassName0(name), initialize, loader);
+        return Class.forName(this.mapClassOrArrayName(name), initialize, loader);
     }
 
     @Override
     public Class<?> forName(final Module module, final String name) {
         // Uses the module's class loader unless a SecurityManager is used
         // todo pass calling classloader when SecurityManager is used?
-        return Class.forName(module, this.mapClassName0(name));
+        return Class.forName(module, this.mapClassOrArrayName(name));
     }
 
     @Override
@@ -150,7 +151,7 @@ public abstract class AbstractReflectionProxy implements ReflectionProxy {
 
     @Override
     public Class<?> findClass(final MethodHandles.Lookup lookup, final String targetName) throws ClassNotFoundException, IllegalAccessException {
-        return lookup.findClass(this.mapClassName0(targetName));
+        return lookup.findClass(this.mapClassOrArrayName(targetName));
     }
 
     @Override
