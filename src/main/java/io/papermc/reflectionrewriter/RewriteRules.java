@@ -38,8 +38,8 @@ public record RewriteRules(List<RewriteRule> rules) {
             return this;
         }
 
-        public Builder builtInRules(final String proxyClassName, final ClassInfoProvider classInfoProvider) {
-            return this.rules(new BuiltInRules(proxyClassName, classInfoProvider).builtInRules());
+        public Builder defaultRules(final String proxyClassName) {
+            return this.rules(new DefaultRules(proxyClassName).rules());
         }
 
         public RewriteRules build() {
