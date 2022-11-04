@@ -6,6 +6,11 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
+/**
+ * Rule for rewriting enum valueOf calls. Not normally needed
+ * as all common remapping software only remaps enum field names,
+ * not the ldc insn for the name of the enum constant.
+ */
 public final class EnumRule {
     private EnumRule() {
     }
