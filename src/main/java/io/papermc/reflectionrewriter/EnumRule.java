@@ -1,24 +1,28 @@
 package io.papermc.reflectionrewriter;
 
 import java.util.function.Predicate;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.framework.qual.DefaultQualifier;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
-@DefaultQualifier(NonNull.class)
 public final class EnumRule {
     private EnumRule() {
     }
 
     public static RewriteRule create(
-            final String proxyClassName,
-            final ClassInfoProvider classInfoProvider,
-            final Predicate<String> ownerPredicate
+        final String proxyClassName,
+        final ClassInfoProvider classInfoProvider,
+        final Predicate<String> ownerPredicate
     ) {
         return new RewriteRule((api, parent) -> new EnumMethodVisitor(api, parent, proxyClassName, classInfoProvider, ownerPredicate));
+    }
+
+    public static RewriteRule minecraft(
+        final String proxyClassName,
+        final ClassInfoProvider classInfoProvider
+    ) {
+        return create(proxyClassName, classInfoProvider, owner -> owner.startsWith("net/minecraft/") || owner.startsWith("com/mojang/"));
     }
 
     // todo needs to handle invokedynamic?
