@@ -59,8 +59,8 @@ public final class BuiltInRules {
             this.methodHandlesLookupRule,
             this.lambdaMetafactoryRule,
             this.constantBootstrapsRule,
-            this.methodTypeRule,
-            this.enumRule
+            this.methodTypeRule//,
+            //this.enumRule
         );
     }
 
