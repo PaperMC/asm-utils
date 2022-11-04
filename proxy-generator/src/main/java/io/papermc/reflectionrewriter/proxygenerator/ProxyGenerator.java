@@ -3,7 +3,11 @@ package io.papermc.reflectionrewriter.proxygenerator;
 import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -45,7 +49,7 @@ public final class ProxyGenerator {
     }
      */
 
-    public static byte[] generateProxy(final byte[] proxyImplementation, final String generatedClassName) {
+    public static byte[] generateProxy(final byte[] proxyImplementation, final String generatedClassName) throws IOException {
         return generateProxy(new ClassReader(proxyImplementation), generatedClassName);
     }
 
@@ -53,10 +57,22 @@ public final class ProxyGenerator {
         return generateProxy(new ClassReader(proxyImplementation.getName()), generatedClassName);
     }
 
-    public static byte[] generateProxy(final ClassReader reader, final String generatedClassName) {
+    public static byte[] generateProxy(final ClassReader reader, final String generatedClassName) throws IOException {
         // Discover methods we need to generate static proxies for
-        final DiscoverMethodsVisitor discover = new DiscoverMethodsVisitor(Opcodes.ASM9, null);
-        reader.accept(discover, 0);
+
+        // First, scan provided impl class for non-static public methods and impl name
+        final DiscoverMethodsVisitor scanImpl = new DiscoverMethodsVisitor(Opcodes.ASM9, null);
+        reader.accept(scanImpl, 0);
+        final Set<MethodInfo> methods = new HashSet<>(scanImpl.methods);
+        final String proxy = scanImpl.name;
+
+        // Next, scan the ReflectionProxy interface
+        // This allows indirect implementation to work (i.e. Impl extends AbstractBase; AbstractBase implements ReflectionProxy)
+        // as well as default methods
+        final ClassReader interfaceReader = new ClassReader(ReflectionProxy.class.getName());
+        final DiscoverMethodsVisitor scanInterface = new DiscoverMethodsVisitor(Opcodes.ASM9, null);
+        interfaceReader.accept(scanInterface, 0);
+        methods.addAll(scanInterface.methods);
 
         // Generate our proxy
         final ClassWriter classWriter = new ClassWriter(0);
@@ -64,22 +80,22 @@ public final class ProxyGenerator {
         // Header
         classWriter.visit(V17, ACC_PUBLIC | ACC_FINAL | ACC_SUPER, generatedClassName, null, "java/lang/Object", null);
         // INSTANCE field
-        instanceField(classWriter, discover);
+        instanceField(classWriter, proxy);
         // Private default constructor
         constructor(classWriter);
         // public static void init(proxyInstance)
-        initMethod(classWriter, generatedClassName, discover);
+        initMethod(classWriter, generatedClassName, proxy);
         // proxy methods
-        for (final MethodInfo method : discover.methods) {
-            proxyMethod(classWriter, generatedClassName, discover, method);
+        for (final MethodInfo method : methods) {
+            proxyMethod(classWriter, generatedClassName, proxy, method);
         }
         // done
         classWriter.visitEnd();
         return classWriter.toByteArray();
     }
 
-    private static void instanceField(final ClassWriter classWriter, final DiscoverMethodsVisitor discover) {
-        final FieldVisitor fieldVisitor = classWriter.visitField(ACC_PRIVATE | ACC_STATIC, "INSTANCE", "L" + discover.name + ";", null, null);
+    private static void instanceField(final ClassWriter classWriter, final String proxy) {
+        final FieldVisitor fieldVisitor = classWriter.visitField(ACC_PRIVATE | ACC_STATIC, "INSTANCE", "L" + proxy + ";", null, null);
         fieldVisitor.visitEnd();
     }
 
@@ -96,33 +112,56 @@ public final class ProxyGenerator {
         methodVisitor.visitEnd();
     }
 
-    private static void initMethod(final ClassWriter classWriter, final String generatedClassName, final DiscoverMethodsVisitor discover) {
-        final MethodVisitor methodVisitor = classWriter.visitMethod(ACC_PUBLIC | ACC_STATIC, "init", "(L" + discover.name + ";)V", null, null);
+    private static void initMethod(final ClassWriter classWriter, final String generatedClassName, final String proxy) {
+        final MethodVisitor methodVisitor = classWriter.visitMethod(ACC_PUBLIC | ACC_STATIC, "init", "(L" + proxy + ";)V", null, null);
         methodVisitor.visitCode();
         methodVisitor.visitVarInsn(ALOAD, 0);
-        methodVisitor.visitFieldInsn(PUTSTATIC, generatedClassName, "INSTANCE", "L" + discover.name + ";");
+        methodVisitor.visitFieldInsn(PUTSTATIC, generatedClassName, "INSTANCE", "L" + proxy + ";");
         methodVisitor.visitInsn(RETURN);
         methodVisitor.visitMaxs(1, 1);
         methodVisitor.visitEnd();
     }
 
-    private static void proxyMethod(final ClassWriter classWriter, final String generatedClassName, final DiscoverMethodsVisitor discover, final MethodInfo method) {
+    private static void proxyMethod(final ClassWriter classWriter, final String generatedClassName, final String proxy, final MethodInfo method) {
         final MethodVisitor visitor = classWriter.visitMethod(ACC_PUBLIC | ACC_STATIC, method.name, method.descriptor, method.signature, method.exceptions);
         visitor.visitCode();
-        visitor.visitFieldInsn(GETSTATIC, generatedClassName, "INSTANCE", "L" + discover.name + ";");
+        visitor.visitFieldInsn(GETSTATIC, generatedClassName, "INSTANCE", "L" + proxy + ";");
         final Type methodType = Type.getType(method.descriptor);
         int locals = 0;
         for (final Type argumentType : methodType.getArgumentTypes()) {
             visitor.visitVarInsn(argumentType.getOpcode(ILOAD), locals);
             locals++;
         }
-        visitor.visitMethodInsn(INVOKEVIRTUAL, discover.name, method.name, method.descriptor, false);
+        visitor.visitMethodInsn(INVOKEVIRTUAL, proxy, method.name, method.descriptor, false);
         visitor.visitInsn(methodType.getReturnType().getOpcode(IRETURN));
         visitor.visitMaxs(locals + 1, locals);
         visitor.visitEnd();
     }
 
     private record MethodInfo(String name, String descriptor, String signature, String[] exceptions) {
+        // need to override equals and hashcode because of useless array default
+
+        @Override
+        public boolean equals(final @Nullable Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || this.getClass() != o.getClass()) {
+                return false;
+            }
+            final MethodInfo that = (MethodInfo) o;
+            return this.name.equals(that.name)
+                    && this.descriptor.equals(that.descriptor)
+                    && Objects.equals(this.signature, that.signature)
+                    && Arrays.equals(this.exceptions, that.exceptions);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = Objects.hash(this.name, this.descriptor, this.signature);
+            result = 31 * result + Arrays.hashCode(this.exceptions);
+            return result;
+        }
     }
 
     private static final class DiscoverMethodsVisitor extends ClassVisitor {
