@@ -55,7 +55,7 @@ public final class EnumRule {
                 return null;
             }
         ));
-        return new RewriteRule((api, parent, classInfoProvider) -> enumConstantRule.methodVisitorFactory().createVisitor(
+        return RewriteRule.create((api, parent, classInfoProvider) -> enumConstantRule.methodVisitorFactory().createVisitor(
             api,
             new EnumMethodVisitor(api, parent, proxyClassName, classInfoProvider, ownerPredicate),
             classInfoProvider
