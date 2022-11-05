@@ -197,7 +197,7 @@ public abstract class AbstractDefaultRulesReflectionProxy implements DefaultRule
                 final String result = mappedDot.equals(unmappedDot)
                     ? unmappedSlash // Avoid double replace if mapping didn't make a change
                     : mappedDot.replace('.', '/'); // back to slash for the descriptor string
-                i += endIndex - i;
+                i = endIndex;
                 desc.append(result);
             }
         }
