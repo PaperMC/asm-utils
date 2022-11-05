@@ -191,10 +191,14 @@ public abstract class AbstractDefaultRulesReflectionProxy implements DefaultRule
                 if (endIndex == -1) {
                     throw new IllegalArgumentException("'" + descriptor + "' is not a valid method descriptor.");
                 }
-                final String className = this.mapClassName(descriptor.substring(i, endIndex).replace('/', '.')) // replace slash with period for class mappings
-                    .replace('.', '/'); // re-add the slashes for the descriptor string
+                final String unmappedSlash = descriptor.substring(i, endIndex);
+                final String unmappedDot = unmappedSlash.replace('/', '.'); // replace slash with dot for class mappings
+                final String mappedDot = this.mapClassName(unmappedDot);
+                final String result = mappedDot.equals(unmappedDot)
+                    ? unmappedSlash // Avoid double replace if mapping didn't make a change
+                    : mappedDot.replace('.', '/'); // back to slash for the descriptor string
                 i += endIndex - i;
-                desc.append(className);
+                desc.append(result);
             }
         }
         return MethodType.fromMethodDescriptorString(desc.toString(), loader);
