@@ -35,7 +35,7 @@ public abstract class AbstractReflectionProxy implements ReflectionProxy {
 
     protected final String mapClassOrArrayName(final String name) {
         Objects.requireNonNull(name, "name");
-        if (name.isBlank() || !name.contains("L")) {
+        if (name.isBlank()) {
             return name;
         }
 
@@ -59,33 +59,6 @@ public abstract class AbstractReflectionProxy implements ReflectionProxy {
         }
 
         return this.mapClassName(name);
-    }
-
-    // todo: rewrite this method & fromMethodDescriptorString without using ASM
-    protected final Class<?> mappedJavaType(
-        final Type type,
-        final ClassLoader loader
-    ) throws TypeNotPresentException {
-        return switch (type.getSort()) {
-            case Type.ARRAY -> {
-                final String arrPrefix = "[".repeat(type.getDimensions());
-                final String typeName = type.getElementType().getSort() == Type.OBJECT
-                    ? 'L' + type.getElementType().getClassName() + ';'
-                    : type.getElementType().getDescriptor();
-                yield this.forNameTypeNotPresentException(arrPrefix + typeName, loader);
-            }
-            case Type.OBJECT -> this.forNameTypeNotPresentException(type.getClassName(), loader);
-            case Type.VOID -> Void.TYPE;
-            case Type.INT -> int.class;
-            case Type.BOOLEAN -> boolean.class;
-            case Type.BYTE -> byte.class;
-            case Type.CHAR -> char.class;
-            case Type.SHORT -> short.class;
-            case Type.DOUBLE -> double.class;
-            case Type.FLOAT -> float.class;
-            case Type.LONG -> long.class;
-            default -> throw new IllegalArgumentException();
-        };
     }
 
     protected final Class<?> forNameTypeNotPresentException(final String name, final ClassLoader loader) {
@@ -222,7 +195,7 @@ public abstract class AbstractReflectionProxy implements ReflectionProxy {
                 if (endIndex == -1) {
                     throw new IllegalArgumentException(descriptor + " is not a valid descriptor");
                 }
-                final String className = this.mapClassName(descriptor.substring(0, endIndex));
+                final String className = this.mapClassName(descriptor.substring(0, endIndex).replace('/', '.')).replace('.', '/');
                 descriptor = descriptor.substring(endIndex);
                 desc.append(className);
             }
