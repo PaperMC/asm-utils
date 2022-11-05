@@ -187,7 +187,7 @@ public abstract class AbstractDefaultRulesReflectionProxy implements DefaultRule
             i++;
             desc.append(c);
             if (c == 'L') {
-                final int endIndex = descriptor.indexOf(";", i);
+                final int endIndex = descriptor.indexOf(';', i);
                 if (endIndex == -1) {
                     throw new IllegalArgumentException("'" + descriptor + "' is not a valid method descriptor.");
                 }
