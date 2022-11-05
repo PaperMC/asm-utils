@@ -56,14 +56,6 @@ public abstract class AbstractReflectionProxy implements ReflectionProxy {
         return this.mapClassName(name);
     }
 
-    protected final Class<?> forNameTypeNotPresentException(final String name, final ClassLoader loader) {
-        try {
-            return this.forName(name, false, loader);
-        } catch (final ClassNotFoundException ex) {
-            throw new TypeNotPresentException(name, ex);
-        }
-    }
-
     private static ClassLoader callerClassLoader() {
         return StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE)
             .walk(stream -> stream.skip(3).findFirst().map(frame -> frame.getDeclaringClass().getClassLoader()).orElseThrow());
@@ -190,7 +182,8 @@ public abstract class AbstractReflectionProxy implements ReflectionProxy {
                 if (endIndex == -1) {
                     throw new IllegalArgumentException(descriptor + " is not a valid descriptor");
                 }
-                final String className = this.mapClassName(descriptor.substring(0, endIndex).replace('/', '.')).replace('.', '/');
+                final String className = this.mapClassName(descriptor.substring(0, endIndex).replace('/', '.')) // replace slash with period for class mappings
+                    .replace('.', '/'); // re-add the slashes for the descriptor string
                 descriptor = descriptor.substring(endIndex);
                 desc.append(className);
             }
