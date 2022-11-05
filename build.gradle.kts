@@ -21,9 +21,11 @@ allprojects {
     }
 
     dependencies {
-        val asm = "org.ow2.asm:asm:9.4"
-        api(asm)
-        testImplementation(asm)
+        if ("-runtime" !in project.name) {
+            val asm = "org.ow2.asm:asm:9.4"
+            api(asm)
+            testImplementation(asm)
+        }
 
         val checker = "org.checkerframework:checker-qual:3.25.0"
         compileOnlyApi(checker)
