@@ -1,44 +1,51 @@
 package io.papermc.reflectionrewriter;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.DefaultQualifier;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
+@DefaultQualifier(NonNull.class)
 @FunctionalInterface
-interface InvokeStaticRewrite extends VisitInvokeDynamicInsn, VisitMethodInsn {
-
-    @Nullable Rewrite visitInvokeStatic(MethodVisitor parent, String owner, String name, String descriptor, boolean isInterface);
+interface InvokeStaticRewrite extends MethodVisitorFactory {
+    @Nullable Rewrite rewrite(ClassInfoProvider classInfoProvider, String owner, String name, String descriptor, boolean isInterface);
 
     @Override
-    default boolean visit(final MethodVisitor parent, final String name, final String descriptor, final Handle bootstrapMethodHandle, final Object... bootstrapMethodArguments) {
-        if (bootstrapMethodHandle.getOwner().equals("java/lang/invoke/LambdaMetafactory") && bootstrapMethodArguments.length > 1 && bootstrapMethodArguments[1] instanceof Handle handle) {
-            final @Nullable Rewrite replacement = this.visitInvokeStatic(parent, handle.getOwner(), handle.getName(), handle.getDesc(), handle.isInterface());
-            if (replacement != null) {
-                bootstrapMethodArguments[1] = new Handle(Opcodes.H_INVOKESTATIC, replacement.owner, replacement.name, replacement.descriptor, replacement.isInterface);
-                parent.visitInvokeDynamicInsn(name, descriptor, bootstrapMethodHandle, bootstrapMethodArguments);
-                return true;
+    default MethodVisitor createVisitor(final int api, final MethodVisitor parent, final ClassInfoProvider classInfoProvider) {
+        return new MethodVisitor(api, parent) {
+            @Override
+            public void visitMethodInsn(final int opcode, final String owner, final String name, final String descriptor, final boolean isInterface) {
+                final @Nullable Rewrite replacement = InvokeStaticRewrite.this.rewrite(classInfoProvider, owner, name, descriptor, isInterface);
+                if (replacement != null) {
+                    parent.visitMethodInsn(Opcodes.INVOKESTATIC, replacement.owner, replacement.name, replacement.descriptor, replacement.isInterface);
+                    return;
+                }
+                super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
             }
-        }
-        return false;
-    }
 
-    @Override
-    default boolean visit(final MethodVisitor parent, final int opcode, final String owner, final String name, final String descriptor, final boolean isInterface) {
-        final @Nullable Rewrite replacement = this.visitInvokeStatic(parent, owner, name, descriptor, isInterface);
-        if (replacement != null) {
-            parent.visitMethodInsn(Opcodes.INVOKESTATIC, replacement.owner, replacement.name, replacement.descriptor, replacement.isInterface);
-            return true;
-        }
-        return false;
+            @Override
+            public void visitInvokeDynamicInsn(final String name, final String descriptor, final Handle bootstrapMethodHandle, final Object... bootstrapMethodArguments) {
+                if (bootstrapMethodHandle.getOwner().equals("java/lang/invoke/LambdaMetafactory") && bootstrapMethodArguments.length > 1 && bootstrapMethodArguments[1] instanceof Handle handle) {
+                    final @Nullable Rewrite replacement = InvokeStaticRewrite.this.rewrite(classInfoProvider, handle.getOwner(), handle.getName(), handle.getDesc(), handle.isInterface());
+                    if (replacement != null) {
+                        bootstrapMethodArguments[1] = new Handle(Opcodes.H_INVOKESTATIC, replacement.owner, replacement.name, replacement.descriptor, replacement.isInterface);
+                        parent.visitInvokeDynamicInsn(name, descriptor, bootstrapMethodHandle, bootstrapMethodArguments);
+                        return;
+                    }
+                }
+                super.visitInvokeDynamicInsn(name, descriptor, bootstrapMethodHandle, bootstrapMethodArguments);
+            }
+        };
     }
 
     static InvokeStaticRewrite forOwner(final String ownerClass, final InvokeStaticRewrite invokeStaticRewrite) {
-        return (parent, owner, name, descriptor, isInterface) -> {
+        return (classInfoProvider, owner, name, descriptor, isInterface) -> {
             if (!owner.equals(ownerClass)) {
                 return null;
             }
-            return invokeStaticRewrite.visitInvokeStatic(parent, owner, name, descriptor, isInterface);
+            return invokeStaticRewrite.rewrite(classInfoProvider, owner, name, descriptor, isInterface);
         };
     }
 
