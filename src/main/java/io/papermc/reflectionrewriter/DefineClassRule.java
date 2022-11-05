@@ -36,20 +36,15 @@ public final class DefineClassRule {
      * @return new rule
      */
     public static RewriteRule create(final String proxyClassName, final boolean assumeClassLoader) {
-        return new RewriteRule((api, parent, classInfoProvider) -> {
-            final InvokeStaticRewrite rewrite = (parent0, owner, name, descriptor, isInterface) -> {
-                if (name.equals("defineClass") && DEFINE_CLASS_DESCS.contains(descriptor) && isClassLoader(classInfoProvider, owner, assumeClassLoader)) {
-                    final String redirectedDescriptor = "(Ljava/lang/ClassLoader;" + descriptor.substring(1);
-                    return InvokeStaticRewrite.staticRedirect(proxyClassName, name, redirectedDescriptor);
-                } else if (owner.equals("java/lang/invoke/MethodHandles$Lookup")) {
-                    if (name.equals("defineClass") && descriptor.equals("([B)Ljava/lang/Class;")) {
-                        final String redirectedDescriptor = "(Ljava/lang/invoke/MethodHandles$Lookup;" + descriptor.substring(1);
-                        return InvokeStaticRewrite.staticRedirect(proxyClassName, name, redirectedDescriptor);
-                    }
-                }
-                return null;
-            };
-            return new MethodVisitorBuilder().visitBoth(rewrite).createVisitor(api, parent, classInfoProvider);
+        return RewriteRule.create((InvokeStaticRewrite) (classInfoProvider, owner, name, descriptor, isInterface) -> {
+            if (name.equals("defineClass") && DEFINE_CLASS_DESCS.contains(descriptor) && isClassLoader(classInfoProvider, owner, assumeClassLoader)) {
+                final String redirectedDescriptor = "(Ljava/lang/ClassLoader;" + descriptor.substring(1);
+                return InvokeStaticRewrite.staticRedirect(proxyClassName, name, redirectedDescriptor);
+            } else if (owner.equals("java/lang/invoke/MethodHandles$Lookup") && name.equals("defineClass") && descriptor.equals("([B)Ljava/lang/Class;")) {
+                final String redirectedDescriptor = "(Ljava/lang/invoke/MethodHandles$Lookup;" + descriptor.substring(1);
+                return InvokeStaticRewrite.staticRedirect(proxyClassName, name, redirectedDescriptor);
+            }
+            return null;
         });
     }
 

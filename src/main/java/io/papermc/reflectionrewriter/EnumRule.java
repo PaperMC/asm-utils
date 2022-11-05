@@ -46,15 +46,15 @@ public final class EnumRule {
         final String proxyClassName,
         final Predicate<String> ownerPredicate
     ) {
-        final RewriteRule enumConstantRule = RewriteRule.methodVisitorBuilder(builder -> builder.visitBoth(InvokeStaticRewrite.forOwner(
+        final RewriteRule enumConstantRule = RewriteRule.create(InvokeStaticRewrite.forOwner(
             "java/lang/invoke/ConstantBootstraps",
-            (parent0, owner, name, descriptor, isInterface) -> {
+            (classInfoProvider, owner, name, descriptor, isInterface) -> {
                 if (name.equals("enumConstant") && descriptor.equals("(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Enum;")) {
                     return InvokeStaticRewrite.staticRedirect(proxyClassName, name, descriptor);
                 }
                 return null;
             }
-        )));
+        ));
         return new RewriteRule((api, parent, classInfoProvider) -> enumConstantRule.methodVisitorFactory().createVisitor(
             api,
             new EnumMethodVisitor(api, parent, proxyClassName, classInfoProvider, ownerPredicate),
