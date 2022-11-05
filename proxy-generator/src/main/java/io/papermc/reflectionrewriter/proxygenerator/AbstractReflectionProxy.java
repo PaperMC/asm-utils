@@ -1,6 +1,5 @@
 package io.papermc.reflectionrewriter.proxygenerator;
 
-import java.io.StringReader;
 import java.lang.invoke.CallSite;
 import java.lang.invoke.ConstantBootstraps;
 import java.lang.invoke.LambdaConversionException;
@@ -8,15 +7,11 @@ import java.lang.invoke.LambdaMetafactory;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.lang.invoke.TypeDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.framework.qual.DefaultQualifier;
-import org.objectweb.asm.Type;
 
 @DefaultQualifier(NonNull.class)
 public abstract class AbstractReflectionProxy implements ReflectionProxy {
