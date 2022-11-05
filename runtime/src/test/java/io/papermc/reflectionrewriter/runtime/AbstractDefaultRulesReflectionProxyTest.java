@@ -20,16 +20,16 @@ class AbstractDefaultRulesReflectionProxyTest {
         assertClassNotMapped(proxy, "[Ljava.lang.invoke.MethodType;");
     }
 
-    static void assertClassNotMapped(AbstractDefaultRulesReflectionProxy proxy, String name) {
+    static void assertClassNotMapped(final AbstractDefaultRulesReflectionProxy proxy, final String name) {
         assertClassIsMappedTo(proxy, name, name);
     }
 
-    static void assertClassIsMappedTo(AbstractDefaultRulesReflectionProxy proxy, String unmapped, String mapped) {
+    static void assertClassIsMappedTo(final AbstractDefaultRulesReflectionProxy proxy, final String unmapped, final String mapped) {
         try {
             final Class<?> mappedType = proxy.forName(unmapped);
             final Class<?> directType = Class.forName(mapped);
             assertEquals(directType.getName(), mappedType.getName());
-        } catch (ClassNotFoundException ex) {
+        } catch (final ClassNotFoundException ex) {
             throw new RuntimeException(ex);
         }
     }
@@ -49,11 +49,11 @@ class AbstractDefaultRulesReflectionProxyTest {
         assertDescNotMapped(proxy, "(Ljava/lang/StringBuilder;)I");
     }
 
-    static void assertDescNotMapped(AbstractDefaultRulesReflectionProxy proxy, String desc) {
+    static void assertDescNotMapped(final AbstractDefaultRulesReflectionProxy proxy, final String desc) {
         assertDescIsMappedTo(proxy, desc, desc);
     }
 
-    static void assertDescIsMappedTo(AbstractDefaultRulesReflectionProxy proxy, String unmapped, String mapped) {
+    static void assertDescIsMappedTo(final AbstractDefaultRulesReflectionProxy proxy, final String unmapped, final String mapped) {
         final ClassLoader loader = AbstractDefaultRulesReflectionProxyTest.class.getClassLoader();
         final MethodType mappedType = proxy.fromMethodDescriptorString(unmapped, loader);
         final MethodType directType = MethodType.fromMethodDescriptorString(mapped, loader);
@@ -69,32 +69,32 @@ class AbstractDefaultRulesReflectionProxyTest {
     static class TestProxy extends AbstractDefaultRulesReflectionProxy {
         final Map<String, String> classMappings;
 
-        TestProxy(Map<String, String> classMappings) {
+        TestProxy(final Map<String, String> classMappings) {
             this.classMappings = classMappings;
         }
 
         @Override
-        protected String mapClassName(String name) {
+        protected String mapClassName(final String name) {
             return this.classMappings.getOrDefault(name, name);
         }
 
         @Override
-        protected String mapDeclaredMethodName(Class<?> clazz, String name, Class<?>... parameterTypes) {
+        protected String mapDeclaredMethodName(final Class<?> clazz, final String name, final Class<?>... parameterTypes) {
             return name;
         }
 
         @Override
-        protected String mapMethodName(Class<?> clazz, String name, Class<?>... parameterTypes) {
+        protected String mapMethodName(final Class<?> clazz, final String name, final Class<?>... parameterTypes) {
             return name;
         }
 
         @Override
-        protected String mapDeclaredFieldName(Class<?> clazz, String name) {
+        protected String mapDeclaredFieldName(final Class<?> clazz, final String name) {
             return name;
         }
 
         @Override
-        protected String mapFieldName(Class<?> clazz, String name) {
+        protected String mapFieldName(final Class<?> clazz, final String name) {
             return name;
         }
     }
