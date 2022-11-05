@@ -1,4 +1,4 @@
-package io.papermc.reflectionrewriter.proxygenerator;
+package io.papermc.reflectionrewriter.runtime;
 
 import java.lang.invoke.CallSite;
 import java.lang.invoke.ConstantBootstraps;
@@ -14,8 +14,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.framework.qual.DefaultQualifier;
 
 @DefaultQualifier(NonNull.class)
-public abstract class AbstractReflectionProxy implements ReflectionProxy {
-    protected AbstractReflectionProxy() {
+public abstract class AbstractDefaultRulesReflectionProxy implements DefaultRulesReflectionProxy {
+    protected AbstractDefaultRulesReflectionProxy() {
     }
 
     protected abstract String mapClassName(String name);

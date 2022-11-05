@@ -1,4 +1,4 @@
-package io.papermc.reflectionrewriter.proxygenerator;
+package io.papermc.reflectionrewriter.runtime;
 
 import java.lang.invoke.CallSite;
 import java.lang.invoke.LambdaConversionException;
@@ -13,13 +13,13 @@ import org.checkerframework.framework.qual.DefaultQualifier;
 /**
  * Interface with all the methods needed for the default rules to function.
  *
- * <p>Since the proxy methods must all be static, {@link ProxyGenerator}
+ * <p>Since the proxy methods must all be static, ProxyGenerator
  * should be used to generate a class with a static field holding an instance
  * of your proxy, and static methods redirecting to that instance.</p>
  */
 @DefaultQualifier(NonNull.class)
 @SuppressWarnings("checkstyle:MethodName") // These methods have their names copied from the method we are proxying
-public interface ReflectionProxy {
+public interface DefaultRulesReflectionProxy {
     // Begin standard reflection
     Class<?> forName(String name) throws ClassNotFoundException;
 
@@ -72,9 +72,9 @@ public interface ReflectionProxy {
 
     /**
      * Has required methods for the non-default enum rule. Implement in addition to
-     * {@link ReflectionProxy} if using the enum rule.
+     * {@link DefaultRulesReflectionProxy} if using the enum rule.
      */
-    interface EnumReflectionProxy {
+    interface EnumRuleReflectionProxy {
         <E extends Enum<E>> E enumConstant(MethodHandles.Lookup lookup, String name, Class<E> type);
 
         <E extends java.lang.Enum<E>> E valueOf(Class<E> enumClass, String name);
