@@ -171,20 +171,29 @@ public abstract class AbstractDefaultRulesReflectionProxy implements DefaultRule
 
     // Begin MethodType
     @Override
-    public MethodType fromMethodDescriptorString(String descriptor, final ClassLoader loader) throws IllegalArgumentException, TypeNotPresentException {
-        final StringBuilder desc = new StringBuilder();
-        while (!descriptor.isEmpty()) {
-            final char c = descriptor.charAt(0);
+    public MethodType fromMethodDescriptorString(final String descriptor, final ClassLoader loader) throws IllegalArgumentException, TypeNotPresentException {
+        if (descriptor.indexOf('L') == -1) {
+            // Only primitives in descriptor, nothing to remap
+            return MethodType.fromMethodDescriptorString(descriptor, loader);
+        }
+
+        final StringBuilder desc = new StringBuilder(descriptor.length());
+
+        // Search and replace L(class/Name); -> L(remapped/Name);
+        int i = 0;
+        final int length = descriptor.length();
+        while (i < length) {
+            final char c = descriptor.charAt(i);
+            i++;
             desc.append(c);
-            descriptor = descriptor.substring(1);
             if (c == 'L') {
-                final int endIndex = descriptor.indexOf(";");
+                final int endIndex = descriptor.indexOf(";", i);
                 if (endIndex == -1) {
-                    throw new IllegalArgumentException(descriptor + " is not a valid descriptor");
+                    throw new IllegalArgumentException("'" + descriptor + "' is not a valid method descriptor.");
                 }
-                final String className = this.mapClassName(descriptor.substring(0, endIndex).replace('/', '.')) // replace slash with period for class mappings
+                final String className = this.mapClassName(descriptor.substring(i, endIndex).replace('/', '.')) // replace slash with period for class mappings
                     .replace('.', '/'); // re-add the slashes for the descriptor string
-                descriptor = descriptor.substring(endIndex);
+                i += endIndex - i;
                 desc.append(className);
             }
         }

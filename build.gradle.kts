@@ -30,5 +30,9 @@ allprojects {
         val checker = "org.checkerframework:checker-qual:3.25.0"
         compileOnlyApi(checker)
         testCompileOnly(checker)
+
+        val junitVer = "5.9.0"
+        testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVer")
+        testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVer")
     }
 }
