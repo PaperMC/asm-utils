@@ -116,26 +116,26 @@ public final class ProxyGenerator {
     }
 
     private static void constructor(final ClassWriter classWriter) {
-        final MethodVisitor methodVisitor = classWriter.visitMethod(ACC_PRIVATE, "<init>", "()V", null, null);
-        methodVisitor.visitCode();
-        methodVisitor.visitVarInsn(ALOAD, 0);
-        methodVisitor.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
-        methodVisitor.visitTypeInsn(NEW, "java/lang/IllegalStateException");
-        methodVisitor.visitInsn(DUP);
-        methodVisitor.visitMethodInsn(INVOKESPECIAL, "java/lang/IllegalStateException", "<init>", "()V", false);
-        methodVisitor.visitInsn(ATHROW);
-        methodVisitor.visitMaxs(2, 1);
-        methodVisitor.visitEnd();
+        final MethodVisitor visitor = classWriter.visitMethod(ACC_PRIVATE, "<init>", "()V", null, null);
+        visitor.visitCode();
+        visitor.visitVarInsn(ALOAD, 0);
+        visitor.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
+        visitor.visitTypeInsn(NEW, "java/lang/IllegalStateException");
+        visitor.visitInsn(DUP);
+        visitor.visitMethodInsn(INVOKESPECIAL, "java/lang/IllegalStateException", "<init>", "()V", false);
+        visitor.visitInsn(ATHROW);
+        visitor.visitMaxs(2, 1);
+        visitor.visitEnd();
     }
 
     private static void initMethod(final ClassWriter classWriter, final String generatedClassName, final String proxy) {
-        final MethodVisitor methodVisitor = classWriter.visitMethod(ACC_PUBLIC | ACC_STATIC, "init", "(L" + proxy + ";)V", null, null);
-        methodVisitor.visitCode();
-        methodVisitor.visitVarInsn(ALOAD, 0);
-        methodVisitor.visitFieldInsn(PUTSTATIC, generatedClassName, "INSTANCE", "L" + proxy + ";");
-        methodVisitor.visitInsn(RETURN);
-        methodVisitor.visitMaxs(1, 1);
-        methodVisitor.visitEnd();
+        final MethodVisitor visitor = classWriter.visitMethod(ACC_PUBLIC | ACC_STATIC, "init", "(L" + proxy + ";)V", null, null);
+        visitor.visitCode();
+        visitor.visitVarInsn(ALOAD, 0);
+        visitor.visitFieldInsn(PUTSTATIC, generatedClassName, "INSTANCE", "L" + proxy + ";");
+        visitor.visitInsn(RETURN);
+        visitor.visitMaxs(1, 1);
+        visitor.visitEnd();
     }
 
     private static void proxyMethod(final ClassWriter classWriter, final String generatedClassName, final String proxy, final MethodInfo method) {
