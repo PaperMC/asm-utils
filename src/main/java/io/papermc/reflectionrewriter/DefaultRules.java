@@ -6,7 +6,6 @@ import java.util.List;
 public final class DefaultRules {
     private final String proxy;
     private final RewriteRule classRule;
-    // TODO MethodHandles$Lookup: findVarHandle, findStaticVarHandle, bind
     private final RewriteRule methodHandlesLookupRule;
     private final RewriteRule lambdaMetafactoryRule;
     // TODO ConstantBootstraps: fieldVarHandle, staticFieldVarHandle
@@ -77,7 +76,9 @@ public final class DefaultRules {
                 if (((name.equals("findStatic") || name.equals("findVirtual")) && descriptor.equals("(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;"))
                     || (name.equals("findClass") && descriptor.equals("(Ljava/lang/String;)Ljava/lang/Class;"))
                     || (name.equals("findSpecial") && descriptor.equals("(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/Class;)Ljava/lang/invoke/MethodHandle;"))
-                    || ((name.equals("findGetter") || name.equals("findSetter") || name.equals("findStaticGetter") || name.equals("findStaticSetter")) && descriptor.equals("(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/invoke/MethodHandle;"))) {
+                    || ((name.equals("findGetter") || name.equals("findSetter") || name.equals("findStaticGetter") || name.equals("findStaticSetter")) && descriptor.equals("(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/invoke/MethodHandle;"))
+                    || ((name.equals("findVarHandle") || name.equals("findStaticVarHandle")) && descriptor.equals("(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/invoke/VarHandle;"))
+                    || (name.equals("bind") && descriptor.equals("(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;"))) {
                     final String redirectedDescriptor = "(Ljava/lang/invoke/MethodHandles$Lookup;" + descriptor.substring(1);
                     return InvokeStaticRewrite.staticRedirect(this.proxy, name, redirectedDescriptor);
                 }

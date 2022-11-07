@@ -5,6 +5,7 @@ import java.lang.invoke.LambdaConversionException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -52,6 +53,12 @@ public interface DefaultRulesReflectionProxy {
     MethodHandle findStaticGetter(MethodHandles.Lookup lookup, Class<?> refc, String name, Class<?> type) throws NoSuchFieldException, IllegalAccessException;
 
     MethodHandle findStaticSetter(MethodHandles.Lookup lookup, Class<?> refc, String name, Class<?> type) throws NoSuchFieldException, IllegalAccessException;
+
+    MethodHandle bind(MethodHandles.Lookup lookup, Object receiver, String name, MethodType type) throws NoSuchMethodException, IllegalAccessException;
+
+    VarHandle findVarHandle(MethodHandles.Lookup lookup, Class<?> recv, String name, Class<?> type) throws NoSuchFieldException, IllegalAccessException;
+
+    VarHandle findStaticVarHandle(MethodHandles.Lookup lookup, Class<?> decl, String name, Class<?> type) throws NoSuchFieldException, IllegalAccessException;
     // End MethodHandles
 
     // Begin LambdaMetafactory

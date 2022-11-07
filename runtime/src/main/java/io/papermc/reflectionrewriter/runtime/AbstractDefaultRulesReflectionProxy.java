@@ -7,6 +7,7 @@ import java.lang.invoke.LambdaMetafactory;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Objects;
@@ -139,6 +140,21 @@ public abstract class AbstractDefaultRulesReflectionProxy implements DefaultRule
     @Override
     public MethodHandle findStaticSetter(final MethodHandles.Lookup lookup, final Class<?> refc, final String name, final Class<?> type) throws NoSuchFieldException, IllegalAccessException {
         return lookup.findStaticSetter(refc, this.mapFieldName(refc, name), type);
+    }
+
+    @Override
+    public MethodHandle bind(final MethodHandles.Lookup lookup, final Object receiver, final String name, final MethodType type) throws NoSuchMethodException, IllegalAccessException {
+        return lookup.bind(receiver, this.mapMethodName(receiver.getClass(), name, type.parameterArray()), type);
+    }
+
+    @Override
+    public VarHandle findVarHandle(final MethodHandles.Lookup lookup, final Class<?> recv, final String name, final Class<?> type) throws NoSuchFieldException, IllegalAccessException {
+        return lookup.findVarHandle(recv, this.mapFieldName(recv, name), type);
+    }
+
+    @Override
+    public VarHandle findStaticVarHandle(final MethodHandles.Lookup lookup, final Class<?> decl, final String name, final Class<?> type) throws NoSuchFieldException, IllegalAccessException {
+        return lookup.findStaticVarHandle(decl, this.mapFieldName(decl, name), type);
     }
     // End MethodHandles
 
