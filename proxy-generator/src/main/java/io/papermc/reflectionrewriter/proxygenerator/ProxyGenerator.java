@@ -146,11 +146,11 @@ public final class ProxyGenerator {
         int locals = 0;
         for (final Type argumentType : methodType.getArgumentTypes()) {
             visitor.visitVarInsn(argumentType.getOpcode(ILOAD), locals);
-            locals++;
+            locals += argumentType.getSize();
         }
         visitor.visitMethodInsn(INVOKEVIRTUAL, proxy, method.name, method.descriptor, false);
         visitor.visitInsn(methodType.getReturnType().getOpcode(IRETURN));
-        visitor.visitMaxs(locals + 1, locals);
+        visitor.visitMaxs(locals + methodType.getReturnType().getSize(), locals);
         visitor.visitEnd();
     }
 
