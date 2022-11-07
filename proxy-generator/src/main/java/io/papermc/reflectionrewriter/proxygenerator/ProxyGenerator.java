@@ -142,15 +142,18 @@ public final class ProxyGenerator {
         final MethodVisitor visitor = classWriter.visitMethod(ACC_PUBLIC | ACC_STATIC, method.name, method.descriptor, method.signature, method.exceptions);
         visitor.visitCode();
         visitor.visitFieldInsn(GETSTATIC, generatedClassName, "INSTANCE", "L" + proxy + ";");
+        int stackSize = 1;
         final Type methodType = Type.getType(method.descriptor);
         int locals = 0;
         for (final Type argumentType : methodType.getArgumentTypes()) {
             visitor.visitVarInsn(argumentType.getOpcode(ILOAD), locals);
             locals += argumentType.getSize();
         }
+        stackSize += locals;
         visitor.visitMethodInsn(INVOKEVIRTUAL, proxy, method.name, method.descriptor, false);
         visitor.visitInsn(methodType.getReturnType().getOpcode(IRETURN));
-        visitor.visitMaxs(locals + methodType.getReturnType().getSize(), locals);
+        stackSize += methodType.getReturnType().getSize();
+        visitor.visitMaxs(stackSize, locals);
         visitor.visitEnd();
     }
 

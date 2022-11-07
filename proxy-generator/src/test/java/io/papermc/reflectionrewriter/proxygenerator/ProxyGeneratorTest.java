@@ -25,6 +25,7 @@ class ProxyGeneratorTest {
         assertEquals(instance.plusOne(1), (int) generatedClass.getDeclaredMethod("plusOne", int.class).invoke(null, 1));
         assertEquals(instance.repeat("hello"), generatedClass.getDeclaredMethod("repeat", String.class).invoke(null, "hello"));
         assertEquals(instance.multiply(1.5D, 3), (double) generatedClass.getDeclaredMethod("multiply", double.class, int.class).invoke(null, 1.5D, 3));
+        generatedClass.getDeclaredMethod("run").invoke(null);
     }
 
     interface TestProxy {
@@ -49,7 +50,7 @@ class ProxyGeneratorTest {
         }
     }
 
-    static class TestProxyImpl extends AbstractTestProxy {
+    static class TestProxyImpl extends AbstractTestProxy implements Runnable {
         public double one() {
             return 1.00D;
         }
@@ -60,6 +61,10 @@ class ProxyGeneratorTest {
 
         public String repeat(final String s) {
             return s + s;
+        }
+
+        @Override
+        public void run() {
         }
     }
 }
