@@ -183,6 +183,16 @@ public abstract class AbstractDefaultRulesReflectionProxy implements DefaultRule
     public Object getStaticFinal(final MethodHandles.Lookup lookup, final String name, final Class<?> type) {
         return ConstantBootstraps.getStaticFinal(lookup, this.mapFieldName(type, name), type);
     }
+
+    @Override
+    public VarHandle fieldVarHandle(final MethodHandles.Lookup lookup, final String name, final Class<VarHandle> type, final Class<?> declaringClass, final Class<?> fieldType) {
+        return ConstantBootstraps.fieldVarHandle(lookup, this.mapFieldName(declaringClass, name), type, declaringClass, fieldType);
+    }
+
+    @Override
+    public VarHandle staticFieldVarHandle(final MethodHandles.Lookup lookup, final String name, final Class<VarHandle> type, final Class<?> declaringClass, final Class<?> fieldType) {
+        return ConstantBootstraps.staticFieldVarHandle(lookup, this.mapFieldName(declaringClass, name), type, declaringClass, fieldType);
+    }
     // End ConstantBootstraps
 
     // Begin MethodType

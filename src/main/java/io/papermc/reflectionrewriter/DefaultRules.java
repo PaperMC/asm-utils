@@ -8,7 +8,6 @@ public final class DefaultRules {
     private final RewriteRule classRule;
     private final RewriteRule methodHandlesLookupRule;
     private final RewriteRule lambdaMetafactoryRule;
-    // TODO ConstantBootstraps: fieldVarHandle, staticFieldVarHandle
     private final RewriteRule constantBootstrapsRule;
     // TODO Any reflection utils bundled with Paper
     private final RewriteRule methodTypeRule;
@@ -104,8 +103,9 @@ public final class DefaultRules {
         return RewriteRule.methodVisitorBuilder(builder -> builder.visitBoth(InvokeStaticRewrite.forOwner(
             "java/lang/invoke/ConstantBootstraps",
             (parent, owner, name, descriptor, isInterface) -> {
-                if (name.equals("getStaticFinal") && descriptor.equals("(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/Class;)Ljava/lang/Object;")
-                    || name.equals("getStaticFinal") && descriptor.equals("(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Object;")) {
+                if ((name.equals("getStaticFinal") && descriptor.equals("(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/Class;)Ljava/lang/Object;"))
+                    || (name.equals("getStaticFinal") && descriptor.equals("(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Object;"))
+                    || ((name.equals("fieldVarHandle") || name.equals("staticFieldVarHandle")) && descriptor.equals("(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/Class;Ljava/lang/Class;)Ljava/lang/invoke/VarHandle;"))) {
                     return InvokeStaticRewrite.staticRedirect(this.proxy, name, descriptor);
                 }
                 return null;

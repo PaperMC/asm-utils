@@ -71,6 +71,10 @@ public interface DefaultRulesReflectionProxy {
     Object getStaticFinal(MethodHandles.Lookup lookup, String name, Class<?> type, Class<?> declaringClass);
 
     Object getStaticFinal(MethodHandles.Lookup lookup, String name, Class<?> type);
+
+    VarHandle fieldVarHandle(MethodHandles.Lookup lookup, String name, Class<VarHandle> type, Class<?> declaringClass, Class<?> fieldType);
+
+    VarHandle staticFieldVarHandle(MethodHandles.Lookup lookup, String name, Class<VarHandle> type, Class<?> declaringClass, Class<?> fieldType);
     // End ConstantBootstraps
 
     // Begin MethodType
