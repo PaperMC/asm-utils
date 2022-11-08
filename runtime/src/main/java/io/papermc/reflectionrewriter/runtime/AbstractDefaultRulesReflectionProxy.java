@@ -45,7 +45,7 @@ public abstract class AbstractDefaultRulesReflectionProxy implements DefaultRule
                     final String cls = name.substring(last + 2, name.length() - 1);
                     return name.substring(0, last + 2) + this.mapClassName(cls) + ';';
                 }
-            } catch (final Exception ex) {
+            } catch (final IndexOutOfBoundsException ex) {
                 // Pass through on invalid names
                 return name;
             }
