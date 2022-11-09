@@ -11,7 +11,6 @@ public final class DefaultRules {
     private final RewriteRule constantBootstrapsRule;
     // TODO Any reflection utils bundled with Paper
     private final RewriteRule methodTypeRule;
-    // TODO ClassLoader/MethodHandles.Lookup#defineClass?
 
     public DefaultRules(final String proxyClassName) {
         this.proxy = proxyClassName;
