@@ -53,7 +53,7 @@ public final class DefaultRules {
     private RewriteRule createClassRule() {
         return RewriteRule.create(InvokeStaticRewrite.forOwner(
             "java/lang/Class",
-            (classInfoProvider, owner, name, descriptor, isInterface) -> {
+            (classInfoProvider, opcode, owner, name, descriptor, isInterface) -> {
                 if (((name.equals("getDeclaredField") || name.equals("getField")) && descriptor.equals("(Ljava/lang/String;)Ljava/lang/reflect/Field;"))
                     || ((name.equals("getDeclaredMethod") || name.equals("getMethod")) && descriptor.equals("(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;"))) {
                     final String redirectedDescriptor = "(Ljava/lang/Class;" + descriptor.substring(1);
@@ -69,7 +69,7 @@ public final class DefaultRules {
     private RewriteRule createMethodHandlesLookupRule() {
         return RewriteRule.create(InvokeStaticRewrite.forOwner(
             "java/lang/invoke/MethodHandles$Lookup",
-            (classInfoProvider, owner, name, descriptor, isInterface) -> {
+            (classInfoProvider, opcode, owner, name, descriptor, isInterface) -> {
                 if (((name.equals("findStatic") || name.equals("findVirtual")) && descriptor.equals("(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;"))
                     || (name.equals("findClass") && descriptor.equals("(Ljava/lang/String;)Ljava/lang/Class;"))
                     || (name.equals("findSpecial") && descriptor.equals("(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/Class;)Ljava/lang/invoke/MethodHandle;"))
@@ -87,7 +87,7 @@ public final class DefaultRules {
     private RewriteRule createLamdaMetafactoryRule() {
         return RewriteRule.create(InvokeStaticRewrite.forOwner(
             "java/lang/invoke/LambdaMetafactory",
-            (classInfoProvider, owner, name, descriptor, isInterface) -> {
+            (classInfoProvider, opcode, owner, name, descriptor, isInterface) -> {
                 if ((name.equals("metafactory") && descriptor.equals("(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;"))
                     || (name.equals("altMetafactory") && descriptor.equals("(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;[Ljava/lang/Object;)Ljava/lang/invoke/CallSite;"))) {
                     return InvokeStaticRewrite.staticRedirect(this.proxy, name, descriptor);
@@ -100,7 +100,7 @@ public final class DefaultRules {
     private RewriteRule createConstantBootstrapsRule() {
         return RewriteRule.create(InvokeStaticRewrite.forOwner(
             "java/lang/invoke/ConstantBootstraps",
-            (classInfoProvider, owner, name, descriptor, isInterface) -> {
+            (classInfoProvider, opcode, owner, name, descriptor, isInterface) -> {
                 if ((name.equals("getStaticFinal") && descriptor.equals("(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/Class;)Ljava/lang/Object;"))
                     || (name.equals("getStaticFinal") && descriptor.equals("(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Object;"))
                     || ((name.equals("fieldVarHandle") || name.equals("staticFieldVarHandle")) && descriptor.equals("(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/Class;Ljava/lang/Class;)Ljava/lang/invoke/VarHandle;"))) {
@@ -114,7 +114,7 @@ public final class DefaultRules {
     private RewriteRule createMethodTypeRule() {
         return RewriteRule.create(InvokeStaticRewrite.forOwner(
             "java/lang/invoke/MethodType",
-            (classInfoProvider, owner, name, descriptor, isInterface) -> {
+            (classInfoProvider, opcode, owner, name, descriptor, isInterface) -> {
                 if (name.equals("fromMethodDescriptorString") && descriptor.equals("(Ljava/lang/String;Ljava/lang/ClassLoader;)Ljava/lang/invoke/MethodType;")) {
                     return InvokeStaticRewrite.staticRedirect(this.proxy, name, descriptor);
                 }

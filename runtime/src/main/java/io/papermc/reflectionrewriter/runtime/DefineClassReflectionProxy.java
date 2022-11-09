@@ -2,33 +2,37 @@ package io.papermc.reflectionrewriter.runtime;
 
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
+import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.function.Function;
 
 public interface DefineClassReflectionProxy {
+    // Note:
+    //  - The loader parameters are of type Object to account for assumeClassLoader potentially
+    //    being true on the DefineClassRule. The built-in implementation will check the type
+    //    and pass through to the original method if it's not correct (ClassLoader/SecureClassLoader
+    //    or extending class).
+    //  - This is why the built-in implementation implements each method separately instead of having
+    //    one implemented and having the others call it, to more easily implement the aforementioned
+    //    pass through behavior. Furthermore, default methods are not used in this interface to encourage
+    //    the implementor to decide whether they will handle assumeClassLoader being true. (again,
+    //    the built-in implementation handles both cases)
+
     // ClassLoader start
-    default Class<?> defineClass(final ClassLoader loader, final byte[] b, final int off, final int len) throws ClassFormatError {
-        return this.defineClass(loader, null, b, off, len, null);
-    }
+    Class<?> defineClass(Object loader, byte[] b, int off, int len) throws ClassFormatError;
 
-    default Class<?> defineClass(final ClassLoader loader, final String name, final byte[] b, final int off, final int len) throws ClassFormatError {
-        return this.defineClass(loader, name, b, off, len, null);
-    }
+    Class<?> defineClass(Object loader, String name, byte[] b, int off, int len) throws ClassFormatError;
 
-    Class<?> defineClass(ClassLoader loader, String name, byte[] b, int off, int len, ProtectionDomain protectionDomain) throws ClassFormatError;
+    Class<?> defineClass(Object loader, String name, byte[] b, int off, int len, ProtectionDomain protectionDomain) throws ClassFormatError;
 
-    default Class<?> defineClass(final ClassLoader loader, final String name, final ByteBuffer b, final ProtectionDomain protectionDomain) throws ClassFormatError {
-        final int len = b.remaining();
-        if (b.hasArray()) {
-            return this.defineClass(loader, name, b.array(), b.position() + b.arrayOffset(), len, protectionDomain);
-        } else {
-            // no array, or read-only array
-            final byte[] tb = new byte[len];
-            b.get(tb); // get bytes out of byte buffer.
-            return this.defineClass(loader, name, tb, 0, len, protectionDomain);
-        }
-    }
+    Class<?> defineClass(Object loader, String name, ByteBuffer b, ProtectionDomain protectionDomain) throws ClassFormatError;
     // ClassLoader end
+
+    // SecureClassLoader start
+    Class<?> defineClass(Object secureLoader, String name, byte[] b, int off, int len, CodeSource cs);
+
+    Class<?> defineClass(Object secureLoader, String name, ByteBuffer b, CodeSource cs);
+    // SecureClassLoader end
 
     // MethodHandles.Lookup start
     Class<?> defineClass(MethodHandles.Lookup lookup, byte[] bytes) throws IllegalAccessException;

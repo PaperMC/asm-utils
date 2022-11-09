@@ -48,7 +48,7 @@ public final class EnumRule {
     ) {
         final InvokeStaticRewrite rewrite = InvokeStaticRewrite.forOwner(
             "java/lang/invoke/ConstantBootstraps",
-            (classInfoProvider, owner, name, descriptor, isInterface) -> {
+            (classInfoProvider, opcode, owner, name, descriptor, isInterface) -> {
                 if (name.equals("enumConstant") && descriptor.equals("(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Enum;")) {
                     return InvokeStaticRewrite.staticRedirect(proxyClassName, name, descriptor);
                 }
