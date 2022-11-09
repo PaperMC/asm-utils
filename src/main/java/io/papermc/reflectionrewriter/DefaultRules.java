@@ -9,7 +9,6 @@ public final class DefaultRules {
     private final RewriteRule methodHandlesLookupRule;
     private final RewriteRule lambdaMetafactoryRule;
     private final RewriteRule constantBootstrapsRule;
-    // TODO Any reflection utils bundled with Paper
     private final RewriteRule methodTypeRule;
 
     public DefaultRules(final String proxyClassName) {
