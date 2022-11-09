@@ -7,5 +7,5 @@ import org.objectweb.asm.MethodVisitor;
 @DefaultQualifier(NonNull.class)
 @FunctionalInterface
 public interface MethodVisitorFactory {
-    MethodVisitor createVisitor(int api, MethodVisitor parent);
+    MethodVisitor createVisitor(int api, MethodVisitor parent, ClassInfoProvider classInfoProvider);
 }

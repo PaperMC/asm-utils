@@ -13,10 +13,10 @@ public record RewriteRules(List<RewriteRule> rules) {
         this.rules = List.copyOf(rules);
     }
 
-    public MethodVisitor methodVisitor(final int api, final MethodVisitor visitor) {
+    public MethodVisitor methodVisitor(final int api, final MethodVisitor visitor, final ClassInfoProvider classInfoProvider) {
         MethodVisitor lastVisitor = visitor;
         for (final RewriteRule rule : this.rules()) {
-            lastVisitor = rule.methodVisitorFactory().createVisitor(api, lastVisitor);
+            lastVisitor = rule.methodVisitorFactory().createVisitor(api, lastVisitor, classInfoProvider);
         }
         return lastVisitor;
     }

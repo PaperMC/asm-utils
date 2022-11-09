@@ -26,7 +26,7 @@ public final class MethodVisitorBuilder implements MethodVisitorFactory {
     }
 
     @Override
-    public MethodVisitor createVisitor(final int api, final MethodVisitor parent) {
+    public MethodVisitor createVisitor(final int api, final MethodVisitor parent, final ClassInfoProvider classInfoProvider) {
         return new BuiltVisitor(api, parent, this.visitMethodInsn, this.visitInvokeDynamicInsn);
     }
 

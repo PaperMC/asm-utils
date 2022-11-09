@@ -44,7 +44,6 @@ public final class EnumRule {
 
     public static RewriteRule create(
         final String proxyClassName,
-        final ClassInfoProvider classInfoProvider,
         final Predicate<String> ownerPredicate
     ) {
         final RewriteRule enumConstantRule = RewriteRule.methodVisitorBuilder(builder -> builder.visitBoth(InvokeStaticRewrite.forOwner(
@@ -56,17 +55,15 @@ public final class EnumRule {
                 return null;
             }
         )));
-        return new RewriteRule((api, parent) -> enumConstantRule.methodVisitorFactory().createVisitor(
+        return new RewriteRule((api, parent, classInfoProvider) -> enumConstantRule.methodVisitorFactory().createVisitor(
             api,
-            new EnumMethodVisitor(api, parent, proxyClassName, classInfoProvider, ownerPredicate)
+            new EnumMethodVisitor(api, parent, proxyClassName, classInfoProvider, ownerPredicate),
+            classInfoProvider
         ));
     }
 
-    public static RewriteRule minecraft(
-        final String proxyClassName,
-        final ClassInfoProvider classInfoProvider
-    ) {
-        return create(proxyClassName, classInfoProvider, owner -> owner.startsWith("net/minecraft/") || owner.startsWith("com/mojang/"));
+    public static RewriteRule minecraft(final String proxyClassName) {
+        return create(proxyClassName, owner -> owner.startsWith("net/minecraft/") || owner.startsWith("com/mojang/"));
     }
 
     // todo needs to handle invokedynamic?
