@@ -57,17 +57,11 @@ interface InvokeStaticRewrite extends MethodVisitorFactory {
         return rewrite(owner, name, descriptor, false);
     }
 
-    final class Rewrite {
-        String owner;
-        String name;
-        String descriptor;
-        boolean isInterface;
-
-        Rewrite(final String owner, final String name, final String descriptor, final boolean isInterface) {
-            this.owner = owner;
-            this.name = name;
-            this.descriptor = descriptor;
-            this.isInterface = isInterface;
-        }
+    record Rewrite(
+        String owner,
+        String name,
+        String descriptor,
+        boolean isInterface
+    ) {
     }
 }
