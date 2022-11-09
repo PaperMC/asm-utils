@@ -77,7 +77,7 @@ public final class ProxyGenerator {
 
         // Scan impl class for methods & impl class name
         final DiscoverMethodsVisitor scanImpl = new DiscoverMethodsVisitor(Opcodes.ASM9, null);
-        proxyImplementation.accept(scanImpl, 0);
+        proxyImplementation.accept(scanImpl, ClassReader.SKIP_CODE);
         final Set<MethodInfo> methods = new HashSet<>(scanImpl.methods);
         final String proxy = scanImpl.name;
 
@@ -86,7 +86,7 @@ public final class ProxyGenerator {
         // as well as default methods
         for (final ClassReader parent : parents) {
             final DiscoverMethodsVisitor scanInterface = new DiscoverMethodsVisitor(Opcodes.ASM9, null);
-            parent.accept(scanInterface, 0);
+            parent.accept(scanInterface, ClassReader.SKIP_CODE);
             methods.addAll(scanInterface.methods);
         }
 
