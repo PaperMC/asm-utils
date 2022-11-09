@@ -19,7 +19,7 @@ interface InvokeStaticRewrite extends MethodVisitorFactory {
             public void visitMethodInsn(final int opcode, final String owner, final String name, final String descriptor, final boolean isInterface) {
                 final @Nullable Rewrite replacement = InvokeStaticRewrite.this.rewrite(classInfoProvider, owner, name, descriptor, isInterface);
                 if (replacement != null) {
-                    parent.visitMethodInsn(Opcodes.INVOKESTATIC, replacement.owner, replacement.name, replacement.descriptor, replacement.isInterface);
+                    super.visitMethodInsn(Opcodes.INVOKESTATIC, replacement.owner, replacement.name, replacement.descriptor, replacement.isInterface);
                     return;
                 }
                 super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
@@ -31,7 +31,7 @@ interface InvokeStaticRewrite extends MethodVisitorFactory {
                     final @Nullable Rewrite replacement = InvokeStaticRewrite.this.rewrite(classInfoProvider, handle.getOwner(), handle.getName(), handle.getDesc(), handle.isInterface());
                     if (replacement != null) {
                         bootstrapMethodArguments[1] = new Handle(Opcodes.H_INVOKESTATIC, replacement.owner, replacement.name, replacement.descriptor, replacement.isInterface);
-                        parent.visitInvokeDynamicInsn(name, descriptor, bootstrapMethodHandle, bootstrapMethodArguments);
+                        super.visitInvokeDynamicInsn(name, descriptor, bootstrapMethodHandle, bootstrapMethodArguments);
                         return;
                     }
                 }
