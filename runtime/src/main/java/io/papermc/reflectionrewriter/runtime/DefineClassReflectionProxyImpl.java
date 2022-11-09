@@ -3,7 +3,6 @@ package io.papermc.reflectionrewriter.runtime;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.nio.ByteBuffer;
 import java.security.ProtectionDomain;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,16 +17,6 @@ final class DefineClassReflectionProxyImpl implements DefineClassReflectionProxy
 
     DefineClassReflectionProxyImpl(final Function<byte[], byte[]> classTransformer) {
         this.classTransformer = classTransformer;
-    }
-
-    @Override
-    public Class<?> defineClass(final ClassLoader loader, final byte[] b, final int off, final int len) throws ClassFormatError {
-        return this.defineClass(loader, null, b, off, len, null);
-    }
-
-    @Override
-    public Class<?> defineClass(final ClassLoader loader, final String name, final byte[] b, final int off, final int len) throws ClassFormatError {
-        return this.defineClass(loader, name, b, off, len, null);
     }
 
     @Override
@@ -54,19 +43,6 @@ final class DefineClassReflectionProxyImpl implements DefineClassReflectionProxy
             throw error;
         } catch (final Throwable ex) {
             throw new RuntimeException("Failed to invoke defineClass", ex);
-        }
-    }
-
-    @Override
-    public Class<?> defineClass(final ClassLoader loader, final String name, final ByteBuffer b, final ProtectionDomain protectionDomain) throws ClassFormatError {
-        final int len = b.remaining();
-        if (b.hasArray()) {
-            return this.defineClass(loader, name, b.array(), b.position() + b.arrayOffset(), len, protectionDomain);
-        } else {
-            // no array, or read-only array
-            final byte[] tb = new byte[len];
-            b.get(tb); // get bytes out of byte buffer.
-            return this.defineClass(loader, name, tb, 0, len, protectionDomain);
         }
     }
 
