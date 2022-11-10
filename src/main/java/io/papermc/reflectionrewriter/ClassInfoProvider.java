@@ -17,7 +17,7 @@ public interface ClassInfoProvider {
                 return new ClassInfo(
                     className,
                     clazz.isEnum(),
-                    clazz.getSuperclass() == null ? null : clazz.getSuperclass().getName()
+                    clazz.getSuperclass() == null ? null : clazz.getSuperclass().getName().replace(".", "/")
                 );
             } catch (final ClassNotFoundException ex) {
                 return null;
