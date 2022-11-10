@@ -8,17 +8,22 @@ import org.checkerframework.framework.qual.DefaultQualifier;
 import org.objectweb.asm.MethodVisitor;
 
 @DefaultQualifier(NonNull.class)
-public record RewriteRules(List<RewriteRule> rules) {
+public final class RewriteRules {
+    private final RewriteRule chained;
+
     public RewriteRules(final List<RewriteRule> rules) {
-        this.rules = List.copyOf(rules);
+        this.chained = RewriteRule.chain(rules);
     }
 
-    public MethodVisitor methodVisitor(final int api, final MethodVisitor visitor, final ClassInfoProvider classInfoProvider) {
-        MethodVisitor lastVisitor = visitor;
-        for (final RewriteRule rule : this.rules()) {
-            lastVisitor = rule.methodVisitorFactory().createVisitor(api, lastVisitor, classInfoProvider);
+    public MethodVisitor methodVisitor(
+        final int api,
+        final MethodVisitor visitor,
+        final ClassProcessingContext context
+    ) {
+        if (this.chained.shouldProcess(context)) {
+            return this.chained.createVisitor(api, visitor, context);
         }
-        return lastVisitor;
+        return visitor;
     }
 
     public static final class Builder {

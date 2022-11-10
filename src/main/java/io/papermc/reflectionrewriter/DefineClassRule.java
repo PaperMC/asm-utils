@@ -7,7 +7,7 @@ import org.checkerframework.framework.qual.DefaultQualifier;
 import org.objectweb.asm.Opcodes;
 
 @DefaultQualifier(NonNull.class)
-public final class DefineClassRule {
+public final class DefineClassRule implements InvokeStaticRewrite {
     private static final Set<String> CLASS_LOADER_DESCS = Set.of(
         "([BII)Ljava/lang/Class;",
         "(Ljava/lang/String;[BII)Ljava/lang/Class;",
@@ -19,7 +19,57 @@ public final class DefineClassRule {
         "(Ljava/lang/String;[BIILjava/security/CodeSource;)Ljava/lang/Class;"
     );
 
-    private DefineClassRule() {
+    private final String proxy;
+    private final boolean assumeClassLoader;
+
+    private DefineClassRule(final String proxyClassName, final boolean assumeClassLoader) {
+        this.proxy = proxyClassName;
+        this.assumeClassLoader = assumeClassLoader;
+    }
+
+    // We could split this into multiple rules and return false for shouldProcess when the processing class doesn't
+    // extend (S)CL. However since the MethodHandles.Lookup portion always needs to run, the actual benefit would
+    // be beyond minute.
+    @Override
+    public @Nullable Rewrite rewrite(
+        final ClassProcessingContext context,
+        final int opcode,
+        final String owner,
+        final String name,
+        final String descriptor,
+        final boolean isInterface
+    ) {
+        if (!name.equals("defineClass") || opcode == Opcodes.INVOKESTATIC || opcode == Opcodes.H_INVOKESTATIC) {
+            return null;
+        }
+        if (owner.equals("java/lang/invoke/MethodHandles$Lookup") && descriptor.equals("([B)Ljava/lang/Class;")) {
+            return InvokeStaticRewrite.staticRedirect(this.proxy, name, InvokeStaticRewrite.insertFirstParam("java/lang/invoke/MethodHandles$Lookup", descriptor));
+        }
+        final @Nullable String superName = context.processingClassSuperClassName();
+        if (superName != null) {
+            if (CLASS_LOADER_DESCS.contains(descriptor)
+                && this.isClassLoader(context.classInfoProvider(), superName)
+                && (owner.equals(context.processingClassName()) || this.isClassLoader(context.classInfoProvider(), owner))) {
+                return this.classLoaderRewrite(name, descriptor);
+            } else if (SECURE_CLASS_LOADER_DESCS.contains(descriptor)
+                && this.isSecureClassLoader(context.classInfoProvider(), superName)
+                && (owner.equals(context.processingClassName()) || this.isSecureClassLoader(context.classInfoProvider(), owner))) {
+                return this.classLoaderRewrite(name, descriptor);
+            }
+        }
+        return null;
+    }
+
+    private Rewrite classLoaderRewrite(final String name, final String descriptor) {
+        return InvokeStaticRewrite.staticRedirect(this.proxy, name, InvokeStaticRewrite.insertFirstParam("java/lang/Object", descriptor));
+    }
+
+    private boolean isSecureClassLoader(final ClassInfoProvider classInfoProvider, final String className) {
+        return is(classInfoProvider, className, "java/security/SecureClassLoader", this.assumeClassLoader);
+    }
+
+    private boolean isClassLoader(final ClassInfoProvider classInfoProvider, final String className) {
+        return is(classInfoProvider, className, "java/lang/ClassLoader", this.assumeClassLoader);
     }
 
     /**
@@ -37,32 +87,11 @@ public final class DefineClassRule {
      *
      * @param proxyClassName    proxy class name
      * @param assumeClassLoader whether to assume a class is a {@link ClassLoader} if it cannot be determined
-     *                          using {@code classInfoProvider}
+     *                          using the {@link ClassInfoProvider}
      * @return new rule
      */
     public static RewriteRule create(final String proxyClassName, final boolean assumeClassLoader) {
-        return RewriteRule.create((InvokeStaticRewrite) (classInfoProvider, opcode, owner, name, descriptor, isInterface) -> {
-            final boolean staticCall = opcode == Opcodes.INVOKESTATIC || opcode == Opcodes.H_INVOKESTATIC;
-            if (!staticCall && name.equals("defineClass") && CLASS_LOADER_DESCS.contains(descriptor) && isClassLoader(classInfoProvider, owner, assumeClassLoader)) {
-                final String redirectedDescriptor = "(Ljava/lang/Object;" + descriptor.substring(1);
-                return InvokeStaticRewrite.staticRedirect(proxyClassName, name, redirectedDescriptor);
-            } else if (!staticCall && name.equals("defineClass") && SECURE_CLASS_LOADER_DESCS.contains(descriptor) && isSecureClassLoader(classInfoProvider, owner, assumeClassLoader)) {
-                final String redirectedDescriptor = "(Ljava/lang/Object;" + descriptor.substring(1);
-                return InvokeStaticRewrite.staticRedirect(proxyClassName, name, redirectedDescriptor);
-            } else if (owner.equals("java/lang/invoke/MethodHandles$Lookup") && name.equals("defineClass") && descriptor.equals("([B)Ljava/lang/Class;")) {
-                final String redirectedDescriptor = "(Ljava/lang/invoke/MethodHandles$Lookup;" + descriptor.substring(1);
-                return InvokeStaticRewrite.staticRedirect(proxyClassName, name, redirectedDescriptor);
-            }
-            return null;
-        });
-    }
-
-    private static boolean isSecureClassLoader(final ClassInfoProvider classInfoProvider, final String className, final boolean assumeClassLoader) {
-        return is(classInfoProvider, className, "java/security/SecureClassLoader", assumeClassLoader);
-    }
-
-    private static boolean isClassLoader(final ClassInfoProvider classInfoProvider, final String className, final boolean assumeClassLoader) {
-        return is(classInfoProvider, className, "java/lang/ClassLoader", assumeClassLoader);
+        return RewriteRule.create(new DefineClassRule(proxyClassName, assumeClassLoader));
     }
 
     private static boolean is(final ClassInfoProvider classInfoProvider, final String className, final String checkForName, final boolean assumeClassLoader) {
