@@ -35,10 +35,8 @@ final class DefineClassReflectionProxyImpl implements DefineClassReflectionProxy
             final byte[] bytes = slice(b, off, len);
             final byte[] transformed = this.classTransformer.apply(bytes);
             return (Class<?>) handle.invokeExact(loader, transformed, 0, transformed.length);
-        } catch (final Error error) {
-            throw error;
         } catch (final Throwable ex) {
-            throw new RuntimeException("Failed to invoke defineClass", ex);
+            throw sneakyThrow(ex);
         }
     }
 
@@ -55,10 +53,8 @@ final class DefineClassReflectionProxyImpl implements DefineClassReflectionProxy
             final byte[] bytes = slice(b, off, len);
             final byte[] transformed = this.classTransformer.apply(bytes);
             return (Class<?>) handle.invokeExact(loader, name, transformed, 0, transformed.length);
-        } catch (final Error error) {
-            throw error;
         } catch (final Throwable ex) {
-            throw new RuntimeException("Failed to invoke defineClass", ex);
+            throw sneakyThrow(ex);
         }
     }
 
@@ -75,10 +71,8 @@ final class DefineClassReflectionProxyImpl implements DefineClassReflectionProxy
             final byte[] bytes = slice(b, off, len);
             final byte[] transformed = this.classTransformer.apply(bytes);
             return (Class<?>) handle.invokeExact(loader, name, transformed, 0, transformed.length, protectionDomain);
-        } catch (final Error error) {
-            throw error;
         } catch (final Throwable ex) {
-            throw new RuntimeException("Failed to invoke defineClass", ex);
+            throw sneakyThrow(ex);
         }
     }
 
@@ -95,10 +89,8 @@ final class DefineClassReflectionProxyImpl implements DefineClassReflectionProxy
             final byte[] bytes = slice(b);
             final byte[] transformed = this.classTransformer.apply(bytes);
             return (Class<?>) handle.invokeExact(loader, name, ByteBuffer.wrap(transformed), protectionDomain);
-        } catch (final Error error) {
-            throw error;
         } catch (final Throwable ex) {
-            throw new RuntimeException("Failed to invoke defineClass", ex);
+            throw sneakyThrow(ex);
         }
     }
 
@@ -115,10 +107,8 @@ final class DefineClassReflectionProxyImpl implements DefineClassReflectionProxy
             final byte[] bytes = slice(b, off, len);
             final byte[] transformed = this.classTransformer.apply(bytes);
             return (Class<?>) handle.invokeExact(secureLoader, name, transformed, 0, transformed.length, cs);
-        } catch (final Error error) {
-            throw error;
         } catch (final Throwable ex) {
-            throw new RuntimeException("Failed to invoke defineClass", ex);
+            throw sneakyThrow(ex);
         }
     }
 
@@ -135,10 +125,8 @@ final class DefineClassReflectionProxyImpl implements DefineClassReflectionProxy
             final byte[] bytes = slice(b);
             final byte[] transformed = this.classTransformer.apply(bytes);
             return (Class<?>) handle.invokeExact(secureLoader, name, ByteBuffer.wrap(transformed), cs);
-        } catch (final Error error) {
-            throw error;
         } catch (final Throwable ex) {
-            throw new RuntimeException("Failed to invoke defineClass", ex);
+            throw sneakyThrow(ex);
         }
     }
 
@@ -154,7 +142,7 @@ final class DefineClassReflectionProxyImpl implements DefineClassReflectionProxy
         return this.handles.computeIfAbsent(new MethodKey(loaderType, methodType), methodKey -> {
             try {
                 return MethodHandles.privateLookupIn(methodKey.owner(), LOOKUP)
-                    .findVirtual(loaderType, "defineClass", methodKey.methodType())
+                    .findVirtual(methodKey.owner(), "defineClass", methodKey.methodType())
                     .asType(methodKey.methodType().insertParameterTypes(0, Object.class));
             } catch (final ReflectiveOperationException ex) {
                 throw new RuntimeException("Failed to lookup defineClass handle", ex);
@@ -177,6 +165,11 @@ final class DefineClassReflectionProxyImpl implements DefineClassReflectionProxy
             b.get(tb);
         }
         return tb;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <X extends Throwable> X sneakyThrow(final Throwable ex) throws X {
+        throw (X) ex;
     }
 
     // All the methods we use are named defineClass and are distinguished by descriptor, so we don't need the name in the key
