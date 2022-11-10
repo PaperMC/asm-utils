@@ -10,16 +10,16 @@ public record BasicRewriteRule(
     MethodVisitorFactory methodVisitorFactory
 ) implements RewriteRule {
     @Override
+    public boolean shouldProcess(final ClassProcessingContext context) {
+        return this.shouldProcess.shouldProcess(context);
+    }
+
+    @Override
     public MethodVisitor createVisitor(
         final int api,
         final MethodVisitor parent,
         final ClassProcessingContext context
     ) {
         return this.methodVisitorFactory.createVisitor(api, parent, context);
-    }
-
-    @Override
-    public boolean shouldProcess(final ClassProcessingContext context) {
-        return this.shouldProcess.shouldProcess(context);
     }
 }

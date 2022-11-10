@@ -7,7 +7,7 @@ import org.checkerframework.framework.qual.DefaultQualifier;
 import org.objectweb.asm.MethodVisitor;
 
 @DefaultQualifier(NonNull.class)
-public interface RewriteRule extends MethodVisitorFactory, ShouldProcess {
+public interface RewriteRule extends ShouldProcess, MethodVisitorFactory {
     static RewriteRule create(final MethodVisitorFactory methodVisitorFactory) {
         return new BasicRewriteRule($ -> true, methodVisitorFactory);
     }
@@ -16,23 +16,44 @@ public interface RewriteRule extends MethodVisitorFactory, ShouldProcess {
         return new BasicRewriteRule(shouldProcess, methodVisitorFactory);
     }
 
-    static RewriteRule chain(final RewriteRule... rules) {
+    static Chain chain(final RewriteRule... rules) {
         return chain(Arrays.asList(rules));
     }
 
-    static RewriteRule chain(final List<RewriteRule> rules) {
-        final List<RewriteRule> rulesCopy = List.copyOf(rules);
-        return RewriteRule.create(
-            context -> rulesCopy.stream().anyMatch(rule -> rule.shouldProcess(context)),
-            (api, parent, context) -> {
-                MethodVisitor visitor = parent;
-                for (final RewriteRule rule : rulesCopy) {
-                    if (rule.shouldProcess(context)) {
-                        visitor = rule.createVisitor(api, visitor, context);
-                    }
+    static Chain chain(final List<RewriteRule> rules) {
+        return new Chain(rules);
+    }
+
+    final class Chain implements RewriteRule {
+        private final List<RewriteRule> rules;
+
+        private Chain(final List<RewriteRule> rules) {
+            this.rules = List.copyOf(rules);
+        }
+
+        public List<RewriteRule> rules() {
+            return this.rules;
+        }
+
+        @Override
+        public boolean shouldProcess(final ClassProcessingContext context) {
+            for (final RewriteRule rule : this.rules) {
+                if (rule.shouldProcess(context)) {
+                    return true;
                 }
-                return visitor;
             }
-        );
+            return false;
+        }
+
+        @Override
+        public MethodVisitor createVisitor(final int api, final MethodVisitor parent, final ClassProcessingContext context) {
+            MethodVisitor visitor = parent;
+            for (final RewriteRule rule : this.rules) {
+                if (rule.shouldProcess(context)) {
+                    visitor = rule.createVisitor(api, visitor, context);
+                }
+            }
+            return visitor;
+        }
     }
 }
