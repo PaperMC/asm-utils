@@ -26,8 +26,15 @@ public final class RewriteRules {
         return visitor;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public static final class Builder {
         private final List<RewriteRule> rules = new ArrayList<>();
+
+        private Builder() {
+        }
 
         public Builder rule(final RewriteRule rule) {
             this.rules.add(rule);
