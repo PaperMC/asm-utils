@@ -71,8 +71,9 @@ public final class DefineClassRule {
         }
         final @Nullable ClassInfo info = classInfoProvider.info(className);
         if (info != null) {
-            if (info.superClass() != null) {
-                return is(classInfoProvider, info.superClass(), checkForName, assumeClassLoader);
+            final @Nullable String superName = info.superClassName();
+            if (superName != null) {
+                return is(classInfoProvider, superName, checkForName, assumeClassLoader);
             } else {
                 return false;
             }
