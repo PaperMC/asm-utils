@@ -29,7 +29,7 @@ public final class DefineClassRule implements InvokeStaticRewrite {
 
     // We could split this into multiple rules and return false for shouldProcess when the processing class doesn't
     // extend (S)CL. However since the MethodHandles.Lookup portion always needs to run, the actual benefit would
-    // be beyond minute.
+    // be beyond minute (if not actually worse).
     @Override
     public @Nullable Rewrite rewrite(
         final ClassProcessingContext context,
