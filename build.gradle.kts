@@ -22,16 +22,16 @@ allprojects {
 
     dependencies {
         if ("-runtime" !in project.name) {
-            val asm = "org.ow2.asm:asm:9.4"
+            val asm = "org.ow2.asm:asm:9.5"
             api(asm)
             testImplementation(asm)
         }
 
-        val checker = "org.checkerframework:checker-qual:3.25.0"
+        val checker = "org.checkerframework:checker-qual:3.37.0"
         compileOnlyApi(checker)
         testCompileOnly(checker)
 
-        val junitVer = "5.9.0"
+        val junitVer = "5.9.3"
         testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVer")
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVer")
     }
