@@ -22,7 +22,6 @@ jobs:
               with:
                   java-version: ${{ matrix.java }}
                   distribution: 'temurin'
-                  cache: 'gradle'
             - uses: gradle/actions/setup-gradle@v3
             - name: Build
               run: ./gradlew build --stacktrace
