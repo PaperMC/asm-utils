@@ -1,8 +1,8 @@
 package io.papermc.reflectionrewriter;
 
-import io.papermc.asmutils.InvokeStaticRewrite;
-import io.papermc.asmutils.MethodMatcher;
-import io.papermc.asmutils.RewriteRule;
+import io.papermc.asm.InvokeStaticRewrite;
+import io.papermc.asm.MethodMatcher;
+import io.papermc.asm.RewriteRule;
 import java.util.List;
 import java.util.Set;
 

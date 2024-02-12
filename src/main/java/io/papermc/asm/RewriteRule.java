@@ -1,4 +1,4 @@
-package io.papermc.asmutils;
+package io.papermc.asm;
 
 import java.util.Arrays;
 import java.util.List;

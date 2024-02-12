@@ -1,4 +1,4 @@
-package io.papermc.asmutils;
+package io.papermc.asm;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
