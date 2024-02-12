@@ -5,7 +5,7 @@ plugins {
     id("net.kyori.indra") version indraVer
     id("net.kyori.indra.checkstyle") version indraVer
     id("net.kyori.indra.publishing") version indraVer
-    id("org.incendo.cloud-build-logic") version "0.0.12" apply false
+    id("org.incendo.cloud-build-logic.javadoc-links") version "0.0.12"
 }
 
 allprojects {
