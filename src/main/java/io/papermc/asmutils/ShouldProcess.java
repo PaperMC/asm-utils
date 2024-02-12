@@ -1,4 +1,4 @@
-package io.papermc.reflectionrewriter;
+package io.papermc.asmutils;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.framework.qual.DefaultQualifier;

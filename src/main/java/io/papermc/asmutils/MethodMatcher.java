@@ -1,4 +1,4 @@
-package io.papermc.reflectionrewriter;
+package io.papermc.asmutils;
 
 import java.util.HashSet;
 import java.util.Set;

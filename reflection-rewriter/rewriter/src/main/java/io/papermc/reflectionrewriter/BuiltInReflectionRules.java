@@ -1,9 +1,12 @@
 package io.papermc.reflectionrewriter;
 
+import io.papermc.asmutils.InvokeStaticRewrite;
+import io.papermc.asmutils.MethodMatcher;
+import io.papermc.asmutils.RewriteRule;
 import java.util.List;
 import java.util.Set;
 
-public final class DefaultRules {
+public final class BuiltInReflectionRules {
     private final String proxy;
     private final RewriteRule classRule;
     private final RewriteRule methodHandlesLookupRule;
@@ -11,7 +14,7 @@ public final class DefaultRules {
     private final RewriteRule constantBootstrapsRule;
     private final RewriteRule methodTypeRule;
 
-    public DefaultRules(final String proxyClassName) {
+    public BuiltInReflectionRules(final String proxyClassName) {
         this.proxy = proxyClassName;
         this.classRule = this.createClassRule();
         this.methodHandlesLookupRule = this.createMethodHandlesLookupRule();

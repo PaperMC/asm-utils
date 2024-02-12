@@ -1,4 +1,4 @@
-package io.papermc.reflectionrewriter;
+package io.papermc.asmutils;
 
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -8,13 +8,13 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 
 @DefaultQualifier(NonNull.class)
-public final class ReflectionRewriter extends ClassVisitor implements ClassProcessingContext {
+public final class RewriteRulesClassVisitor extends ClassVisitor implements ClassProcessingContext {
     private final RewriteRules rules;
     private final ClassInfoProvider classInfoProvider;
     private @MonotonicNonNull String name;
     private @Nullable String superName;
 
-    public ReflectionRewriter(
+    public RewriteRulesClassVisitor(
         final int api,
         final ClassVisitor parent,
         final RewriteRules rules,
