@@ -14,6 +14,9 @@ allprojects {
         javaVersions {
             target(17)
         }
+
+        publishSnapshotsTo("paperSnapshots", "https://repo.papermc.io/repository/maven-snapshots/")
+        publishReleasesTo("paperReleases", "https://repo.papermc.io/repository/maven-releases/")
     }
 
     repositories {
