@@ -1,4 +1,4 @@
-package io.papermc.reflectionrewriter;
+package io.papermc.asm;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -9,7 +9,7 @@ import org.objectweb.asm.Opcodes;
 
 @DefaultQualifier(NonNull.class)
 @FunctionalInterface
-interface InvokeStaticRewrite extends MethodVisitorFactory {
+public interface InvokeStaticRewrite extends MethodVisitorFactory {
     @Nullable Rewrite rewrite(ClassProcessingContext context, int opcode, String owner, String name, String descriptor, boolean isInterface);
 
     @Override

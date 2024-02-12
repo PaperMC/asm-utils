@@ -1,4 +1,4 @@
-package io.papermc.reflectionrewriter;
+package io.papermc.asm;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;

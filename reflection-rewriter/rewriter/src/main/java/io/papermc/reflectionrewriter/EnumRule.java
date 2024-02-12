@@ -1,5 +1,9 @@
 package io.papermc.reflectionrewriter;
 
+import io.papermc.asm.ClassInfo;
+import io.papermc.asm.ClassInfoProvider;
+import io.papermc.asm.InvokeStaticRewrite;
+import io.papermc.asm.RewriteRule;
 import java.util.function.Predicate;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.MethodVisitor;

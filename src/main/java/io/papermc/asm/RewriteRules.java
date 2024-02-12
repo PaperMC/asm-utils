@@ -1,4 +1,4 @@
-package io.papermc.reflectionrewriter;
+package io.papermc.asm;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,10 +48,6 @@ public final class RewriteRules {
         public Builder rules(final List<RewriteRule> rules) {
             this.rules.addAll(rules);
             return this;
-        }
-
-        public Builder defaultRules(final String proxyClassName) {
-            return this.rules(new DefaultRules(proxyClassName).rules());
         }
 
         public RewriteRules build() {
