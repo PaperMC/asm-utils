@@ -6,7 +6,7 @@ import io.papermc.asmutils.RewriteRule;
 import java.util.List;
 import java.util.Set;
 
-public final class BuiltInReflectionRules {
+public final class BaseReflectionRules {
     private final String proxy;
     private final RewriteRule classRule;
     private final RewriteRule methodHandlesLookupRule;
@@ -14,7 +14,7 @@ public final class BuiltInReflectionRules {
     private final RewriteRule constantBootstrapsRule;
     private final RewriteRule methodTypeRule;
 
-    public BuiltInReflectionRules(final String proxyClassName) {
+    public BaseReflectionRules(final String proxyClassName) {
         this.proxy = proxyClassName;
         this.classRule = this.createClassRule();
         this.methodHandlesLookupRule = this.createMethodHandlesLookupRule();
