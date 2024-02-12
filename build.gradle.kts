@@ -1,5 +1,5 @@
 plugins {
-    val indraVer = "3.1.2"
+    val indraVer = "3.1.3"
     id("net.kyori.indra") version indraVer
     id("net.kyori.indra.checkstyle") version indraVer
     id("net.kyori.indra.publishing") version indraVer
@@ -22,16 +22,16 @@ allprojects {
 
     dependencies {
         if ("-runtime" !in project.name) {
-            val asm = "org.ow2.asm:asm:9.5"
+            val asm = "org.ow2.asm:asm:9.6"
             api(asm)
             testImplementation(asm)
         }
 
-        val checker = "org.checkerframework:checker-qual:3.37.0"
+        val checker = "org.checkerframework:checker-qual:3.42.0"
         compileOnlyApi(checker)
         testCompileOnly(checker)
 
-        val junitVer = "5.9.3"
+        val junitVer = "5.10.2"
         testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVer")
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVer")
     }
