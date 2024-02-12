@@ -1,8 +1,8 @@
-# paper-asm
+# asm-utils
 
-Houses ASM utilities for Paper projects
+Houses ASM utilities for PaperMC projects
 
-## paper-asm (root project)
+## asm-utils (root project)
 
 Shared ASM utilities
 

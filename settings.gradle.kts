@@ -2,7 +2,7 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
 }
 
-rootProject.name = "paper-asm"
+rootProject.name = "asm-utils"
 
 include("reflection-rewriter/rewriter")
 project(":reflection-rewriter/rewriter").name = "reflection-rewriter"
