@@ -1,8 +1,11 @@
+import org.incendo.cloudbuildlogic.jmp
+
 plugins {
     val indraVer = "3.1.3"
     id("net.kyori.indra") version indraVer
     id("net.kyori.indra.checkstyle") version indraVer
     id("net.kyori.indra.publishing") version indraVer
+    id("org.incendo.cloud-build-logic") version "0.0.12" apply false
 }
 
 allprojects {
@@ -17,6 +20,30 @@ allprojects {
 
         publishSnapshotsTo("paperSnapshots", "https://repo.papermc.io/repository/maven-snapshots/")
         publishReleasesTo("paperReleases", "https://repo.papermc.io/repository/maven-releases/")
+
+        apache2License()
+
+        github("PaperMC", "asm-utils") {
+            ci(true)
+        }
+
+        configurePublications {
+            pom {
+                developers {
+                    jmp()
+                    developer {
+                        id = "Machine-Maker"
+                        name = "Jake Potrebic"
+                        url = "https://github.com/Machine-Maker"
+                    }
+                    developer {
+                        id = "kennytv"
+                        name = "Nassim Jahnke"
+                        url = "https://github.com/kennytv"
+                    }
+                }
+            }
+        }
     }
 
     repositories {
