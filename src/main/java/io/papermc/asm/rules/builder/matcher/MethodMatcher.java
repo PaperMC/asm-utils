@@ -10,9 +10,9 @@ import java.util.function.Predicate;
 
 public interface MethodMatcher {
 
-    boolean matchesName(final String name);
+    boolean matchesName(String name);
 
-    boolean matches(final String name, final String descriptor);
+    boolean matches(String name, String descriptor);
 
     static Builder builder() {
         return new Builder();

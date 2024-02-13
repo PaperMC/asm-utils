@@ -40,13 +40,14 @@ public final class DefineClassRule implements MethodRewriteRule {
     // extend (S)CL. However since the MethodHandles.Lookup portion always needs to run, the actual benefit would
     // be beyond minute (if not actually worse).
     @Override
-    public @Nullable Rewrite rewrite(final ClassProcessingContext context,
-       final boolean invokeDynamic,
-       final int opcode,
-       final String owner,
-       final String name,
-       MethodTypeDesc descriptor,
-       final boolean isInterface
+    public @Nullable Rewrite rewrite(
+        final ClassProcessingContext context,
+        final boolean invokeDynamic,
+        final int opcode,
+        final String owner,
+        final String name,
+        MethodTypeDesc descriptor,
+        final boolean isInterface
     ) {
         if (!name.equals("defineClass") || isStatic(opcode, invokeDynamic)) {
             return null;
