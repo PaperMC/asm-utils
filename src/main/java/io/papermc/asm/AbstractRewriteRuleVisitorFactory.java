@@ -49,21 +49,31 @@ public abstract class AbstractRewriteRuleVisitorFactory implements RewriteRuleVi
     }
 
     private final class MutableProcessingContext implements ClassProcessingContext {
-        private @MonotonicNonNull String name;
-        private @Nullable String superName;
+        private static final String NULL = "null";
+
+        private @MonotonicNonNull String name = NULL;
+        private @Nullable String superName = NULL;
 
         @Override
         public ClassInfoProvider classInfoProvider() {
             return AbstractRewriteRuleVisitorFactory.this.classInfoProvider;
         }
 
+        @SuppressWarnings("StringEquality")
         @Override
         public String processingClassName() {
+            if (this.name == NULL || this.name == null) {
+                throw new IllegalStateException("processingClassName is only available after the class header is visited.");
+            }
             return this.name;
         }
 
+        @SuppressWarnings("StringEquality")
         @Override
         public @Nullable String processingClassSuperClassName() {
+            if (this.superName == NULL) {
+                throw new IllegalStateException("processingClassSuperClassName is only available after the class header is visited.");
+            }
             return this.superName;
         }
     }

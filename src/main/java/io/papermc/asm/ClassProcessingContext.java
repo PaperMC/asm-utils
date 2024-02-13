@@ -8,30 +8,19 @@ import org.checkerframework.framework.qual.DefaultQualifier;
 public interface ClassProcessingContext {
     ClassInfoProvider classInfoProvider();
 
+    /**
+     * Returns the name of the class currently being processed. Only
+     * available once the class header has been visited.
+     *
+     * @return name of the class currently being processed
+     */
     String processingClassName();
 
+    /**
+     * Returns the name of the super class of the class currently being processed. Only
+     * available once the class header has been visited.
+     *
+     * @return name of the super class of the class currently being processed
+     */
     @Nullable String processingClassSuperClassName();
-
-    static ClassProcessingContext create(
-        final ClassInfoProvider classInfoProvider,
-        final String processingClassName,
-        final @Nullable String processingClassSuperClassName
-    ) {
-        return new ClassProcessingContext() {
-            @Override
-            public ClassInfoProvider classInfoProvider() {
-                return classInfoProvider;
-            }
-
-            @Override
-            public String processingClassName() {
-                return processingClassName;
-            }
-
-            @Override
-            public @Nullable String processingClassSuperClassName() {
-                return processingClassSuperClassName;
-            }
-        };
-    }
 }
