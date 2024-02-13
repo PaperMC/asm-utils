@@ -1,46 +1,46 @@
 name: Build
 on:
-    push:
-        branches: [ "**" ]
-        tags-ignore: [ "**" ]
-    pull_request:
+  push:
+    branches: [ "**" ]
+    tags-ignore: [ "**" ]
+  pull_request:
 
 jobs:
-    build:
-        # Only run on PRs if the source branch is on someone else's repo
-        if: ${{ github.event_name != 'pull_request' || github.repository != github.event.pull_request.head.repo.full_name }}
-        runs-on: ubuntu-latest
-        strategy:
-            matrix:
-                java: [ 17 ]
-            fail-fast: true
-        steps:
-            -   uses: actions/checkout@v4
-            -   uses: gradle/wrapper-validation-action@v2
-            -   name: JDK ${{ matrix.java }}
-                uses: actions/setup-java@v4
-                with:
-                    java-version: ${{ matrix.java }}
-                    distribution: 'temurin'
-            -   uses: gradle/actions/setup-gradle@v3
-            -   name: Build
-                run: ./gradlew build --stacktrace
-            -   name: Determine Status
-                run: |
-                    if [ "$(./gradlew properties | awk '/^version:/ { print $2; }' | grep '\-SNAPSHOT')" ]; then
-                      echo "STATUS=snapshot" >> $GITHUB_ENV
-                    else
-                      echo "STATUS=release" >> $GITHUB_ENV
-                    fi
-            -   name: Publish Snapshot
-                if: "${{ env.STATUS != 'release' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}"
-                run: ./gradlew publish
-                env:
-                    ORG_GRADLE_PROJECT_paperUsername: "${{ secrets.PAPER_REPO_USER }}"
-                    ORG_GRADLE_PROJECT_paperPassword: "${{ secrets.PAPER_REPO_PASSWORD }}"
-            -   name: Publish Release
-                if: "${{ env.STATUS == 'release' && github.event_name == 'release' }}"
-                run: ./gradlew publish
-                env:
-                    ORG_GRADLE_PROJECT_paperUsername: "${{ secrets.PAPER_REPO_USER }}"
-                    ORG_GRADLE_PROJECT_paperPassword: "${{ secrets.PAPER_REPO_PASSWORD }}"
+  build:
+    # Only run on PRs if the source branch is on someone else's repo
+    if: ${{ github.event_name != 'pull_request' || github.repository != github.event.pull_request.head.repo.full_name }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [ 17 ]
+      fail-fast: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gradle/wrapper-validation-action@v2
+      - name: JDK ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: 'temurin'
+      - uses: gradle/actions/setup-gradle@v3
+      - name: Build
+        run: ./gradlew build --stacktrace
+      - name: Determine Status
+        run: |
+          if [ "$(./gradlew properties | awk '/^version:/ { print $2; }' | grep '\-SNAPSHOT')" ]; then
+            echo "STATUS=snapshot" >> $GITHUB_ENV
+          else
+            echo "STATUS=release" >> $GITHUB_ENV
+          fi
+      - name: Publish Snapshot
+        if: "${{ env.STATUS != 'release' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}"
+        run: ./gradlew publish
+        env:
+          ORG_GRADLE_PROJECT_paperUsername: "${{ secrets.PAPER_REPO_USER }}"
+          ORG_GRADLE_PROJECT_paperPassword: "${{ secrets.PAPER_REPO_PASSWORD }}"
+      - name: Publish Release
+        if: "${{ env.STATUS == 'release' && github.event_name == 'release' }}"
+        run: ./gradlew publish
+        env:
+          ORG_GRADLE_PROJECT_paperUsername: "${{ secrets.PAPER_REPO_USER }}"
+          ORG_GRADLE_PROJECT_paperPassword: "${{ secrets.PAPER_REPO_PASSWORD }}"
