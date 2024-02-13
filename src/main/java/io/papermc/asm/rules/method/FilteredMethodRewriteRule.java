@@ -19,7 +19,7 @@ import static io.papermc.asm.util.DescriptorUtils.desc;
 public interface FilteredMethodRewriteRule extends MethodRewriteRule, OwnableRewriteRule {
 
     private static String transformExecutableName(final Executable executable) {
-        return executable instanceof Constructor<?> ? "<init>" : executable.getName();
+        return executable instanceof Constructor<?> ? StaticRewrite.CONSTRUCTOR_METHOD_NAME : executable.getName();
     }
 
     MethodMatcher methodMatcher();

@@ -43,7 +43,7 @@ public interface MethodRewriteRule extends RewriteRule {
                     @Override
                     public void visitInvokeDynamicInsn(final String name, final String descriptor, final Handle bootstrapMethodHandle, final Object... bootstrapMethodArguments) {
                         if (LAMBDA_METAFACTORY_OWNER.equals(bootstrapMethodHandle.getOwner()) && bootstrapMethodArguments.length > 1 && bootstrapMethodArguments[1] instanceof final Handle handle) {
-                            if (MethodRewriteRule.this.shouldProcess(context, handle.getTag(), handle.getOwner(), name, descriptor, handle.isInterface())) {
+                            if (MethodRewriteRule.this.shouldProcess(context, handle.getTag(), handle.getOwner(), handle.getName(), handle.getDesc(), handle.isInterface())) {
                                 final @Nullable Rewrite rewrite = MethodRewriteRule.this.rewrite(context, true, handle.getTag(), handle.getOwner(), handle.getName(), methodDesc(handle.getDesc()), handle.isInterface());
                                 if (rewrite != null) {
                                     bootstrapMethodArguments[1] = rewrite.createHandle();

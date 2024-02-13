@@ -28,6 +28,8 @@ import static java.util.function.Predicate.isEqual;
 
 public interface StaticRewrite extends FilteredMethodRewriteRule {
 
+    String CONSTRUCTOR_METHOD_NAME = "<init>";
+
     ClassDesc staticRedirectOwner();
 
     default MethodTypeDesc modifyMethodDescriptor(final MethodTypeDesc bytecodeDescriptor) {
@@ -39,7 +41,7 @@ public interface StaticRewrite extends FilteredMethodRewriteRule {
         if (isVirtual(opcode, invokeDynamic) || isInterface(opcode, invokeDynamic)) { // insert owner object as first param
             descriptor = descriptor.insertParameterTypes(0, fromOwner(owner));
         } else if (isSpecial(opcode, invokeDynamic)) {
-            if ("<init>".equals(name)) {
+            if (CONSTRUCTOR_METHOD_NAME.equals(name)) {
                 name = "create" + owner.substring(owner.lastIndexOf('/') + 1);
                 descriptor = descriptor.changeReturnType(fromOwner(owner));
                 return new RewriteConstructor(this.staticRedirectOwner(), owner, name, this.modifyMethodDescriptor(descriptor));
@@ -61,7 +63,7 @@ public interface StaticRewrite extends FilteredMethodRewriteRule {
             boolean handled = false;
             final Deque<String> typeStack = new ArrayDeque<>();
             while (insn != null) {
-                if (insn.getOpcode() == Opcodes.INVOKESPECIAL && "<init>".equals(((MethodInsnNode) insn).name)) {
+                if (insn.getOpcode() == Opcodes.INVOKESPECIAL && CONSTRUCTOR_METHOD_NAME.equals(((MethodInsnNode) insn).name)) {
                     typeStack.push(((MethodInsnNode) insn).owner);
                 }
                 if (wasDup && insn.getOpcode() == Opcodes.NEW) {
