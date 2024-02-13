@@ -1,6 +1,7 @@
 package io.papermc.asm;
 
 import io.papermc.asm.rules.RewriteRule;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.framework.qual.DefaultQualifier;
@@ -29,5 +30,17 @@ public interface RewriteRuleVisitorFactory {
         final ClassInfoProvider classInfoProvider
     ) {
         return create(api, () -> rule, classInfoProvider);
+    }
+
+    static RewriteRuleVisitorFactory create(
+        final int api,
+        final Consumer<RewriteRule.ChainBuilder> builderConsumer,
+        final ClassInfoProvider classInfoProvider
+    ) {
+        return create(api, () -> {
+            final RewriteRule.ChainBuilder builder = RewriteRule.chain();
+            builderConsumer.accept(builder);
+            return builder.build();
+        }, classInfoProvider);
     }
 }
