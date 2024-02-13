@@ -24,15 +24,9 @@ public interface RewriteRule extends ShouldProcess, MethodVisitorFactory {
         return new Chain(rules);
     }
 
-    final class Chain implements RewriteRule {
-        private final List<RewriteRule> rules;
-
-        private Chain(final List<RewriteRule> rules) {
+    record Chain(List<RewriteRule> rules) implements RewriteRule {
+        public Chain(final List<RewriteRule> rules) {
             this.rules = List.copyOf(rules);
-        }
-
-        public List<RewriteRule> rules() {
-            return this.rules;
         }
 
         @Override
