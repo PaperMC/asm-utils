@@ -36,11 +36,11 @@ jobs:
         if: "${{ env.STATUS != 'release' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}"
         run: ./gradlew publish
         env:
-          ORG_GRADLE_PROJECT_paperUsername: "${{ secrets.PAPER_REPO_USER }}"
-          ORG_GRADLE_PROJECT_paperPassword: "${{ secrets.PAPER_REPO_PASSWORD }}"
+          ORG_GRADLE_PROJECT_paperSnapshotsUsername: "${{ secrets.PAPER_REPO_USER }}"
+          ORG_GRADLE_PROJECT_paperSnapshotsPassword: "${{ secrets.PAPER_REPO_PASSWORD }}"
       - name: Publish Release
         if: "${{ env.STATUS == 'release' && github.event_name == 'release' }}"
         run: ./gradlew publish
         env:
-          ORG_GRADLE_PROJECT_paperUsername: "${{ secrets.PAPER_REPO_USER }}"
-          ORG_GRADLE_PROJECT_paperPassword: "${{ secrets.PAPER_REPO_PASSWORD }}"
+          ORG_GRADLE_PROJECT_paperReleasesUsername: "${{ secrets.PAPER_REPO_USER }}"
+          ORG_GRADLE_PROJECT_paperReleasesPassword: "${{ secrets.PAPER_REPO_PASSWORD }}"
