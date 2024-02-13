@@ -8,30 +8,26 @@ import org.checkerframework.framework.qual.DefaultQualifier;
 import org.objectweb.asm.ClassVisitor;
 
 @DefaultQualifier(NonNull.class)
-public class RewriteRulesVisitorFactory implements ClassProcessingContext {
+public abstract class RewriteRulesVisitorFactory implements ClassProcessingContext {
 
     private @MonotonicNonNull RewriteRule rootRule;
     private final int api;
-    private final ClassVisitor parent;
     private final ClassInfoProvider classInfoProvider;
 
     private @MonotonicNonNull String name;
     private @Nullable String superName;
 
-    public RewriteRulesVisitorFactory(final int api, final ClassVisitor parent, final ClassInfoProvider classInfoProvider) {
+    public RewriteRulesVisitorFactory(final int api, final ClassInfoProvider classInfoProvider) {
         this.api = api;
-        this.parent = parent;
         this.classInfoProvider = classInfoProvider;
     }
 
-    public ClassVisitor createVisitor() {
-        final ClassVisitor ruleVisitor = this.rootRule().createVisitor(this.api, this.parent, this);
+    public ClassVisitor createVisitor(final ClassVisitor parent) {
+        final ClassVisitor ruleVisitor = this.rootRule().createVisitor(this.api, parent, this);
         return new ContextFillerVisitor(this.api, ruleVisitor);
     }
 
-    protected RewriteRule createRootRule() {
-        return RewriteRule.EMPTY;
-    }
+    protected abstract RewriteRule createRootRule();
 
     private RewriteRule rootRule() {
         if (this.rootRule == null) {
