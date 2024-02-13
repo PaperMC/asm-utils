@@ -1,4 +1,4 @@
-package io.papermc.asm.rules;
+package io.papermc.asm.rules.method;
 
 import io.papermc.asm.rules.builder.matcher.TargetedMethodMatcher;
 import java.lang.constant.ClassDesc;

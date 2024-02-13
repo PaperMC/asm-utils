@@ -1,13 +1,13 @@
 package io.papermc.asm.rules.builder;
 
-import io.papermc.asm.rules.FieldRewrites;
-import io.papermc.asm.rules.MethodRewrites;
 import io.papermc.asm.rules.RewriteRule;
-import io.papermc.asm.rules.StaticRewrite;
-import io.papermc.asm.rules.StaticRewrites;
 import io.papermc.asm.rules.builder.matcher.FieldMatcher;
 import io.papermc.asm.rules.builder.matcher.MethodMatcher;
 import io.papermc.asm.rules.builder.matcher.TargetedMethodMatcher;
+import io.papermc.asm.rules.field.FieldRewrites;
+import io.papermc.asm.rules.method.MethodRewrites;
+import io.papermc.asm.rules.method.StaticRewrite;
+import io.papermc.asm.rules.method.StaticRewrites;
 import io.papermc.asm.util.Builder;
 import java.lang.constant.ClassDesc;
 import java.lang.reflect.Method;

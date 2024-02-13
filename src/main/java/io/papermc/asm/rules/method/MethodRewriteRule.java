@@ -1,6 +1,7 @@
-package io.papermc.asm.rules;
+package io.papermc.asm.rules.method;
 
 import io.papermc.asm.ClassProcessingContext;
+import io.papermc.asm.rules.RewriteRule;
 import java.lang.constant.MethodTypeDesc;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.ClassVisitor;

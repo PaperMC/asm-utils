@@ -1,4 +1,4 @@
-package io.papermc.asm.rules;
+package io.papermc.asm.rules.field;
 
 import io.papermc.asm.ClassProcessingContext;
 import io.papermc.asm.rules.builder.matcher.FieldMatcher;
@@ -12,7 +12,7 @@ public final class FieldRewrites {
     }
 
     // Keep in mind that you have to include all subtype owners as well as the field could be referenced via them as well
-    public record Rename(Set<Class<?>> owners, FieldMatcher fieldMatcher, String newName) implements FieldRewriteRule {
+    public record Rename(Set<Class<?>> owners, FieldMatcher fieldMatcher, String newName) implements GuardedMethodRewriteRule {
 
         @Override
         public @Nullable Rewrite rewrite(final ClassProcessingContext context, final int opcode, final String owner, final String name, final ClassDesc desc) {

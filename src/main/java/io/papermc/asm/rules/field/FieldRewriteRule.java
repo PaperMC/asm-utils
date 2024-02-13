@@ -1,7 +1,7 @@
-package io.papermc.asm.rules;
+package io.papermc.asm.rules.field;
 
 import io.papermc.asm.ClassProcessingContext;
-import io.papermc.asm.rules.builder.matcher.FieldMatcher;
+import io.papermc.asm.rules.RewriteRule;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -10,9 +10,11 @@ import org.objectweb.asm.MethodVisitor;
 
 import static io.papermc.asm.util.DescriptorUtils.parseType;
 
-public interface FieldRewriteRule extends OwnableRewriteRule {
+public interface FieldRewriteRule extends RewriteRule {
 
-    FieldMatcher fieldMatcher();
+    default boolean shouldProcess(final ClassProcessingContext context, final int opcode, final String owner, final String name, final String descriptor) {
+        return true;
+    }
 
     @Override
     default ClassVisitor createVisitor(final int api, final ClassVisitor parent, final ClassProcessingContext context) {
@@ -22,7 +24,7 @@ public interface FieldRewriteRule extends OwnableRewriteRule {
                 return new MethodVisitor(this.api, super.visitMethod(access, name, descriptor, signature, exceptions)) {
                     @Override
                     public void visitFieldInsn(final int opcode, final String owner, final String name, final String descriptor) {
-                        if (FieldRewriteRule.this.matchesOwner(context, owner) && FieldRewriteRule.this.fieldMatcher().matches(name, descriptor)) {
+                        if (FieldRewriteRule.this.shouldProcess(context, opcode, owner, name, descriptor)) {
                             final @Nullable Rewrite rewrite = FieldRewriteRule.this.rewrite(context, opcode, owner, name, parseType(descriptor));
                             if (rewrite != null) {
                                 rewrite.apply(this.getDelegate());

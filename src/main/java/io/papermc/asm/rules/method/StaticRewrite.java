@@ -1,4 +1,4 @@
-package io.papermc.asm.rules;
+package io.papermc.asm.rules.method;
 
 import io.papermc.asm.ClassProcessingContext;
 import io.papermc.asm.rules.builder.matcher.MethodMatcher;
@@ -25,7 +25,7 @@ import static io.papermc.asm.util.OpcodeUtils.isVirtual;
 import static io.papermc.asm.util.OpcodeUtils.staticOp;
 import static java.util.function.Predicate.isEqual;
 
-public interface StaticRewrite extends ConfiguredMethodRewriteRule {
+public interface StaticRewrite extends GuardedMethodRewriteRule {
 
     ClassDesc staticRedirectOwner();
 

@@ -1,6 +1,7 @@
-package io.papermc.asm.rules;
+package io.papermc.asm.rules.method;
 
 import io.papermc.asm.ClassProcessingContext;
+import io.papermc.asm.rules.OwnableRewriteRule;
 import io.papermc.asm.rules.builder.matcher.MethodMatcher;
 import java.lang.constant.MethodTypeDesc;
 import java.lang.reflect.Constructor;
@@ -12,7 +13,10 @@ import java.util.stream.Stream;
 
 import static io.papermc.asm.util.DescriptorUtils.fromExecutable;
 
-public interface ConfiguredMethodRewriteRule extends MethodRewriteRule, OwnableRewriteRule {
+/**
+ * A rule that targets specific methods and owners.
+ */
+public interface GuardedMethodRewriteRule extends MethodRewriteRule, OwnableRewriteRule {
 
     private static String transformExecutableName(final Executable executable) {
         return executable instanceof Constructor<?> ? "<init>" : executable.getName();
