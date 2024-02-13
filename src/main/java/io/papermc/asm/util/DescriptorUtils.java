@@ -9,8 +9,6 @@ import java.util.Set;
 import java.util.function.Predicate;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import static java.util.function.Predicate.isEqual;
-
 public final class DescriptorUtils {
 
     public static ClassDesc fromOwner(final String owner) {
@@ -22,15 +20,11 @@ public final class DescriptorUtils {
         return descriptor.substring(1, descriptor.length() - 1);
     }
 
-    public static Predicate<ClassDesc> isEquals(final Class<?> clazz) {
-        return isEqual(clazz.describeConstable().orElseThrow());
-    }
-
     public static ClassDesc desc(final Class<?> clazz) {
         return clazz.describeConstable().orElseThrow();
     }
 
-    public static MethodTypeDesc fromExecutable(final Executable executable) {
+    public static MethodTypeDesc desc(final Executable executable) {
         final org.objectweb.asm.commons.Method asmMethod;
         if (executable instanceof final Method method) {
             asmMethod = org.objectweb.asm.commons.Method.getMethod(method);
@@ -42,11 +36,11 @@ public final class DescriptorUtils {
         return MethodTypeDesc.ofDescriptor(asmMethod.getDescriptor());
     }
 
-    public static MethodTypeDesc parseMethod(final String descriptor) {
+    public static MethodTypeDesc methodDesc(final String descriptor) {
         return MethodTypeDesc.ofDescriptor(descriptor);
     }
 
-    public static ClassDesc parseType(final String descriptor) {
+    public static ClassDesc classDesc(final String descriptor) {
         return ClassDesc.ofDescriptor(descriptor);
     }
 

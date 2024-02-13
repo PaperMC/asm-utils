@@ -3,7 +3,7 @@ package io.papermc.asm.rules.builder.matcher;
 import java.lang.constant.ClassDesc;
 import java.util.function.Predicate;
 
-import static io.papermc.asm.util.DescriptorUtils.parseType;
+import static io.papermc.asm.util.DescriptorUtils.classDesc;
 
 public class FieldMatcherImpl implements FieldMatcher {
 
@@ -22,6 +22,6 @@ public class FieldMatcherImpl implements FieldMatcher {
 
     @Override
     public boolean matches(final String name, final String descriptor) {
-        return this.byName.test(name) && this.byDesc.test(parseType(descriptor));
+        return this.byName.test(name) && this.byDesc.test(classDesc(descriptor));
     }
 }

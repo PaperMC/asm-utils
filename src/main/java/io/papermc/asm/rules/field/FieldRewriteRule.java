@@ -8,7 +8,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 
-import static io.papermc.asm.util.DescriptorUtils.parseType;
+import static io.papermc.asm.util.DescriptorUtils.classDesc;
 
 public interface FieldRewriteRule extends RewriteRule {
 
@@ -25,7 +25,7 @@ public interface FieldRewriteRule extends RewriteRule {
                     @Override
                     public void visitFieldInsn(final int opcode, final String owner, final String name, final String descriptor) {
                         if (FieldRewriteRule.this.shouldProcess(context, opcode, owner, name, descriptor)) {
-                            final @Nullable Rewrite rewrite = FieldRewriteRule.this.rewrite(context, opcode, owner, name, parseType(descriptor));
+                            final @Nullable Rewrite rewrite = FieldRewriteRule.this.rewrite(context, opcode, owner, name, classDesc(descriptor));
                             if (rewrite != null) {
                                 rewrite.apply(this.getDelegate());
                                 return;

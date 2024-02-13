@@ -1,6 +1,7 @@
 package io.papermc.reflectionrewriter;
 
 import io.papermc.asm.rules.RewriteRule;
+import java.lang.constant.ClassDesc;
 import java.lang.invoke.ConstantBootstraps;
 import java.lang.invoke.LambdaMetafactory;
 import java.lang.invoke.MethodHandles;
@@ -8,7 +9,7 @@ import java.lang.invoke.MethodType;
 import java.util.List;
 
 public final class BaseReflectionRules {
-    private final String proxy;
+    private final ClassDesc proxy;
     private final RewriteRule classRule;
     private final RewriteRule methodHandlesLookupRule;
     private final RewriteRule lambdaMetafactoryRule;
@@ -16,7 +17,7 @@ public final class BaseReflectionRules {
     private final RewriteRule methodTypeRule;
 
     public BaseReflectionRules(final String proxyClassName) {
-        this.proxy = proxyClassName;
+        this.proxy = ClassDesc.of(proxyClassName);
         this.classRule = this.createClassRule();
         this.methodHandlesLookupRule = this.createMethodHandlesLookupRule();
         this.lambdaMetafactoryRule = this.createLamdaMetafactoryRule();

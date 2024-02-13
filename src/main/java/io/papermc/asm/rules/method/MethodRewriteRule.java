@@ -9,7 +9,7 @@ import org.objectweb.asm.Handle;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.tree.MethodNode;
 
-import static io.papermc.asm.util.DescriptorUtils.parseMethod;
+import static io.papermc.asm.util.DescriptorUtils.methodDesc;
 
 public interface MethodRewriteRule extends RewriteRule {
 
@@ -31,7 +31,7 @@ public interface MethodRewriteRule extends RewriteRule {
                     @Override
                     public void visitMethodInsn(final int opcode, final String owner, final String name, final String descriptor, final boolean isInterface) {
                         if (MethodRewriteRule.this.shouldProcess(context, opcode, owner, name, descriptor, isInterface)) {
-                            final @Nullable Rewrite rewrite = MethodRewriteRule.this.rewrite(context, false, opcode, owner, name, parseMethod(descriptor), isInterface);
+                            final @Nullable Rewrite rewrite = MethodRewriteRule.this.rewrite(context, false, opcode, owner, name, methodDesc(descriptor), isInterface);
                             if (rewrite != null) {
                                 rewrite.apply(this.getDelegate(), mn);
                                 return;
@@ -44,7 +44,7 @@ public interface MethodRewriteRule extends RewriteRule {
                     public void visitInvokeDynamicInsn(final String name, final String descriptor, final Handle bootstrapMethodHandle, final Object... bootstrapMethodArguments) {
                         if (LAMBDA_METAFACTORY_OWNER.equals(bootstrapMethodHandle.getOwner()) && bootstrapMethodArguments.length > 1 && bootstrapMethodArguments[1] instanceof final Handle handle) {
                             if (MethodRewriteRule.this.shouldProcess(context, handle.getTag(), handle.getOwner(), name, descriptor, handle.isInterface())) {
-                                final @Nullable Rewrite rewrite = MethodRewriteRule.this.rewrite(context, true, handle.getTag(), handle.getOwner(), handle.getName(), parseMethod(handle.getDesc()), handle.isInterface());
+                                final @Nullable Rewrite rewrite = MethodRewriteRule.this.rewrite(context, true, handle.getTag(), handle.getOwner(), handle.getName(), methodDesc(handle.getDesc()), handle.isInterface());
                                 if (rewrite != null) {
                                     bootstrapMethodArguments[1] = rewrite.createHandle();
                                 }

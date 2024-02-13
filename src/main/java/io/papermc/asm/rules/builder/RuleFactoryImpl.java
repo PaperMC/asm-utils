@@ -18,8 +18,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static io.papermc.asm.util.DescriptorUtils.desc;
-
 class RuleFactoryImpl implements RuleFactory {
 
     final Set<Class<?>> owners;
@@ -41,46 +39,43 @@ class RuleFactoryImpl implements RuleFactory {
     }
 
     @Override
-    public void changeParamToSuper(final Class<?> oldParamType, final Class<?> newParamType, final Consumer<? super MethodMatcher.Builder> builderConsumer) {
-        if (!newParamType.isAssignableFrom(oldParamType)) {
-            throw new IllegalArgumentException(newParamType + " is not a superclass of " + oldParamType);
-        }
-        this.addRule(new MethodRewrites.SuperTypeParam(this.owners, build(builderConsumer, MethodMatcher::builder), desc(oldParamType), desc(newParamType)));
+    public void changeParamToSuper(final ClassDesc oldParamType, final ClassDesc newParamType, final Consumer<? super MethodMatcher.Builder> builderConsumer) {
+        this.addRule(new MethodRewrites.SuperTypeParam(this.owners, build(builderConsumer, MethodMatcher::builder), oldParamType, newParamType));
     }
 
     @Override
-    public void changeParamFuzzy(final Supplier<Class<?>> newOwner, final Class<?> newType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.addRule(new StaticRewrites.FuzzyParam(this.owners, desc(newType), build(builderConsumer, MethodMatcher::targeted), convert(newOwner), verify(staticHandler)));
+    public void changeParamFuzzy(final ClassDesc newOwner, final ClassDesc newType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
+        this.addRule(new StaticRewrites.FuzzyParam(this.owners, newType, build(builderConsumer, MethodMatcher::targeted), newOwner, verify(staticHandler)));
     }
 
     @Override
-    public void changeParamDirect(final Supplier<Class<?>> newOwner, final Class<?> existingParam, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.addRule(new StaticRewrites.DirectParam(this.owners, desc(existingParam), build(builderConsumer, MethodMatcher::targeted), convert(newOwner), verify(staticHandler)));
+    public void changeParamDirect(final ClassDesc newOwner, final ClassDesc existingParam, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
+        this.addRule(new StaticRewrites.DirectParam(this.owners, existingParam, build(builderConsumer, MethodMatcher::targeted), newOwner, verify(staticHandler)));
     }
 
     @Override
-    public void changeReturnTypeToSub(final Class<?> oldReturnType, final Class<?> newReturnType, final Consumer<? super MethodMatcher.Builder> builderConsumer) {
-        this.addRule(new MethodRewrites.SubTypeReturn(this.owners, build(builderConsumer, MethodMatcher::builder), desc(oldReturnType), desc(newReturnType)));
+    public void changeReturnTypeToSub(final ClassDesc oldReturnType, final ClassDesc newReturnType, final Consumer<? super MethodMatcher.Builder> builderConsumer) {
+        this.addRule(new MethodRewrites.SubTypeReturn(this.owners, build(builderConsumer, MethodMatcher::builder), oldReturnType, newReturnType));
     }
 
     @Override
-    public void changeReturnTypeFuzzy(final Supplier<Class<?>> newOwner, final Class<?> newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.addRule(StaticRewrites.returnRewrite(this.owners, desc(newReturnType), build(builderConsumer, MethodMatcher::targeted), convert(newOwner), verify(staticHandler), StaticRewrites.OBJECT_DESC, false));
+    public void changeReturnTypeFuzzy(final ClassDesc newOwner, final ClassDesc newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
+        this.addRule(StaticRewrites.returnRewrite(this.owners, newReturnType, build(builderConsumer, MethodMatcher::targeted), newOwner, verify(staticHandler), StaticRewrites.OBJECT_DESC, false));
     }
 
     @Override
-    public void changeReturnTypeDirect(final Supplier<Class<?>> newOwner, final Class<?> newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.addRule(StaticRewrites.returnRewrite(this.owners, desc(newReturnType), build(builderConsumer, MethodMatcher::targeted), convert(newOwner), verify(staticHandler), desc(newReturnType), false));
+    public void changeReturnTypeDirect(final ClassDesc newOwner, final ClassDesc newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
+        this.addRule(StaticRewrites.returnRewrite(this.owners, newReturnType, build(builderConsumer, MethodMatcher::targeted), newOwner, verify(staticHandler), newReturnType, false));
     }
 
     @Override
-    public void changeReturnTypeFuzzyWithContext(final Supplier<Class<?>> newOwner, final Class<?> newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.addRule(StaticRewrites.returnRewrite(this.owners, desc(newReturnType), build(builderConsumer, MethodMatcher::targeted), convert(newOwner), verify(staticHandler), StaticRewrites.OBJECT_DESC, true));
+    public void changeReturnTypeFuzzyWithContext(final ClassDesc newOwner, final ClassDesc newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
+        this.addRule(StaticRewrites.returnRewrite(this.owners, newReturnType, build(builderConsumer, MethodMatcher::targeted), newOwner, verify(staticHandler), StaticRewrites.OBJECT_DESC, true));
     }
 
     @Override
-    public void changeReturnTypeDirectWithContext(final Supplier<Class<?>> newOwner, final Class<?> newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.addRule(StaticRewrites.returnRewrite(this.owners, desc(newReturnType), build(builderConsumer, MethodMatcher::targeted), convert(newOwner), verify(staticHandler), desc(newReturnType), true));
+    public void changeReturnTypeDirectWithContext(final ClassDesc newOwner, final ClassDesc newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
+        this.addRule(StaticRewrites.returnRewrite(this.owners, newReturnType, build(builderConsumer, MethodMatcher::targeted), newOwner, verify(staticHandler), newReturnType, true));
     }
 
     @Override

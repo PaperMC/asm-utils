@@ -8,7 +8,6 @@ import java.lang.constant.ClassDesc;
 import java.lang.reflect.Method;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import static io.papermc.asm.util.DescriptorUtils.desc;
 
@@ -19,7 +18,7 @@ public interface RuleFactory {
     }
 
     @SafeVarargs
-    static Consumer<? super RuleFactory> combine(final Consumer<? super RuleFactory>...factories) {
+    static Consumer<? super RuleFactory> combine(final Consumer<? super RuleFactory>... factories) {
         return r -> {
             for (final Consumer<? super RuleFactory> factory : factories) {
                 factory.accept(r);
@@ -27,31 +26,61 @@ public interface RuleFactory {
         };
     }
 
-    default void plainStaticRewrite(final Class<?> newOwner, final Consumer<? super MethodMatcher.Builder> builderConsumer) {
-        this.plainStaticRewrite(desc(newOwner), builderConsumer);
-    }
-
-    default void plainStaticRewrite(final String newOwner, final Consumer<? super MethodMatcher.Builder> builderConsumer) {
-        this.plainStaticRewrite(ClassDesc.of(newOwner), builderConsumer);
-    }
-
     void plainStaticRewrite(ClassDesc newOwner, Consumer<? super MethodMatcher.Builder> builderConsumer);
 
-    void changeParamToSuper(Class<?> oldParamType, Class<?> newParamType, Consumer<? super MethodMatcher.Builder> builderConsumer);
+    default void changeParamToSuper(final Class<?> oldParamType, final Class<?> newParamType, final Consumer<? super MethodMatcher.Builder> builderConsumer) {
+        if (!newParamType.isAssignableFrom(oldParamType)) {
+            throw new IllegalArgumentException(newParamType + " is not a superclass of " + oldParamType);
+        }
+        this.changeParamToSuper(desc(oldParamType), desc(newParamType), builderConsumer);
+    }
 
-    void changeParamFuzzy(Supplier<Class<?>> newOwner, Class<?> newParamType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
+    void changeParamToSuper(ClassDesc oldParamType, ClassDesc newParamType, Consumer<? super MethodMatcher.Builder> builderConsumer);
 
-    void changeParamDirect(Supplier<Class<?>> newOwner, Class<?> newParamType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
+    default void changeParamFuzzy(final ClassDesc newOwner, final Class<?> newParamType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
+        this.changeParamFuzzy(newOwner, desc(newParamType), staticHandler, builderConsumer);
+    }
 
-    void changeReturnTypeToSub(Class<?> oldReturnType, Class<?> newReturnType, Consumer<? super MethodMatcher.Builder> builderConsumer);
+    void changeParamFuzzy(ClassDesc newOwner, ClassDesc newParamType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
 
-    void changeReturnTypeFuzzy(Supplier<Class<?>> newOwner, Class<?> newReturnType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
+    default void changeParamDirect(final ClassDesc newOwner, final Class<?> newParamType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
+        this.changeParamDirect(newOwner, desc(newParamType), staticHandler, builderConsumer);
+    }
 
-    void changeReturnTypeDirect(Supplier<Class<?>> newOwner, Class<?> newReturnType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
+    void changeParamDirect(ClassDesc newOwner, ClassDesc newParamType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
 
-    void changeReturnTypeFuzzyWithContext(Supplier<Class<?>> newOwner, Class<?> newReturnType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
+    default void changeReturnTypeToSub(final Class<?> oldReturnType, final Class<?> newReturnType, final Consumer<? super MethodMatcher.Builder> builderConsumer) {
+        if (!oldReturnType.isAssignableFrom(newReturnType)) {
+            throw new IllegalArgumentException(newReturnType + " is not a subclass of " + oldReturnType);
+        }
+        this.changeReturnTypeToSub(desc(oldReturnType), desc(newReturnType), builderConsumer);
+    }
 
-    void changeReturnTypeDirectWithContext(Supplier<Class<?>> newOwner, Class<?> newReturnType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
+    void changeReturnTypeToSub(ClassDesc oldReturnType, ClassDesc newReturnType, Consumer<? super MethodMatcher.Builder> builderConsumer);
+
+    default void changeReturnTypeFuzzy(final ClassDesc newOwner, final Class<?> newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
+        this.changeReturnTypeFuzzy(newOwner, desc(newReturnType), staticHandler, builderConsumer);
+    }
+
+    void changeReturnTypeFuzzy(ClassDesc newOwner, ClassDesc newReturnType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
+
+    default void changeReturnTypeDirect(final ClassDesc newOwner, final Class<?> newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
+        this.changeReturnTypeDirect(newOwner, desc(newReturnType), staticHandler, builderConsumer);
+    }
+
+    void changeReturnTypeDirect(ClassDesc newOwner, ClassDesc newReturnType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
+
+    default void changeReturnTypeFuzzyWithContext(final ClassDesc newOwner, final Class<?> newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
+        this.changeReturnTypeFuzzyWithContext(newOwner, desc(newReturnType), staticHandler, builderConsumer);
+    }
+
+    void changeReturnTypeFuzzyWithContext(ClassDesc newOwner, ClassDesc newReturnType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
+
+    default void changeReturnTypeDirectWithContext(final ClassDesc newOwner, final Class<?> newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
+        this.changeReturnTypeDirectWithContext(newOwner, desc(newReturnType), staticHandler, builderConsumer);
+    }
+
+    void changeReturnTypeDirectWithContext(ClassDesc newOwner, ClassDesc newReturnType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
 
     void renameField(String newName, Consumer<? super FieldMatcher.Builder> builderConsumer);
 

@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static io.papermc.asm.util.DescriptorUtils.fromExecutable;
+import static io.papermc.asm.util.DescriptorUtils.desc;
 
 /**
  * A rule that targets specific methods and owners.
@@ -33,7 +33,7 @@ public interface FilteredMethodRewriteRule extends MethodRewriteRule, OwnableRew
         return this.owners().stream()
             .flatMap(o -> Stream.concat(Arrays.stream(o.getDeclaredMethods()), Arrays.stream(o.getDeclaredConstructors())))
             .filter(executable -> Modifier.isPublic(executable.getModifiers())) // we only care about public stuff since that is API
-            .map(executable -> Map.entry(executable, fromExecutable(executable)))
+            .map(executable -> Map.entry(executable, desc(executable)))
             .filter(pair -> this.methodMatcher().matchesName(transformExecutableName(pair.getKey())));
     }
 }
