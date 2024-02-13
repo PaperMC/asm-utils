@@ -3,16 +3,21 @@ package io.papermc.reflectionrewriter;
 import io.papermc.asm.ClassInfo;
 import io.papermc.asm.ClassInfoProvider;
 import io.papermc.asm.ClassProcessingContext;
-import io.papermc.asm.InvokeStaticRewrite;
-import io.papermc.asm.RewriteRule;
+import io.papermc.asm.rules.MethodRewriteRule;
+import io.papermc.asm.rules.RewriteRule;
+import io.papermc.asm.rules.builder.matcher.MethodMatcher;
+import java.lang.constant.MethodTypeDesc;
 import java.util.Set;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
-import org.objectweb.asm.Opcodes;
+
+import static io.papermc.asm.util.DescriptorUtils.fromOwner;
+import static io.papermc.asm.util.OpcodeUtils.isStatic;
+import static io.papermc.asm.util.OpcodeUtils.staticOp;
 
 @DefaultQualifier(NonNull.class)
-public final class DefineClassRule implements InvokeStaticRewrite {
+public final class DefineClassRule implements MethodRewriteRule {
     private static final Set<String> CLASS_LOADER_DESCS = Set.of(
         "([BII)Ljava/lang/Class;",
         "(Ljava/lang/String;[BII)Ljava/lang/Class;",
@@ -36,37 +41,39 @@ public final class DefineClassRule implements InvokeStaticRewrite {
     // extend (S)CL. However since the MethodHandles.Lookup portion always needs to run, the actual benefit would
     // be beyond minute (if not actually worse).
     @Override
-    public @Nullable Rewrite rewrite(
-        final ClassProcessingContext context,
-        final int opcode,
-        final String owner,
-        final String name,
-        final String descriptor,
-        final boolean isInterface
+    public @Nullable Rewrite rewrite(final ClassProcessingContext context,
+                           final boolean invokeDynamic,
+                           final int opcode,
+                           final String owner,
+                           final String name,
+                           MethodTypeDesc descriptor,
+                           final boolean isInterface
     ) {
-        if (!name.equals("defineClass") || opcode == Opcodes.INVOKESTATIC || opcode == Opcodes.H_INVOKESTATIC) {
+        if (!name.equals("defineClass") || isStatic(opcode, invokeDynamic)) {
             return null;
         }
-        if (owner.equals("java/lang/invoke/MethodHandles$Lookup") && descriptor.equals("([B)Ljava/lang/Class;")) {
-            return InvokeStaticRewrite.staticRedirect(this.proxy, name, InvokeStaticRewrite.insertFirstParam("java/lang/invoke/MethodHandles$Lookup", descriptor));
+        if (owner.equals("java/lang/invoke/MethodHandles$Lookup") && descriptor.descriptorString().equals("([B)Ljava/lang/Class;")) {
+            descriptor = descriptor.insertParameterTypes(0, fromOwner("java/lang/invoke/MethodHandles$Lookup"));
+            new RewriteSingle(staticOp(invokeDynamic), this.proxy, name, descriptor, false);
         }
         final @Nullable String superName = context.processingClassSuperClassName();
         if (superName != null) {
-            if (CLASS_LOADER_DESCS.contains(descriptor)
+            if (CLASS_LOADER_DESCS.contains(descriptor.descriptorString())
                 && this.isClassLoader(context.classInfoProvider(), superName)
                 && (owner.equals(context.processingClassName()) || this.isClassLoader(context.classInfoProvider(), owner))) {
-                return this.classLoaderRewrite(name, descriptor);
-            } else if (SECURE_CLASS_LOADER_DESCS.contains(descriptor)
+                return this.classLoaderRewrite(invokeDynamic, name, descriptor);
+            } else if (SECURE_CLASS_LOADER_DESCS.contains(descriptor.descriptorString())
                 && this.isSecureClassLoader(context.classInfoProvider(), superName)
                 && (owner.equals(context.processingClassName()) || this.isSecureClassLoader(context.classInfoProvider(), owner))) {
-                return this.classLoaderRewrite(name, descriptor);
+                return this.classLoaderRewrite(invokeDynamic, name, descriptor);
             }
         }
         return null;
     }
 
-    private Rewrite classLoaderRewrite(final String name, final String descriptor) {
-        return InvokeStaticRewrite.staticRedirect(this.proxy, name, InvokeStaticRewrite.insertFirstParam("java/lang/Object", descriptor));
+    private MethodRewriteRule.Rewrite classLoaderRewrite(final boolean invokeDynamic, final String name, MethodTypeDesc descriptor) {
+        descriptor = descriptor.insertParameterTypes(0, fromOwner("java/lang/Object"));
+        return new RewriteSingle(staticOp(invokeDynamic), this.proxy, name, descriptor, false);
     }
 
     private boolean isSecureClassLoader(final ClassInfoProvider classInfoProvider, final String className) {
@@ -96,7 +103,7 @@ public final class DefineClassRule implements InvokeStaticRewrite {
      * @return new rule
      */
     public static RewriteRule create(final String proxyClassName, final boolean assumeClassLoader) {
-        return RewriteRule.create(new DefineClassRule(proxyClassName, assumeClassLoader));
+        return new DefineClassRule(proxyClassName, assumeClassLoader);
     }
 
     private static boolean is(final ClassInfoProvider classInfoProvider, final String className, final String checkForName, final boolean assumeClassLoader) {
@@ -113,5 +120,35 @@ public final class DefineClassRule implements InvokeStaticRewrite {
             }
         }
         return assumeClassLoader;
+    }
+
+    @Override
+    public boolean matchesOwner(final ClassProcessingContext context, final String owner) {
+        final @Nullable String superName = context.processingClassSuperClassName();
+        if (superName != null) {
+            final boolean isClassLoader = this.isClassLoader(context.classInfoProvider(), superName) && (owner.equals(context.processingClassName()) || this.isClassLoader(context.classInfoProvider(), owner));
+            final boolean isSecureClassLoader = this.isSecureClassLoader(context.classInfoProvider(), superName) && (owner.equals(context.processingClassName()) || this.isSecureClassLoader(context.classInfoProvider(), owner));
+            return isClassLoader || isSecureClassLoader;
+        }
+        return false;
+    }
+
+    @Override
+    public Set<Class<?>> owners() {
+        throw new UnsupportedOperationException("dynamic owners");
+    }
+
+    @Override
+    public MethodMatcher methodMatcher() {
+        return MethodMatcher.builder()
+            .match("defineClass").desc(
+                "([BII)Ljava/lang/Class;",
+                "(Ljava/lang/String;[BII)Ljava/lang/Class;",
+                "(Ljava/lang/String;[BIILjava/security/ProtectionDomain;)Ljava/lang/Class;",
+                "(Ljava/lang/String;Ljava/nio/ByteBuffer;Ljava/security/ProtectionDomain;)Ljava/lang/Class;",
+                "(Ljava/lang/String;Ljava/nio/ByteBuffer;Ljava/security/CodeSource;)Ljava/lang/Class;",
+                "(Ljava/lang/String;[BIILjava/security/CodeSource;)Ljava/lang/Class;"
+            )
+            .build();
     }
 }

@@ -25,6 +25,9 @@ allprojects {
             val asm = "org.ow2.asm:asm:9.6"
             api(asm)
             testImplementation(asm)
+            val asmCommons = "org.ow2.asm:asm-commons:9.6"
+            api(asmCommons)
+            testImplementation(asmCommons)
         }
 
         val checker = "org.checkerframework:checker-qual:3.42.0"
