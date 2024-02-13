@@ -7,7 +7,7 @@ import io.papermc.asm.rules.builder.matcher.FieldMatcher;
 /**
  * A rule that targets specific fields and owners.
  */
-public interface GuardedMethodRewriteRule extends FieldRewriteRule, OwnableRewriteRule {
+public interface FilteredFieldRewriteRule extends FieldRewriteRule, OwnableRewriteRule {
 
     FieldMatcher fieldMatcher();
 

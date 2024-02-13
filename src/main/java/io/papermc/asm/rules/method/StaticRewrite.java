@@ -25,7 +25,7 @@ import static io.papermc.asm.util.OpcodeUtils.isVirtual;
 import static io.papermc.asm.util.OpcodeUtils.staticOp;
 import static java.util.function.Predicate.isEqual;
 
-public interface StaticRewrite extends GuardedMethodRewriteRule {
+public interface StaticRewrite extends FilteredMethodRewriteRule {
 
     ClassDesc staticRedirectOwner();
 

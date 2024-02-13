@@ -16,7 +16,7 @@ import static io.papermc.asm.util.DescriptorUtils.fromExecutable;
 /**
  * A rule that targets specific methods and owners.
  */
-public interface GuardedMethodRewriteRule extends MethodRewriteRule, OwnableRewriteRule {
+public interface FilteredMethodRewriteRule extends MethodRewriteRule, OwnableRewriteRule {
 
     private static String transformExecutableName(final Executable executable) {
         return executable instanceof Constructor<?> ? "<init>" : executable.getName();
