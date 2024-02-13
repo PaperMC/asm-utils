@@ -21,6 +21,7 @@ import static io.papermc.asm.util.DescriptorUtils.fromOwner;
 import static io.papermc.asm.util.DescriptorUtils.toOwner;
 import static io.papermc.asm.util.OpcodeUtils.isInterface;
 import static io.papermc.asm.util.OpcodeUtils.isSpecial;
+import static io.papermc.asm.util.OpcodeUtils.isStatic;
 import static io.papermc.asm.util.OpcodeUtils.isVirtual;
 import static io.papermc.asm.util.OpcodeUtils.staticOp;
 import static java.util.function.Predicate.isEqual;
@@ -34,7 +35,7 @@ public interface StaticRewrite extends FilteredMethodRewriteRule {
     }
 
     @Override
-    default Rewrite rewrite(final ClassProcessingContext context, final boolean invokeDynamic, final int opcode, final String owner, String name, MethodTypeDesc descriptor, final boolean isInterface) {
+    default MethodRewriteRule.Rewrite rewrite(final ClassProcessingContext context, final boolean invokeDynamic, final int opcode, final String owner, String name, MethodTypeDesc descriptor, final boolean isInterface) {
         if (isVirtual(opcode, invokeDynamic) || isInterface(opcode, invokeDynamic)) { // insert owner object as first param
             descriptor = descriptor.insertParameterTypes(0, fromOwner(owner));
         } else if (isSpecial(opcode, invokeDynamic)) {
@@ -45,13 +46,13 @@ public interface StaticRewrite extends FilteredMethodRewriteRule {
             } else {
                 throw new UnsupportedOperationException("Unhandled static rewrite: " + opcode + " " + owner + " " + name + " " + descriptor);
             }
-        } else {
+        } else if (!isStatic(opcode, invokeDynamic)) {
             throw new UnsupportedOperationException("Unhandled static rewrite: " + opcode + " " + owner + " " + name + " " + descriptor);
         }
         return new RewriteSingle(staticOp(invokeDynamic), toOwner(this.staticRedirectOwner()), name, this.modifyMethodDescriptor(descriptor), false);
     }
 
-    record RewriteConstructor(ClassDesc staticRedirectOwner, String constructorOwner, String methodName, MethodTypeDesc descriptor) implements Rewrite {
+    record RewriteConstructor(ClassDesc staticRedirectOwner, String constructorOwner, String methodName, MethodTypeDesc descriptor) implements MethodRewriteRule.Rewrite {
 
         @Override
         public void apply(final MethodVisitor delegate, final MethodNode context) {
