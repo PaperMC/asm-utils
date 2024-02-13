@@ -51,7 +51,7 @@ public abstract class AbstractRewriteRuleVisitorFactory implements RewriteRuleVi
     private final class MutableProcessingContext implements ClassProcessingContext {
         private static final String NULL = "null";
 
-        private @MonotonicNonNull String name = NULL;
+        private @NonNull String name = NULL;
         private @Nullable String superName = NULL;
 
         @Override
