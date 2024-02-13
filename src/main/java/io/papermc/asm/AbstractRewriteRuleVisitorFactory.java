@@ -31,7 +31,7 @@ public abstract class AbstractRewriteRuleVisitorFactory implements RewriteRuleVi
         return new ContextFillerVisitor(this.api, ruleVisitor, context);
     }
 
-    private RewriteRule rule() {
+    protected final RewriteRule rule() {
         @Nullable RewriteRule rule = this.rule;
         if (rule != null) {
             return rule;
