@@ -2,10 +2,13 @@ package io.papermc.reflectionrewriter;
 
 import io.papermc.asm.ClassInfo;
 import io.papermc.asm.ClassInfoProvider;
-import io.papermc.asm.InvokeStaticRewrite;
-import io.papermc.asm.RewriteRule;
+import io.papermc.asm.ClassProcessingContext;
+import io.papermc.asm.rules.RewriteRule;
+import java.lang.constant.ClassDesc;
+import java.lang.invoke.ConstantBootstraps;
 import java.util.function.Predicate;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -50,20 +53,23 @@ public final class EnumRule {
         final String proxyClassName,
         final Predicate<String> ownerPredicate
     ) {
-        final InvokeStaticRewrite rewrite = InvokeStaticRewrite.forOwner(
-            "java/lang/invoke/ConstantBootstraps",
-            (context, opcode, owner, name, descriptor, isInterface) -> {
-                if (name.equals("enumConstant") && descriptor.equals("(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Enum;")) {
-                    return InvokeStaticRewrite.staticRedirect(proxyClassName, name, descriptor);
-                }
-                return null;
+        final RewriteRule rewrite = RewriteRule.forOwner(ConstantBootstraps.class, rf -> {
+            rf.plainStaticRewrite(ClassDesc.of(proxyClassName), b -> b
+                .match("enumConstant").desc("(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Enum;")
+            );
+        });
+        final RewriteRule enumRule = new RewriteRule() {
+            @Override
+            public ClassVisitor createVisitor(final int api, final ClassVisitor parent, final ClassProcessingContext context) {
+                return new ClassVisitor(api, parent) {
+                    @Override
+                    public MethodVisitor visitMethod(final int access, final String name, final String descriptor, final String signature, final String[] exceptions) {
+                        return new EnumMethodVisitor(this.api, super.visitMethod(access, name, descriptor, signature, exceptions), proxyClassName, context.classInfoProvider(), ownerPredicate);
+                    }
+                };
             }
-        );
-        return RewriteRule.create((api, parent, context) -> rewrite.createVisitor(
-            api,
-            new EnumMethodVisitor(api, parent, proxyClassName, context.classInfoProvider(), ownerPredicate),
-            context
-        ));
+        };
+        return RewriteRule.chain(rewrite, enumRule);
     }
 
     public static RewriteRule minecraft(final String proxyClassName) {
