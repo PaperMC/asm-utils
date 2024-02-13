@@ -5,7 +5,6 @@ import io.papermc.asm.ClassInfoProvider;
 import io.papermc.asm.ClassProcessingContext;
 import io.papermc.asm.rules.MethodRewriteRule;
 import io.papermc.asm.rules.RewriteRule;
-import io.papermc.asm.rules.builder.matcher.MethodMatcher;
 import java.lang.constant.MethodTypeDesc;
 import java.util.Set;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -42,12 +41,12 @@ public final class DefineClassRule implements MethodRewriteRule {
     // be beyond minute (if not actually worse).
     @Override
     public @Nullable Rewrite rewrite(final ClassProcessingContext context,
-                           final boolean invokeDynamic,
-                           final int opcode,
-                           final String owner,
-                           final String name,
-                           MethodTypeDesc descriptor,
-                           final boolean isInterface
+       final boolean invokeDynamic,
+       final int opcode,
+       final String owner,
+       final String name,
+       MethodTypeDesc descriptor,
+       final boolean isInterface
     ) {
         if (!name.equals("defineClass") || isStatic(opcode, invokeDynamic)) {
             return null;
@@ -120,35 +119,5 @@ public final class DefineClassRule implements MethodRewriteRule {
             }
         }
         return assumeClassLoader;
-    }
-
-    @Override
-    public boolean matchesOwner(final ClassProcessingContext context, final String owner) {
-        final @Nullable String superName = context.processingClassSuperClassName();
-        if (superName != null) {
-            final boolean isClassLoader = this.isClassLoader(context.classInfoProvider(), superName) && (owner.equals(context.processingClassName()) || this.isClassLoader(context.classInfoProvider(), owner));
-            final boolean isSecureClassLoader = this.isSecureClassLoader(context.classInfoProvider(), superName) && (owner.equals(context.processingClassName()) || this.isSecureClassLoader(context.classInfoProvider(), owner));
-            return isClassLoader || isSecureClassLoader;
-        }
-        return false;
-    }
-
-    @Override
-    public Set<Class<?>> owners() {
-        throw new UnsupportedOperationException("dynamic owners");
-    }
-
-    @Override
-    public MethodMatcher methodMatcher() {
-        return MethodMatcher.builder()
-            .match("defineClass").desc(
-                "([BII)Ljava/lang/Class;",
-                "(Ljava/lang/String;[BII)Ljava/lang/Class;",
-                "(Ljava/lang/String;[BIILjava/security/ProtectionDomain;)Ljava/lang/Class;",
-                "(Ljava/lang/String;Ljava/nio/ByteBuffer;Ljava/security/ProtectionDomain;)Ljava/lang/Class;",
-                "(Ljava/lang/String;Ljava/nio/ByteBuffer;Ljava/security/CodeSource;)Ljava/lang/Class;",
-                "(Ljava/lang/String;[BIILjava/security/CodeSource;)Ljava/lang/Class;"
-            )
-            .build();
     }
 }
