@@ -51,7 +51,7 @@ public abstract class AbstractRewriteRuleVisitorFactory implements RewriteRuleVi
     private final class MutableProcessingContext implements ClassProcessingContext {
         private static final String NULL = "null";
 
-        private @NonNull String name = NULL;
+        private @MonotonicNonNull String name = null;
         private @Nullable String superName = NULL;
 
         @Override
@@ -59,10 +59,9 @@ public abstract class AbstractRewriteRuleVisitorFactory implements RewriteRuleVi
             return AbstractRewriteRuleVisitorFactory.this.classInfoProvider;
         }
 
-        @SuppressWarnings("StringEquality")
         @Override
         public String processingClassName() {
-            if (this.name == NULL || this.name == null) {
+            if (this.name == null) {
                 throw new IllegalStateException("processingClassName is only available after the class header is visited.");
             }
             return this.name;
