@@ -14,5 +14,5 @@ public interface GeneratedMethodHolder {
         return this.generatedMethodOwner();
     }
 
-    void generateMethod(final Map.Entry<Executable, ? extends MethodTypeDesc> pair, final RewriteRule.MethodGeneratorFactory factory);
+    void generateMethod(Map.Entry<Executable, ? extends MethodTypeDesc> pair, RewriteRule.MethodGeneratorFactory factory);
 }
