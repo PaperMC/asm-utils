@@ -58,6 +58,7 @@ public final class BaseReflectionRules {
     private RewriteRule createClassRule() {
         return RewriteRule.forOwner(Class.class, rf -> {
             rf.plainStaticRewrite(this.proxy, b -> b
+                .match("forName").desc("(Ljava/lang/String;)Ljava/lang/Class;")
                 .match("getField", "getDeclaredField").desc("(Ljava/lang/String;)Ljava/lang/reflect/Field;")
                 .match("getMethod", "getDeclaredMethod").desc("(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;")
             );
