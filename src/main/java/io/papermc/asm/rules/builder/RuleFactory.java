@@ -17,10 +17,9 @@ public interface RuleFactory {
         return new RuleFactoryImpl(owners);
     }
 
-    @SafeVarargs
-    static Consumer<? super RuleFactory> combine(final Consumer<? super RuleFactory>... factories) {
+    static RuleFactory.Factory combine(final RuleFactory.Factory... factories) {
         return r -> {
-            for (final Consumer<? super RuleFactory> factory : factories) {
+            for (final RuleFactory.Factory factory : factories) {
                 factory.accept(r);
             }
         };
@@ -87,4 +86,11 @@ public interface RuleFactory {
     void addRule(RewriteRule rule);
 
     RewriteRule build();
+
+    @FunctionalInterface
+    interface Factory extends Consumer<RuleFactory> {
+
+        @Override
+        void accept(RuleFactory factory);
+    }
 }

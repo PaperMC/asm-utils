@@ -9,47 +9,45 @@ import java.util.function.Consumer;
 
 public class ConfiguredRuleFactoryImpl extends RuleFactoryImpl implements ConfiguredRuleFactory {
 
-    private final ClassDesc delegateOwner;
-    private final ClassDesc generatedDelegateOwner;
+    private final RuleFactoryConfiguration config;
 
-    ConfiguredRuleFactoryImpl(final Set<Class<?>> owners, final ClassDesc delegateOwner, final ClassDesc generatedDelegateOwner) {
+    ConfiguredRuleFactoryImpl(final Set<Class<?>> owners, final RuleFactoryConfiguration config) {
         super(owners);
-        this.delegateOwner = delegateOwner;
-        this.generatedDelegateOwner = generatedDelegateOwner;
+        this.config = config;
     }
 
     @Override
     public void plainStaticRewrite(final Consumer<? super MethodMatcher.Builder> builderConsumer) {
-        this.plainStaticRewrite(this.delegateOwner, builderConsumer);
+        this.plainStaticRewrite(this.config.delegateOwner(), builderConsumer);
     }
 
     @Override
     public void changeParamFuzzy(final ClassDesc newParamType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.changeParamFuzzy(this.generatedDelegateOwner, newParamType, staticHandler, builderConsumer);
+        this.changeParamFuzzy(this.config.generatedDelegateOwner(), newParamType, staticHandler, builderConsumer);
     }
 
     @Override
     public void changeParamDirect(final ClassDesc newParamType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.changeParamDirect(this.generatedDelegateOwner, newParamType, staticHandler, builderConsumer);
+        this.changeParamDirect(this.config.generatedDelegateOwner(), newParamType, staticHandler, builderConsumer);
     }
 
     @Override
     public void changeReturnTypeFuzzy(final ClassDesc newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.changeReturnTypeFuzzy(this.generatedDelegateOwner, newReturnType, staticHandler, builderConsumer);
+        this.changeReturnTypeFuzzy(this.config.generatedDelegateOwner(), newReturnType, staticHandler, builderConsumer);
     }
 
     @Override
     public void changeReturnTypeDirect(final ClassDesc newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.changeReturnTypeDirect(this.generatedDelegateOwner, newReturnType, staticHandler, builderConsumer);
+        this.changeReturnTypeDirect(this.config.generatedDelegateOwner(), newReturnType, staticHandler, builderConsumer);
     }
 
     @Override
     public void changeReturnTypeFuzzyWithContext(final ClassDesc newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.changeReturnTypeFuzzyWithContext(this.generatedDelegateOwner, newReturnType, staticHandler, builderConsumer);
+        this.changeReturnTypeFuzzyWithContext(this.config.generatedDelegateOwner(), newReturnType, staticHandler, builderConsumer);
     }
 
     @Override
     public void changeReturnTypeDirectWithContext(final ClassDesc newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.changeReturnTypeDirectWithContext(this.generatedDelegateOwner, newReturnType, staticHandler, builderConsumer);
+        this.changeReturnTypeDirectWithContext(this.config.generatedDelegateOwner(), newReturnType, staticHandler, builderConsumer);
     }
 }

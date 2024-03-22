@@ -11,14 +11,13 @@ import static io.papermc.asm.util.DescriptorUtils.desc;
 
 public interface ConfiguredRuleFactory extends RuleFactory {
 
-    static ConfiguredRuleFactory create(final Set<Class<?>> owners, final ClassDesc delegateOwner, final ClassDesc generatedDelegateOwner) {
-        return new ConfiguredRuleFactoryImpl(owners, delegateOwner, generatedDelegateOwner);
+    static ConfiguredRuleFactory create(final Set<Class<?>> owners, final RuleFactoryConfiguration config) {
+        return new ConfiguredRuleFactoryImpl(owners, config);
     }
 
-    @SafeVarargs
-    static Consumer<? super ConfiguredRuleFactory> combine(final Consumer<? super ConfiguredRuleFactory>... factories) {
+    static ConfiguredRuleFactory.Factory combine(final ConfiguredRuleFactory.Factory... factories) {
         return r -> {
-            for (final Consumer<? super ConfiguredRuleFactory> factory : factories) {
+            for (final ConfiguredRuleFactory.Factory factory : factories) {
                 factory.accept(r);
             }
         };
@@ -61,4 +60,11 @@ public interface ConfiguredRuleFactory extends RuleFactory {
     }
 
     void changeReturnTypeDirectWithContext(ClassDesc newReturnType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
+
+    @FunctionalInterface
+    interface Factory extends Consumer<ConfiguredRuleFactory> {
+
+        @Override
+        void accept(ConfiguredRuleFactory factory);
+    }
 }
