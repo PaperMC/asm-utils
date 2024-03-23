@@ -4,7 +4,6 @@ import io.papermc.asm.rules.RewriteRule;
 import java.lang.constant.ClassDesc;
 import java.util.Collections;
 import java.util.Set;
-import java.util.function.Consumer;
 
 public interface RuleFactoryConfiguration {
 
