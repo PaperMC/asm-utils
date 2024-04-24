@@ -54,10 +54,11 @@ allprojects {
 
     dependencies {
         if ("-runtime" !in project.name) {
-            val asm = "org.ow2.asm:asm:9.6"
+            val asmVer = "9.6"
+            val asm = "org.ow2.asm:asm:$asmVer"
             api(asm)
             testImplementation(asm)
-            val asmCommons = "org.ow2.asm:asm-commons:9.6"
+            val asmCommons = "org.ow2.asm:asm-commons:$asmVer"
             api(asmCommons)
             testImplementation(asmCommons)
         }
