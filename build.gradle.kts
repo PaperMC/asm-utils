@@ -12,6 +12,7 @@ allprojects {
     plugins.apply("net.kyori.indra")
     plugins.apply("net.kyori.indra.checkstyle")
     plugins.apply("net.kyori.indra.publishing")
+    plugins.apply("org.incendo.cloud-build-logic.javadoc-links")
 
     indra {
         javaVersions {
