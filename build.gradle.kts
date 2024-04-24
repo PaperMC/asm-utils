@@ -56,7 +56,7 @@ allprojects {
             val asm = "org.ow2.asm:asm:9.6"
             api(asm)
             testImplementation(asm)
-            val asmCommons = "org.ow2.asm:asm-commons:9.6"
+            val asmCommons = "org.ow2.asm:asm-commons:9.7"
             api(asmCommons)
             testImplementation(asmCommons)
         }
