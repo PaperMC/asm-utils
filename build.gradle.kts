@@ -72,3 +72,9 @@ allprojects {
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVer")
     }
 }
+
+val testDataSet = sourceSets.create("testData")
+
+dependencies {
+    testImplementation(testDataSet.output)
+}
