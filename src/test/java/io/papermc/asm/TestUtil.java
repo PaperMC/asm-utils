@@ -123,8 +123,7 @@ public final class TestUtil {
                 classReader.accept(node, ClassReader.SKIP_CODE);
                 map.put(node.name, rootBytes);
                 for (final InnerClassNode innerNode : node.innerClasses) {
-                    final String innerName = innerNode.name + ".class";
-                    getClassBytes(map, innerName, classNameMapper);
+                    getClassBytes(map, innerNode.name, classNameMapper);
                 }
             }
         } catch (IOException e) {
