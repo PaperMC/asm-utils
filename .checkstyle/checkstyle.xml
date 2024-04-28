@@ -19,11 +19,9 @@
     <module name="NewlineAtEndOfFile"/>
 
     <!-- https://checkstyle.org/config_filters.html#SuppressionFilter -->
-    <!--
     <module name="SuppressionFilter">
         <property name="file" value="${configDirectory}/suppressions.xml"/>
     </module>
-    -->
 
     <!-- https://checkstyle.org/config_filters.html#SuppressWarningsFilter -->
     <module name="SuppressWarningsFilter"/>

@@ -23,12 +23,15 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 @DefaultQualifier(NonNull.class)
 public final class TestUtil {
+    private TestUtil() {
+    }
+
     public static RewriteRuleVisitorFactory testingVisitorFactory(final RewriteRule rewriteRule) {
         return RewriteRuleVisitorFactory.create(Opcodes.ASM9, rewriteRule, ClassInfoProvider.basic());
     }
 
     public static Map<String, byte[]> inputBytes(final String className) {
-        return getClassBytes(new HashMap<>(), className, n -> n + ".class");
+        return readClassBytes(new HashMap<>(), className, n -> n + ".class");
     }
 
     public interface Processor<E extends Throwable> {
@@ -37,7 +40,7 @@ public final class TestUtil {
 
     public record DefaultProcessor(RewriteRuleVisitorFactory factory) implements Processor<RuntimeException> {
         @Override
-        public byte[] process(byte[] bytes) {
+        public byte[] process(final byte[] bytes) {
             final ClassReader classReader = new ClassReader(bytes);
             final ClassWriter classWriter = new ClassWriter(classReader, 0);
             classReader.accept(this.factory.createVisitor(classWriter), 0);
@@ -102,10 +105,10 @@ public final class TestUtil {
     }
 
     public static Map<String, byte[]> expectedBytes(final String className) {
-        return getClassBytes(new HashMap<>(), className, n -> "expected/" + n + ".class");
+        return readClassBytes(new HashMap<>(), className, n -> "expected/" + n + ".class");
     }
 
-    private static Map<String, byte[]> getClassBytes(
+    private static Map<String, byte[]> readClassBytes(
         final Map<String, byte[]> map,
         final String className,
         final Function<String, String> classNameMapper
@@ -123,10 +126,10 @@ public final class TestUtil {
                 classReader.accept(node, ClassReader.SKIP_CODE);
                 map.put(node.name, rootBytes);
                 for (final InnerClassNode innerNode : node.innerClasses) {
-                    getClassBytes(map, innerNode.name, classNameMapper);
+                    readClassBytes(map, innerNode.name, classNameMapper);
                 }
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new RuntimeException(e);
         }
         return map;
