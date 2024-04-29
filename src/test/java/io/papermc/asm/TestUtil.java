@@ -121,7 +121,7 @@ public final class TestUtil {
         final Map<String, byte[]> input = inputBytes(className);
         final Map<String, byte[]> processed = processClassBytes(input, proc);
 
-        final var loader = new URLClassLoader(new URL[]{}, ClassLoader.getSystemClassLoader()) {
+        final var loader = new URLClassLoader(new URL[]{}, TestUtil.class.getClassLoader()) {
             @Override
             protected Class<?> findClass(final String name) throws ClassNotFoundException {
                 final String slashName = name.replace(".", "/");
