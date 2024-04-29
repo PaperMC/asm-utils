@@ -16,4 +16,12 @@ class TestSameClassTarget {
 
         TestUtil.assertProcessedMatchesExpected("data/SameClassTargetUser", visitorFactory);
     }
+
+    @Test
+    void simpleFieldRenameExecute() {
+        TestUtil.processAndExecute(
+            "data/SameClassTargetUser",
+            bytes -> bytes
+        );
+    }
 }

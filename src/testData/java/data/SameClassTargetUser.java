@@ -1,7 +1,10 @@
 package data;
 
 public class SameClassTargetUser {
-    public static void test() {
-        System.out.println(SameClassTarget.A);
+    public static void entry() {
+        consume(SameClassTarget.A);
+    }
+
+    static void consume(final Object o) {
     }
 }

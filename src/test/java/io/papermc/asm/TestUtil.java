@@ -4,7 +4,9 @@ import io.papermc.asm.rules.RewriteRule;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -102,6 +104,42 @@ public final class TestUtil {
             output.put(entry.getKey(), ((Processor<RuntimeException>) proc).process(entry.getValue()));
         }
         return output;
+    }
+
+    public static void processAndExecute(
+        final String className,
+        final Processor<?> proc
+    ) {
+        processAndExecute(className, proc, "entry");
+    }
+
+    public static void processAndExecute(
+        final String className,
+        final Processor<?> proc,
+        final String methodName
+    ) {
+        final Map<String, byte[]> input = inputBytes(className);
+        final Map<String, byte[]> processed = processClassBytes(input, proc);
+
+        final var loader = new URLClassLoader(new URL[]{}, ClassLoader.getSystemClassLoader()) {
+            @Override
+            protected Class<?> findClass(final String name) throws ClassNotFoundException {
+                final String slashName = name.replace(".", "/");
+                final byte[] processedBytes = processed.get(slashName);
+                if (processedBytes != null) {
+                    return super.defineClass(name, processedBytes, 0, processedBytes.length);
+                }
+                return super.findClass(name);
+            }
+        };
+
+        try {
+            final Class<?> loaded = loader.findClass(className.replace("/", "."));
+            final Method main = loaded.getDeclaredMethod(methodName);
+            main.invoke(null);
+        } catch (final ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static Map<String, byte[]> expectedBytes(final String className) {
