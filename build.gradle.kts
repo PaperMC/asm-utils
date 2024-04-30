@@ -1,6 +1,10 @@
 import org.incendo.cloudbuildlogic.jmp
+import java.nio.file.Files
+import kotlin.io.path.copyTo
+import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.invariantSeparatorsPathString
+import kotlin.io.path.isDirectory
 
 plugins {
     val indraVer = "3.1.3"
@@ -78,24 +82,68 @@ allprojects {
 val testDataSet = sourceSets.create("testData")
 val testDataNewTargets = sourceSets.create("testDataNewTargets")
 
+val filtered = tasks.register<FilterTestClasspath>("filteredTestClasspath") {
+    outputDir.set(layout.buildDirectory.dir("filteredTestClasspath"))
+    old.from(testDataSet.output)
+    new.from(testDataNewTargets.output)
+}
+
 dependencies {
-    val oldRoot = layout.buildDirectory.dir("classes/java/testData").get().asFile.toPath()
-    val newRoot = layout.buildDirectory.dir("classes/java/testDataNewTargets").get().asFile.toPath()
-    testDataSet.output.asFileTree.elements.zip(testDataNewTargets.output.asFileTree.elements) { old, _ ->
-        old.filter {
-            if (it.asFile.toPath().startsWith(oldRoot)) {
-                !newRoot.resolve(oldRoot.relativize(it.asFile.toPath()).invariantSeparatorsPathString).exists()
-            } else {
-                true
+    testImplementation(files(filtered.flatMap { it.outputDir }))
+    testImplementation(testDataNewTargets.output)
+}
+
+abstract class FilterTestClasspath : DefaultTask() {
+    @get:InputFiles
+    abstract val old: ConfigurableFileCollection
+
+    @get:InputFiles
+    abstract val new: ConfigurableFileCollection
+
+    @get:OutputDirectory
+    abstract val outputDir: DirectoryProperty
+
+    @get:Inject
+    abstract val fsOps: FileSystemOperations
+
+    @TaskAction
+    fun run() {
+        if (!outputDir.get().asFile.toPath().exists()) {
+            outputDir.get().asFile.mkdirs()
+        } else {
+            fsOps.delete {
+                delete(outputDir.get())
+            }
+            outputDir.get().asFile.mkdirs()
+        }
+
+        val newExisting = mutableListOf<String>()
+        for (file in new.files) {
+            if (file.exists()) {
+                Files.walk(file.toPath()).use { s ->
+                    s.forEach {
+                        if (it.isDirectory()) {
+                            return@forEach
+                        }
+                        newExisting += file.toPath().relativize(it).invariantSeparatorsPathString
+                    }
+                }
+            }
+        }
+        for (file in old.files) {
+            if (file.exists()) {
+                Files.walk(file.toPath()).use { s ->
+                    s.forEach {
+                        if (it.isDirectory()) {
+                            return@forEach
+                        }
+                        val rel = file.toPath().relativize(it).invariantSeparatorsPathString
+                        if (rel !in newExisting) {
+                            it.copyTo(outputDir.get().asFile.toPath().resolve(rel).also { f -> f.parent.createDirectories() })
+                        }
+                    }
+                }
             }
         }
     }
-    //testImplementation(testDataSet.output.filter {
-    //    if (it.toPath().startsWith(oldRoot)) {
-    //        !newRoot.resolve(oldRoot.relativize(it.toPath()).invariantSeparatorsPathString).exists()
-    //    } else {
-    //        true
-    //    }
-    //})
-    testImplementation(testDataNewTargets.output)
 }
