@@ -6,7 +6,7 @@ import data.types.hierarchy.Player;
 @SuppressWarnings("unused")
 public final class SuperTypeParamUser {
 
-    public static void run() {
+    public static void entry() {
         final Methods methods = new Methods();
         methods.consume(new Player());
         Methods.consumeStatic(new Player());

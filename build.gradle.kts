@@ -75,6 +75,7 @@ allprojects {
 
         val junitVer = "5.10.2"
         testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVer")
+        testImplementation("org.junit.jupiter:junit-jupiter-params:$junitVer")
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVer")
     }
 }
