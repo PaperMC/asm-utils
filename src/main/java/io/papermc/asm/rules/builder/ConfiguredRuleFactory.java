@@ -25,42 +25,6 @@ public interface ConfiguredRuleFactory extends RuleFactory {
 
     void plainStaticRewrite(Consumer<? super MethodMatcher.Builder> builderConsumer);
 
-    default void changeParamFuzzy(final Class<?> newParamType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.changeParamFuzzy(desc(newParamType), staticHandler, builderConsumer);
-    }
-
-    void changeParamFuzzy(ClassDesc newParamType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
-
-    default void changeParamDirect(final Class<?> newParamType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.changeParamDirect(desc(newParamType), staticHandler, builderConsumer);
-    }
-
-    void changeParamDirect(ClassDesc newParamType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
-
-    default void changeReturnTypeFuzzy(final Class<?> newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.changeReturnTypeFuzzy(desc(newReturnType), staticHandler, builderConsumer);
-    }
-
-    void changeReturnTypeFuzzy(ClassDesc newReturnType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
-
-    default void changeReturnTypeDirect(final Class<?> newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.changeReturnTypeDirect(desc(newReturnType), staticHandler, builderConsumer);
-    }
-
-    void changeReturnTypeDirect(ClassDesc newReturnType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
-
-    default void changeReturnTypeFuzzyWithContext(final Class<?> newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.changeReturnTypeFuzzyWithContext(desc(newReturnType), staticHandler, builderConsumer);
-    }
-
-    void changeReturnTypeFuzzyWithContext(ClassDesc newReturnType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
-
-    default void changeReturnTypeDirectWithContext(final Class<?> newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.changeReturnTypeDirectWithContext(desc(newReturnType), staticHandler, builderConsumer);
-    }
-
-    void changeReturnTypeDirectWithContext(ClassDesc newReturnType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
-
     @FunctionalInterface
     interface Factory extends Consumer<ConfiguredRuleFactory> {
 

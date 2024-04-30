@@ -6,5 +6,6 @@ public class SameClassTargetUser {
     }
 
     static void consume(final Object o) {
+        System.out.println(o);
     }
 }

@@ -46,11 +46,8 @@ public interface RewriteRule {
 
     ClassVisitor createVisitor(int api, ClassVisitor parent, ClassProcessingContext context);
 
-    default void generateMethods(final MethodGeneratorFactory methodGeneratorFactory) {
-    }
-
     @FunctionalInterface
-    interface MethodGeneratorFactory {
+    interface GeneratorAdapterFactory {
         GeneratorAdapter create(int access, String name, String descriptor);
     }
 
@@ -66,11 +63,6 @@ public interface RewriteRule {
                 visitor = rule.createVisitor(api, visitor, context);
             }
             return visitor;
-        }
-
-        @Override
-        public void generateMethods(final MethodGeneratorFactory methodGeneratorFactory) {
-            this.rules.forEach(rule -> rule.generateMethods(methodGeneratorFactory));
         }
     }
 

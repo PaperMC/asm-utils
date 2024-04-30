@@ -5,6 +5,7 @@ import io.papermc.asm.ClassInfoProvider;
 import io.papermc.asm.ClassProcessingContext;
 import io.papermc.asm.rules.RewriteRule;
 import io.papermc.asm.rules.method.MethodRewriteRule;
+import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.util.Set;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -12,6 +13,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
 
 import static io.papermc.asm.util.DescriptorUtils.fromOwner;
+import static io.papermc.asm.util.DescriptorUtils.toOwner;
 import static io.papermc.asm.util.OpcodeUtils.isStatic;
 import static io.papermc.asm.util.OpcodeUtils.staticOp;
 
@@ -28,11 +30,11 @@ public final class DefineClassRule implements MethodRewriteRule {
         "(Ljava/lang/String;[BIILjava/security/CodeSource;)Ljava/lang/Class;"
     );
 
-    private final String proxy;
+    private final ClassDesc proxy;
     private final boolean assumeClassLoader;
 
     private DefineClassRule(final String proxyClassName, final boolean assumeClassLoader) {
-        this.proxy = proxyClassName;
+        this.proxy = fromOwner(proxyClassName);
         this.assumeClassLoader = assumeClassLoader;
     }
 
@@ -42,38 +44,39 @@ public final class DefineClassRule implements MethodRewriteRule {
     @Override
     public @Nullable Rewrite rewrite(
         final ClassProcessingContext context,
-        final boolean invokeDynamic,
+        final boolean isInvokeDynamic,
         final int opcode,
-        final String owner,
+        final ClassDesc ownerDesc,
         final String name,
         MethodTypeDesc descriptor,
         final boolean isInterface
     ) {
-        if (!name.equals("defineClass") || isStatic(opcode, invokeDynamic)) {
+        final String owner = toOwner(ownerDesc);
+        if (!name.equals("defineClass") || isStatic(opcode, isInvokeDynamic)) {
             return null;
         }
         if (owner.equals("java/lang/invoke/MethodHandles$Lookup") && descriptor.descriptorString().equals("([B)Ljava/lang/Class;")) {
             descriptor = descriptor.insertParameterTypes(0, fromOwner("java/lang/invoke/MethodHandles$Lookup"));
-            new RewriteSingle(staticOp(invokeDynamic), this.proxy, name, descriptor, false);
+            new RewriteSingle(staticOp(isInvokeDynamic), this.proxy, name, descriptor, false, isInvokeDynamic);
         }
         final @Nullable String superName = context.processingClassSuperClassName();
         if (superName != null) {
             if (CLASS_LOADER_DESCS.contains(descriptor.descriptorString())
                 && this.isClassLoader(context.classInfoProvider(), superName)
                 && (owner.equals(context.processingClassName()) || this.isClassLoader(context.classInfoProvider(), owner))) {
-                return this.classLoaderRewrite(invokeDynamic, name, descriptor);
+                return this.classLoaderRewrite(isInvokeDynamic, name, descriptor);
             } else if (SECURE_CLASS_LOADER_DESCS.contains(descriptor.descriptorString())
                 && this.isSecureClassLoader(context.classInfoProvider(), superName)
                 && (owner.equals(context.processingClassName()) || this.isSecureClassLoader(context.classInfoProvider(), owner))) {
-                return this.classLoaderRewrite(invokeDynamic, name, descriptor);
+                return this.classLoaderRewrite(isInvokeDynamic, name, descriptor);
             }
         }
         return null;
     }
 
-    private MethodRewriteRule.Rewrite classLoaderRewrite(final boolean invokeDynamic, final String name, MethodTypeDesc descriptor) {
+    private MethodRewriteRule.Rewrite classLoaderRewrite(final boolean isInvokeDynamic, final String name, MethodTypeDesc descriptor) {
         descriptor = descriptor.insertParameterTypes(0, fromOwner("java/lang/Object"));
-        return new RewriteSingle(staticOp(invokeDynamic), this.proxy, name, descriptor, false);
+        return new RewriteSingle(staticOp(isInvokeDynamic), this.proxy, name, descriptor, false, isInvokeDynamic);
     }
 
     private boolean isSecureClassLoader(final ClassInfoProvider classInfoProvider, final String className) {

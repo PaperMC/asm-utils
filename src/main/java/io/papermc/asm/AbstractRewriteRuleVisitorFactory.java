@@ -28,6 +28,7 @@ public abstract class AbstractRewriteRuleVisitorFactory implements RewriteRuleVi
     public ClassVisitor createVisitor(final ClassVisitor parent) {
         final MutableProcessingContext context = new MutableProcessingContext();
         final ClassVisitor ruleVisitor = this.rule().createVisitor(this.api, parent, context);
+        // context filler should be last, so it is run before all the wrapped visitors
         return new ContextFillerVisitor(this.api, ruleVisitor, context);
     }
 

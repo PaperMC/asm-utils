@@ -34,19 +34,19 @@ public interface RuleFactory {
         this.changeParamToSuper(desc(oldParamType), desc(newParamType), builderConsumer);
     }
 
-    void changeParamToSuper(ClassDesc oldParamType, ClassDesc newParamType, Consumer<? super MethodMatcher.Builder> builderConsumer);
+    void changeParamToSuper(ClassDesc legacyParamType, ClassDesc newParamType, Consumer<? super MethodMatcher.Builder> builderConsumer);
 
-    default void changeParamFuzzy(final ClassDesc newOwner, final Class<?> newParamType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.changeParamFuzzy(newOwner, desc(newParamType), staticHandler, builderConsumer);
+    default void changeParamFuzzy(final Class<?> newParamType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
+        this.changeParamFuzzy(desc(newParamType), staticHandler, builderConsumer);
     }
 
-    void changeParamFuzzy(ClassDesc newOwner, ClassDesc newParamType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
+    void changeParamFuzzy(ClassDesc newParamType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
 
-    default void changeParamDirect(final ClassDesc newOwner, final Class<?> newParamType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.changeParamDirect(newOwner, desc(newParamType), staticHandler, builderConsumer);
+    default void changeParamDirect(final Class<?> newParamType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
+        this.changeParamDirect(desc(newParamType), staticHandler, builderConsumer);
     }
 
-    void changeParamDirect(ClassDesc newOwner, ClassDesc newParamType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
+    void changeParamDirect(ClassDesc newParamType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
 
     default void changeReturnTypeToSub(final Class<?> oldReturnType, final Class<?> newReturnType, final Consumer<? super MethodMatcher.Builder> builderConsumer) {
         if (!oldReturnType.isAssignableFrom(newReturnType)) {
@@ -57,29 +57,29 @@ public interface RuleFactory {
 
     void changeReturnTypeToSub(ClassDesc oldReturnType, ClassDesc newReturnType, Consumer<? super MethodMatcher.Builder> builderConsumer);
 
-    default void changeReturnTypeFuzzy(final ClassDesc newOwner, final Class<?> newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.changeReturnTypeFuzzy(newOwner, desc(newReturnType), staticHandler, builderConsumer);
+    default void changeReturnTypeFuzzy(final Class<?> newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
+        this.changeReturnTypeFuzzy(desc(newReturnType), staticHandler, builderConsumer);
     }
 
-    void changeReturnTypeFuzzy(ClassDesc newOwner, ClassDesc newReturnType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
+    void changeReturnTypeFuzzy(ClassDesc newReturnType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
 
-    default void changeReturnTypeDirect(final ClassDesc newOwner, final Class<?> newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.changeReturnTypeDirect(newOwner, desc(newReturnType), staticHandler, builderConsumer);
+    default void changeReturnTypeDirect(final Class<?> newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
+        this.changeReturnTypeDirect(desc(newReturnType), staticHandler, builderConsumer);
     }
 
-    void changeReturnTypeDirect(ClassDesc newOwner, ClassDesc newReturnType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
+    void changeReturnTypeDirect(ClassDesc newReturnType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
 
-    default void changeReturnTypeFuzzyWithContext(final ClassDesc newOwner, final Class<?> newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.changeReturnTypeFuzzyWithContext(newOwner, desc(newReturnType), staticHandler, builderConsumer);
+    default void changeReturnTypeFuzzyWithContext(final Class<?> newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
+        this.changeReturnTypeFuzzyWithContext(desc(newReturnType), staticHandler, builderConsumer);
     }
 
-    void changeReturnTypeFuzzyWithContext(ClassDesc newOwner, ClassDesc newReturnType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
+    void changeReturnTypeFuzzyWithContext(ClassDesc newReturnType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
 
-    default void changeReturnTypeDirectWithContext(final ClassDesc newOwner, final Class<?> newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.changeReturnTypeDirectWithContext(newOwner, desc(newReturnType), staticHandler, builderConsumer);
+    default void changeReturnTypeDirectWithContext(final Class<?> newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
+        this.changeReturnTypeDirectWithContext(desc(newReturnType), staticHandler, builderConsumer);
     }
 
-    void changeReturnTypeDirectWithContext(ClassDesc newOwner, ClassDesc newReturnType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
+    void changeReturnTypeDirectWithContext(ClassDesc newReturnType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
 
     void renameField(String newName, Consumer<? super FieldMatcher.Builder> builderConsumer);
 

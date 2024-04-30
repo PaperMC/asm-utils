@@ -7,13 +7,11 @@ import java.util.Set;
 
 public interface RuleFactoryConfiguration {
 
-    static RuleFactoryConfiguration create(final ClassDesc delegateOwner, final ClassDesc generatedDelegateOwner) {
-        return new RuleFactoryConfigurationImpl(delegateOwner, generatedDelegateOwner);
+    static RuleFactoryConfiguration create(final ClassDesc delegateOwner) {
+        return new RuleFactoryConfigurationImpl(delegateOwner);
     }
 
     ClassDesc delegateOwner();
-
-    ClassDesc generatedDelegateOwner();
 
     interface Holder {
 

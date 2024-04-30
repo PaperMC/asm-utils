@@ -3,16 +3,20 @@ package io.papermc.asm.rules.generate;
 import io.papermc.asm.rules.RewriteRule;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
-import java.lang.reflect.Executable;
-import java.util.Map;
 
 public interface GeneratedMethodHolder {
 
-    ClassDesc generatedMethodOwner();
+    void generateMethod(RewriteRule.GeneratorAdapterFactory factory, MethodCallData modified, MethodCallData original);
 
-    default ClassDesc staticRedirectOwner() {
-        return this.generatedMethodOwner();
+    interface CallData {
+        int opcode();
     }
 
-    void generateMethod(Map.Entry<Executable, ? extends MethodTypeDesc> pair, RewriteRule.MethodGeneratorFactory factory);
+    record MethodCallData(int opcode, ClassDesc owner, String name, MethodTypeDesc descriptor, boolean isInvokeDynamic) implements CallData {
+    }
+
+    void generateConstructor(RewriteRule.GeneratorAdapterFactory factory, MethodCallData modified, ConstructorCallData original);
+
+    record ConstructorCallData(int opcode, ClassDesc owner, MethodTypeDesc descriptor) implements CallData {
+    }
 }
