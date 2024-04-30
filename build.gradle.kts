@@ -1,4 +1,6 @@
 import org.incendo.cloudbuildlogic.jmp
+import kotlin.io.path.exists
+import kotlin.io.path.invariantSeparatorsPathString
 
 plugins {
     val indraVer = "3.1.3"
@@ -74,7 +76,17 @@ allprojects {
 }
 
 val testDataSet = sourceSets.create("testData")
+val testDataNewTargets = sourceSets.create("testDataNewTargets")
 
 dependencies {
-    testImplementation(testDataSet.output)
+    val oldRoot = layout.buildDirectory.dir("java/testData").get().asFile.toPath()
+    val newRoot = layout.buildDirectory.dir("java/testDataNewTargets").get().asFile.toPath()
+    testImplementation(testDataSet.output.filter {
+        if (it.toPath().startsWith(oldRoot)) {
+            !newRoot.resolve(oldRoot.relativize(it.toPath()).invariantSeparatorsPathString).exists()
+        } else {
+            true
+        }
+    })
+    testImplementation(testDataNewTargets.output)
 }
