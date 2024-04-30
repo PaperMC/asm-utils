@@ -79,14 +79,23 @@ val testDataSet = sourceSets.create("testData")
 val testDataNewTargets = sourceSets.create("testDataNewTargets")
 
 dependencies {
-    val oldRoot = layout.buildDirectory.dir("java/testData").get().asFile.toPath()
-    val newRoot = layout.buildDirectory.dir("java/testDataNewTargets").get().asFile.toPath()
-    testImplementation(testDataSet.output.filter {
-        if (it.toPath().startsWith(oldRoot)) {
-            !newRoot.resolve(oldRoot.relativize(it.toPath()).invariantSeparatorsPathString).exists()
-        } else {
-            true
+    val oldRoot = layout.buildDirectory.dir("classes/java/testData").get().asFile.toPath()
+    val newRoot = layout.buildDirectory.dir("classes/java/testDataNewTargets").get().asFile.toPath()
+    testDataSet.output.asFileTree.elements.zip(testDataNewTargets.output.asFileTree.elements) { old, _ ->
+        old.filter {
+            if (it.asFile.toPath().startsWith(oldRoot)) {
+                !newRoot.resolve(oldRoot.relativize(it.asFile.toPath()).invariantSeparatorsPathString).exists()
+            } else {
+                true
+            }
         }
-    })
+    }
+    //testImplementation(testDataSet.output.filter {
+    //    if (it.toPath().startsWith(oldRoot)) {
+    //        !newRoot.resolve(oldRoot.relativize(it.toPath()).invariantSeparatorsPathString).exists()
+    //    } else {
+    //        true
+    //    }
+    //})
     testImplementation(testDataNewTargets.output)
 }
