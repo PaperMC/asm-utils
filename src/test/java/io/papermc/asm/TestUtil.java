@@ -44,7 +44,7 @@ public final class TestUtil {
         @Override
         public byte[] process(final byte[] bytes) {
             final ClassReader classReader = new ClassReader(bytes);
-            final ClassWriter classWriter = new ClassWriter(classReader, 0);
+            final ClassWriter classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_MAXS);
             classReader.accept(this.factory.createVisitor(classWriter), 0);
             return classWriter.toByteArray();
         }
@@ -170,6 +170,7 @@ public final class TestUtil {
         try {
             final Class<?> loaded = loader.findClass(className.replace("/", "."));
             final Method main = loaded.getDeclaredMethod(methodName);
+            main.trySetAccessible();
             main.invoke(null);
         } catch (final ReflectiveOperationException e) {
             throw new RuntimeException(e);

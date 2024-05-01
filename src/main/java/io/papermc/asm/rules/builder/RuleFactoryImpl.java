@@ -64,7 +64,8 @@ class RuleFactoryImpl implements RuleFactory {
 
     @Override
     public void changeReturnTypeDirect(final ClassDesc newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.addRule(StaticRewrites.returnRewrite(this.owners, newReturnType, build(builderConsumer, MethodMatcher::targeted), isStatic(staticHandler), newReturnType, false));
+        final TargetedMethodMatcher matcher = build(builderConsumer, MethodMatcher::targeted);
+        this.addRule(StaticRewrites.returnRewrite(this.owners, newReturnType, matcher, isStatic(staticHandler), matcher.targetType(), false));
     }
 
     @Override
@@ -74,7 +75,8 @@ class RuleFactoryImpl implements RuleFactory {
 
     @Override
     public void changeReturnTypeDirectWithContext(final ClassDesc newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.addRule(StaticRewrites.returnRewrite(this.owners, newReturnType, build(builderConsumer, MethodMatcher::targeted), isStatic(staticHandler), newReturnType, true));
+        final TargetedMethodMatcher matcher = build(builderConsumer, MethodMatcher::targeted);
+        this.addRule(StaticRewrites.returnRewrite(this.owners, newReturnType, matcher, isStatic(staticHandler), matcher.targetType(), true));
     }
 
     @Override

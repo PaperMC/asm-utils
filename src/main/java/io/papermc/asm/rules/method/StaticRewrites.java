@@ -41,14 +41,18 @@ public final class StaticRewrites {
     }
 
     public static StaticRewrite.Generated.Return returnRewrite(final Set<Class<?>> owners, final ClassDesc existingType, final TargetedMethodMatcher methodMatcher, final Method staticHandler, final ClassDesc intermediateType, final boolean includeOwnerContext) {
+        if (includeOwnerContext && owners.size() > 1) {
+            throw new IllegalArgumentException("Can't include owner context with multiple owners");
+        }
+        final Class<?> owner = owners.iterator().next();
         if (!staticHandler.getReturnType().describeConstable().orElseThrow().equals(methodMatcher.targetType())) {
             throw new IllegalArgumentException("Return type of staticHandler doesn't match target from methodMatcher");
         }
         if (staticHandler.getParameterCount() != (includeOwnerContext ? 2 : 1)) {
-            throw new IllegalArgumentException("staticHandler should only have %s parameter of type %s".formatted(includeOwnerContext ? 2 : 1, (includeOwnerContext ? "owner type and " : "") + intermediateType));
+            throw new IllegalArgumentException("staticHandler should only have %s parameter of type %s".formatted(includeOwnerContext ? 2 : 1, (includeOwnerContext ? owner + " and " : "") + intermediateType));
         }
-        if (!staticHandler.getParameterTypes()[includeOwnerContext ? 1 : 0].describeConstable().orElseThrow().equals(intermediateType)) {
-            throw new IllegalArgumentException("staticHandler param type isn't " + intermediateType);
+        if (!staticHandler.getParameterTypes()[includeOwnerContext ? 1 : 0].describeConstable().orElseThrow().equals(existingType)) {
+            throw new IllegalArgumentException("staticHandler param type isn't " + existingType);
         }
         return new Return(owners, existingType, methodMatcher, staticHandler, includeOwnerContext);
     }

@@ -10,6 +10,10 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
+import static io.papermc.asm.util.OpcodeUtils.isInterface;
+import static io.papermc.asm.util.OpcodeUtils.isStatic;
+import static io.papermc.asm.util.OpcodeUtils.isVirtual;
+
 public interface GeneratedMethodSource<C> extends GeneratedMethodHolder {
 
     /**
@@ -47,12 +51,15 @@ public interface GeneratedMethodSource<C> extends GeneratedMethodHolder {
         final ClassDesc methodOwner = original.owner();
         final C context = this.createNewContext();
         final GeneratorAdapter methodGenerator = factory.create(Opcodes.ACC_PUBLIC | Opcodes.ACC_SYNTHETIC | Opcodes.ACC_STATIC, modified.name(), modified.descriptor().descriptorString());
-        final MethodTypeDesc transformedInvokedDescriptor = this.transformInvokedDescriptor(original.descriptor(), context);
+        MethodTypeDesc transformedInvokedDescriptor = this.transformInvokedDescriptor(modified.descriptor(), context);
+        final boolean isInterfaceCall = isInterface(original.opcode(), original.isInvokeDynamic());
+        if (isVirtual(original.opcode(), original.isInvokeDynamic()) || isInterfaceCall) {
+            transformedInvokedDescriptor = transformedInvokedDescriptor.dropParameterTypes(0, 1); // remove inserted param if virtual or interface
+        }
         this.generateParameters(methodGenerator, modified.descriptor(), context);
         final Method method = new Method(original.name(), transformedInvokedDescriptor.descriptorString());
         final Type originalOwner = Type.getType(methodOwner.descriptorString());
-        final boolean isStaticCall = OpcodeUtils.isStatic(original.opcode(), original.isInvokeDynamic());
-        final boolean isInterfaceCall = OpcodeUtils.isInterface(original.opcode(), original.isInvokeDynamic());
+        final boolean isStaticCall = isStatic(original.opcode(), original.isInvokeDynamic());
         if (isInterfaceCall) {
             methodGenerator.invokeInterface(originalOwner, method);
         } else if (!isStaticCall) {

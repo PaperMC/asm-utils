@@ -1,5 +1,6 @@
 package data.types.hierarchy;
 
+@SuppressWarnings("unused")
 public class Player implements Entity {
 
     @Override
@@ -13,5 +14,8 @@ public class Player implements Entity {
 
     public static void addEntityStatic(final Entity entity) {
         entity.getName();
+    }
+
+    void test() {
     }
 }

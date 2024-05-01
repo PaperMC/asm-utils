@@ -6,7 +6,7 @@ import data.types.hierarchy.Player;
 @SuppressWarnings("unused")
 final class PlainUser {
 
-    public static void run() {
+    public static void entry() {
         final Player player = new Player();
         final Entity entity = new Player();
         player.addEntity(entity);

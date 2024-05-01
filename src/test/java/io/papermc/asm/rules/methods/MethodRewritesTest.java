@@ -11,10 +11,11 @@ import java.lang.constant.ClassDesc;
 class MethodRewritesTest {
 
     static final ClassDesc PLAYER = Player.class.describeConstable().orElseThrow();
+    static final ClassDesc ENTITY = Entity.class.describeConstable().orElseThrow();
 
     @TransformerTest("data/methods/inplace/SuperTypeParamUser")
     void testSuperTypeParam(final TransformerCheck check) {
-        final RewriteRule renameRule = RewriteRule.forOwner(Methods.class, builder -> {
+        final RewriteRule rule = RewriteRule.forOwner(Methods.class, builder -> {
             builder.changeParamToSuper(
                 Player.class,
                 Entity.class,
@@ -23,20 +24,20 @@ class MethodRewritesTest {
                     .desc(d -> d.parameterList().contains(PLAYER))
             );
         });
-        check.run(renameRule);
+        check.run(rule);
     }
 
     @TransformerTest("data/methods/inplace/SubTypeReturnUser")
     void testSubTypeReturn(final TransformerCheck check) {
-        final RewriteRule renameRule = RewriteRule.forOwner(Methods.class, builder -> {
+        final RewriteRule rule = RewriteRule.forOwner(Methods.class, builder -> {
             builder.changeReturnTypeToSub(
                 Entity.class,
                 Player.class,
                 b -> b
                     .match("get", "getStatic")
-                    .desc(d -> d.returnType().equals(PLAYER))
+                    .desc(d -> d.returnType().equals(ENTITY))
             );
         });
-        check.run(renameRule);
+        check.run(rule);
     }
 }
