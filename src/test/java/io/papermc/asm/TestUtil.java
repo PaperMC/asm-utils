@@ -7,10 +7,13 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -22,6 +25,7 @@ import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.InnerClassNode;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DefaultQualifier(NonNull.class)
 public final class TestUtil {
@@ -86,6 +90,42 @@ public final class TestUtil {
             throw e;
         }
         for (final String name : input.keySet()) {
+            if (!Arrays.equals(expected.get(name), processed.get(name))) {
+                // Try to get a javap diff
+                try {
+                    Path tmp = Files.createTempDirectory("tmpasmutils");
+                    Path cls = tmp.resolve("cls.class");
+                    Files.write(cls, expected.get(name));
+                    final Process proc = new ProcessBuilder("javap", "-c", "-p", "cls")
+                        .directory(tmp.toFile())
+                        .redirectErrorStream(true)
+                        .start();
+                    final String expectedJavap = new String(proc.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+                    proc.waitFor(5, TimeUnit.SECONDS);
+
+                    tmp = Files.createTempDirectory("tmpasmutils");
+                    cls = tmp.resolve("cls.class");
+                    Files.write(cls, processed.get(name));
+                    final Process proc1 = new ProcessBuilder("javap", "-c", "-p", "cls")
+                        .directory(tmp.toFile())
+                        .redirectErrorStream(true)
+                        .start();
+                    final String actualJavap = new String(proc1.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+                    proc1.waitFor(5, TimeUnit.SECONDS);
+
+                    assertEquals(expectedJavap, actualJavap);
+                } catch (final IOException ioException) {
+                    ioException.printStackTrace();
+                    System.err.println("Failed to diff class bytes using javap, falling back to direct byte comparison.");
+                } catch (final InterruptedException interruptedException) {
+                    Thread.currentThread().interrupt();
+                }
+            } else {
+                // Bytes equal
+                return;
+            }
+
+            // If javap failed, just assert the bytes equal
             assertArrayEquals(
                 expected.get(name),
                 processed.get(name),
