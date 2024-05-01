@@ -113,7 +113,7 @@ public final class TestUtil {
                     final String actualJavap = new String(proc1.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
                     proc1.waitFor(5, TimeUnit.SECONDS);
 
-                    assertEquals(expectedJavap, actualJavap);
+                    assertEquals(expectedJavap, actualJavap, () -> "Transformed class bytes did not match expected for " + name);
                 } catch (final IOException ioException) {
                     ioException.printStackTrace();
                     System.err.println("Failed to diff class bytes using javap, falling back to direct byte comparison.");
