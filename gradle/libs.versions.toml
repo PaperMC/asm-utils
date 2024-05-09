@@ -15,4 +15,4 @@ jupiterEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref
 indra = { id = "net.kyori.indra", version.ref = "indra" }
 indraCheckstyle = { id = "net.kyori.indra.checkstyle", version.ref = "indra" }
 indraPublishing = { id = "net.kyori.indra.publishing", version.ref = "indra" }
-javadocLinks = { id = "org.incendo.cloud-build-logic.javadoc-links", version = "0.0.14" }
+javadocLinks = { id = "org.incendo.cloud-build-logic.javadoc-links", version = "0.0.15" }
