@@ -5,9 +5,8 @@ import io.papermc.asm.rules.RewriteRule;
 import io.papermc.asm.rules.generate.GeneratedMethodHolder;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Handle;
@@ -45,7 +44,7 @@ public interface MethodRewriteRule extends RewriteRule {
     default ClassVisitor createVisitor(final int api, final ClassVisitor parent, final ClassProcessingContext context) {
         record MethodKey(String owner, String name, MethodTypeDesc descriptor) {
         }
-        final Map<MethodKey, MethodGenerator> methodsToGenerate = new HashMap<>();
+        final Map<MethodKey, MethodGenerator> methodsToGenerate = new LinkedHashMap<>();
         return new ClassVisitor(api, parent) {
 
             @Override
@@ -58,10 +57,10 @@ public interface MethodRewriteRule extends RewriteRule {
                         if (MethodRewriteRule.this.shouldProcess(context, opcode, owner, name, descriptor, isInterface)) {
                             final ClassDesc methodOwner = fromOwner(owner);
                             final MethodTypeDesc methodDesc = methodDesc(descriptor);
-                            final @Nullable Rewrite rewrite = MethodRewriteRule.this.rewrite(context, false, opcode, methodOwner, name, methodDesc, isInterface);
+                            final @Nullable Rewrite<?> rewrite = MethodRewriteRule.this.rewrite(context, false, opcode, methodOwner, name, methodDesc, isInterface);
                             if (rewrite != null) {
                                 rewrite.apply(this.getDelegate(), mn);
-                                final @Nullable MethodGenerator willGenerate = rewrite.createFactory();
+                                final @Nullable MethodGenerator willGenerate = rewrite.createMethodGenerator();
                                 if (willGenerate != null) {
                                     methodsToGenerate.put(new MethodKey(owner, name, methodDesc), willGenerate);
                                 }
@@ -77,10 +76,10 @@ public interface MethodRewriteRule extends RewriteRule {
                             if (MethodRewriteRule.this.shouldProcess(context, handle.getTag(), handle.getOwner(), handle.getName(), handle.getDesc(), handle.isInterface())) {
                                 final ClassDesc handleOwner = fromOwner(handle.getOwner());
                                 final MethodTypeDesc handleDesc = methodDesc(handle.getDesc());
-                                final @Nullable Rewrite rewrite = MethodRewriteRule.this.rewrite(context, true, handle.getTag(), handleOwner, handle.getName(), handleDesc, handle.isInterface());
+                                final @Nullable Rewrite<?> rewrite = MethodRewriteRule.this.rewrite(context, true, handle.getTag(), handleOwner, handle.getName(), handleDesc, handle.isInterface());
                                 if (rewrite != null) {
                                     bootstrapMethodArguments[1] = rewrite.createHandle();
-                                    final @Nullable MethodGenerator willGenerate = rewrite.createFactory();
+                                    final @Nullable MethodGenerator willGenerate = rewrite.createMethodGenerator();
                                     if (willGenerate != null) {
                                         methodsToGenerate.put(new MethodKey(handle.getOwner(), handle.getName(), handleDesc), willGenerate);
                                     }
@@ -112,33 +111,22 @@ public interface MethodRewriteRule extends RewriteRule {
         };
     }
 
-    @Nullable Rewrite rewrite(ClassProcessingContext context, boolean isInvokeDynamic, int opcode, ClassDesc owner, String name, MethodTypeDesc descriptor, boolean isInterface);
+    @Nullable Rewrite<?> rewrite(ClassProcessingContext context, boolean isInvokeDynamic, int opcode, ClassDesc owner, String name, MethodTypeDesc descriptor, boolean isInterface);
 
-    interface Rewrite {
+    interface Rewrite<D extends GeneratedMethodHolder.CallData> {
 
         void apply(MethodVisitor delegate, MethodNode context);
 
         Handle createHandle();
 
-        @Nullable MethodGeneratorFactory methodGeneratorFactory();
+        Rewrite<D> withGeneratorInfo(GeneratedMethodHolder holder, D original);
 
-        default @Nullable MethodGenerator createFactory() {
-            final @Nullable MethodGeneratorFactory factoryFactory = this.methodGeneratorFactory();
-            if (factoryFactory != null) {
-                return factory -> factoryFactory.create(this.createModifiedData()).generate(factory);
-            }
-            return null;
-        }
+        Rewrite<D> withName(String name);
 
-        GeneratedMethodHolder.MethodCallData createModifiedData();
-
-        Rewrite withFactory(MethodGeneratorFactory factoryFactory);
+        @Nullable MethodGenerator createMethodGenerator();
     }
 
-    @FunctionalInterface
-    interface MethodGeneratorFactory {
-
-        MethodGenerator create(GeneratedMethodHolder.MethodCallData modifiedCall);
+    record GeneratorInfo<D extends GeneratedMethodHolder.CallData>(GeneratedMethodHolder holder, D original) {
     }
 
     @FunctionalInterface
@@ -147,7 +135,18 @@ public interface MethodRewriteRule extends RewriteRule {
         void generate(GeneratorAdapterFactory factory);
     }
 
-    record RewriteSingle(int opcode, ClassDesc owner, String name, MethodTypeDesc descriptor, boolean isInterface, boolean isInvokeDynamic, @Nullable MethodGeneratorFactory methodGeneratorFactory) implements Rewrite {
+    /**
+     * Holds the structure of the rewritten method that replaces a matching method found in the bytecode.
+     *
+     * @param opcode the replaced opcode
+     * @param owner the replaced owner
+     * @param name the replaced name
+     * @param descriptor the replaced descriptor
+     * @param isInterface if the replaced method is an interface method
+     * @param isInvokeDynamic if the replaced method is an invokedynamic
+     * @param generatorInfo info for generating the method (optional)
+     */
+    record RewriteSingle(int opcode, ClassDesc owner, String name, MethodTypeDesc descriptor, boolean isInterface, boolean isInvokeDynamic, @Nullable GeneratorInfo<GeneratedMethodHolder.MethodCallData> generatorInfo) implements Rewrite<GeneratedMethodHolder.MethodCallData> {
 
         public RewriteSingle(final int opcode, final ClassDesc owner, final String name, final MethodTypeDesc descriptor, final boolean isInterface, final boolean isInvokeDynamic) {
             this(opcode, owner, name, descriptor, isInterface, isInvokeDynamic, null);
@@ -164,14 +163,28 @@ public interface MethodRewriteRule extends RewriteRule {
         }
 
         @Override
-        public GeneratedMethodHolder.MethodCallData createModifiedData() {
-            return new GeneratedMethodHolder.MethodCallData(Opcodes.INVOKESTATIC, this.owner(), this.name(), this.descriptor(), this.isInvokeDynamic());
+        public Rewrite<GeneratedMethodHolder.MethodCallData> withName(final String name) {
+            return new RewriteSingle(this.opcode(), this.owner(), name, this.descriptor(), this.isInterface(), this.isInvokeDynamic(), this.generatorInfo());
         }
 
         @Override
-        public Rewrite withFactory(final MethodGeneratorFactory factoryFactory) {
-            return new RewriteSingle(this.opcode(), this.owner(), this.name(), this.descriptor(), this.isInterface(), this.isInvokeDynamic(), factoryFactory);
+        public Rewrite<GeneratedMethodHolder.MethodCallData> withGeneratorInfo(final GeneratedMethodHolder holder, final GeneratedMethodHolder.MethodCallData original) {
+            return new RewriteSingle(this.opcode(), this.owner(), this.name(), this.descriptor(), this.isInterface(), this.isInvokeDynamic(), new GeneratorInfo<>(holder, original));
+        }
+
+        @Override
+        public @Nullable MethodGenerator createMethodGenerator() {
+            if (this.generatorInfo == null) {
+                return null;
+            }
+            final GeneratedMethodHolder.MethodCallData original = this.generatorInfo.original();
+            return factory -> {
+                this.generatorInfo.holder().generateMethod(
+                    factory,
+                    new GeneratedMethodHolder.MethodCallData(Opcodes.INVOKESTATIC, this.owner(), this.name(), this.descriptor(), this.isInvokeDynamic()),
+                    original
+                );
+            };
         }
     }
-
 }

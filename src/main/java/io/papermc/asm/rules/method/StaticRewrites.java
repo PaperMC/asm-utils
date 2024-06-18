@@ -32,6 +32,14 @@ public final class StaticRewrites {
             // We need to replace the parameters in the bytecode descriptor that match the target with the fuzzy param
             return replaceParameters(intermediateDescriptor, isEqual(this.methodMatcher().targetType()), OBJECT_DESC);
         }
+
+        @Override
+        public MethodTypeDesc transformInvokedDescriptor(final MethodTypeDesc original, final Set<Integer> context) {
+            // The "original" has already been made fuzzy by replacing specific params with Object.
+            // To create the generated method descriptor from the descriptor, we replace the
+            // fuzzy type with the fuzzy param
+            return replaceParameters(original, isEqual(OBJECT_DESC), this.existingType(), context);
+        }
     }
 
     // Uses the methodMatcher against bytecode from plugins. Any matching descriptors will have their name/owner changed to point towards a

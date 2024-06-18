@@ -43,4 +43,16 @@ public class Methods {
         System.out.println(pos.getClass());
         return true;
     }
+
+    public boolean consumePos(final Position position) {
+        position.position();
+        System.out.println(position.getClass());
+        return true;
+    }
+
+    public static boolean consumePosStatic(final Position position) {
+        position.position();
+        System.out.println(position.getClass());
+        return true;
+    }
 }

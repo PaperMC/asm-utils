@@ -42,7 +42,7 @@ public final class DefineClassRule implements MethodRewriteRule {
     // extend (S)CL. However since the MethodHandles.Lookup portion always needs to run, the actual benefit would
     // be beyond minute (if not actually worse).
     @Override
-    public @Nullable Rewrite rewrite(
+    public @Nullable Rewrite<?> rewrite(
         final ClassProcessingContext context,
         final boolean isInvokeDynamic,
         final int opcode,
@@ -74,7 +74,7 @@ public final class DefineClassRule implements MethodRewriteRule {
         return null;
     }
 
-    private MethodRewriteRule.Rewrite classLoaderRewrite(final boolean isInvokeDynamic, final String name, MethodTypeDesc descriptor) {
+    private MethodRewriteRule.Rewrite<?> classLoaderRewrite(final boolean isInvokeDynamic, final String name, MethodTypeDesc descriptor) {
         descriptor = descriptor.insertParameterTypes(0, fromOwner("java/lang/Object"));
         return new RewriteSingle(staticOp(isInvokeDynamic), this.proxy, name, descriptor, false, isInvokeDynamic);
     }

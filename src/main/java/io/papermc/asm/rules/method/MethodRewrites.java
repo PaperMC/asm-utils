@@ -31,7 +31,7 @@ public final class MethodRewrites {
     public record SuperTypeParam(Set<Class<?>> owners, MethodMatcher methodMatcher, ClassDesc oldParamType, ClassDesc newParamType) implements FilteredMethodRewriteRule {
 
         @Override
-        public Rewrite rewrite(final ClassProcessingContext context, final boolean isInvokeDynamic, final int opcode, final ClassDesc owner, final String name, final MethodTypeDesc descriptor, final boolean isInterface) {
+        public Rewrite<?> rewrite(final ClassProcessingContext context, final boolean isInvokeDynamic, final int opcode, final ClassDesc owner, final String name, final MethodTypeDesc descriptor, final boolean isInterface) {
             return new RewriteSingle(opcode, owner, name, this.modifyMethodDescriptor(descriptor), isInterface, isInvokeDynamic);
         }
 
@@ -52,7 +52,7 @@ public final class MethodRewrites {
     public record SubTypeReturn(Set<Class<?>> owners, MethodMatcher methodMatcher, ClassDesc oldReturnType, ClassDesc newReturnType) implements FilteredMethodRewriteRule {
 
         @Override
-        public @Nullable Rewrite rewrite(final ClassProcessingContext context, final boolean isInvokeDynamic, final int opcode, final ClassDesc owner, final String name, final MethodTypeDesc descriptor, final boolean isInterface) {
+        public @Nullable Rewrite<?> rewrite(final ClassProcessingContext context, final boolean isInvokeDynamic, final int opcode, final ClassDesc owner, final String name, final MethodTypeDesc descriptor, final boolean isInterface) {
             if (!descriptor.returnType().equals(this.newReturnType())) {
                 return new RewriteSingle(opcode, owner, name, this.modifyMethodDescriptor(descriptor), isInterface, isInvokeDynamic);
             }

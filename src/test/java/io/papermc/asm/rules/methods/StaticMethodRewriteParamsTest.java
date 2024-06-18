@@ -45,4 +45,17 @@ class StaticMethodRewriteParamsTest {
         });
         check.run(rule);
     }
+
+    @TransformerTest("data/methods/statics/param/ParamFuzzyUser")
+    void testParamFuzzyStaticRewrite(final TransformerCheck check) throws NoSuchMethodException {
+        final Method handler = Redirects.class.getDeclaredMethod("toPositionFuzzy", Object.class);
+        final RewriteRule rule = RewriteRule.forOwner(Methods.class, builder -> {
+            builder.changeParamFuzzy(
+                POSITION,
+                handler,
+                b -> b.names("consumePos", "consumePosStatic").containsParam(POSITION)
+            );
+        });
+        check.run(rule);
+    }
 }

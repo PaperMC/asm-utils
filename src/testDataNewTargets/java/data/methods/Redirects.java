@@ -29,6 +29,15 @@ public final class Redirects {
         return new Location(input.x(), input.y(), input.z(), "ctx=" + methods + " wrapped");
     }
 
+    public static Position toPositionFuzzy(final Object maybeLocation) {
+        if (maybeLocation instanceof final Position pos) {
+            System.out.println("was pos");
+            return pos;
+        }
+        System.out.println("was not pos");
+        return toPosition((Location) maybeLocation);
+    }
+
     public static void wrapObject(final Object object) {
     }
 }

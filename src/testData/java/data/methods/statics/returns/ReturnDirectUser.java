@@ -1,4 +1,4 @@
-package data.methods.statics;
+package data.methods.statics.returns;
 
 import data.methods.Methods;
 import data.types.hierarchy.loc.Location;

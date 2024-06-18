@@ -31,6 +31,7 @@ import static java.util.function.Predicate.isEqual;
 public interface StaticRewrite extends FilteredMethodRewriteRule {
 
     String CONSTRUCTOR_METHOD_NAME = "<init>";
+    String GENERATED_PREFIX = "paperAsmGenerated$";
 
     ClassDesc staticRedirectOwner(final ClassProcessingContext context);
 
@@ -49,16 +50,16 @@ public interface StaticRewrite extends FilteredMethodRewriteRule {
         return intermediateDescriptor;
     }
 
-    default Rewrite createRewrite(final ClassProcessingContext context, final MethodTypeDesc descriptor, final GeneratedMethodHolder.MethodCallData callData) {
-        return new RewriteSingle(staticOp(callData.isInvokeDynamic()), this.staticRedirectOwner(context), callData.name(), this.transformToRedirectDescriptor(descriptor), false, callData.isInvokeDynamic());
+    default Rewrite<GeneratedMethodHolder.MethodCallData> createRewrite(final ClassProcessingContext context, final MethodTypeDesc descriptor, final GeneratedMethodHolder.MethodCallData originalCallData) {
+        return new RewriteSingle(staticOp(originalCallData.isInvokeDynamic()), this.staticRedirectOwner(context), originalCallData.name(), this.transformToRedirectDescriptor(descriptor), false, originalCallData.isInvokeDynamic());
     }
 
-    default Rewrite createConstructorRewrite(final ClassProcessingContext context, final String name, final MethodTypeDesc descriptor, final GeneratedMethodHolder.ConstructorCallData callData) {
-        return new RewriteConstructor(this.staticRedirectOwner(context), toOwner(callData.owner()), name, this.transformToRedirectDescriptor(descriptor));
+    default Rewrite<GeneratedMethodHolder.ConstructorCallData> createConstructorRewrite(final ClassProcessingContext context, final String name, final MethodTypeDesc descriptor, final GeneratedMethodHolder.ConstructorCallData originalCallData) {
+        return new RewriteConstructor(this.staticRedirectOwner(context), toOwner(originalCallData.owner()), name, this.transformToRedirectDescriptor(descriptor));
     }
 
     @Override
-    default @Nullable Rewrite rewrite(final ClassProcessingContext context, final boolean isInvokeDynamic, final int opcode, final ClassDesc owner, final String name, final MethodTypeDesc descriptor, final boolean isInterface) {
+    default @Nullable Rewrite<?> rewrite(final ClassProcessingContext context, final boolean isInvokeDynamic, final int opcode, final ClassDesc owner, final String name, final MethodTypeDesc descriptor, final boolean isInterface) {
         MethodTypeDesc modifiedDescriptor = descriptor;
         if (isVirtual(opcode, isInvokeDynamic) || isInterface(opcode, isInvokeDynamic)) { // insert owner object as first param
             modifiedDescriptor = modifiedDescriptor.insertParameterTypes(0, owner);
@@ -77,7 +78,7 @@ public interface StaticRewrite extends FilteredMethodRewriteRule {
         return this.createRewrite(context, modifiedDescriptor, new GeneratedMethodHolder.MethodCallData(opcode, owner, name, descriptor, isInvokeDynamic));
     }
 
-    record RewriteConstructor(ClassDesc staticRedirectOwner, String constructorOwner, String methodName, MethodTypeDesc descriptor, @Nullable MethodGeneratorFactory methodGeneratorFactory) implements MethodRewriteRule.Rewrite {
+    record RewriteConstructor(ClassDesc staticRedirectOwner, String constructorOwner, String methodName, MethodTypeDesc descriptor, @Nullable GeneratorInfo<GeneratedMethodHolder.ConstructorCallData> generatorInfo) implements MethodRewriteRule.Rewrite<GeneratedMethodHolder.ConstructorCallData> {
 
         public RewriteConstructor(final ClassDesc staticRedirectOwner, final String constructorOwner, final String methodName, final MethodTypeDesc descriptor) {
             this(staticRedirectOwner, constructorOwner, methodName, descriptor, null);
@@ -126,13 +127,28 @@ public interface StaticRewrite extends FilteredMethodRewriteRule {
         }
 
         @Override
-        public GeneratedMethodHolder.MethodCallData createModifiedData() {
-            return new GeneratedMethodHolder.MethodCallData(Opcodes.INVOKESTATIC, this.staticRedirectOwner(), this.methodName(), this.descriptor(), false);
+        public Rewrite<GeneratedMethodHolder.ConstructorCallData> withName(final String name) {
+            return new RewriteConstructor(this.staticRedirectOwner(), this.constructorOwner(), name, this.descriptor(), this.generatorInfo());
         }
 
         @Override
-        public Rewrite withFactory(final MethodGeneratorFactory factoryFactory) {
-            return new RewriteConstructor(this.staticRedirectOwner(), this.constructorOwner(), this.methodName(), this.descriptor(), factoryFactory);
+        public Rewrite<GeneratedMethodHolder.ConstructorCallData> withGeneratorInfo(final GeneratedMethodHolder holder, final GeneratedMethodHolder.ConstructorCallData original) {
+            return new RewriteConstructor(this.staticRedirectOwner(), this.constructorOwner(), this.methodName(), this.descriptor(), new GeneratorInfo<>(holder, original));
+        }
+
+        @Override
+        public @Nullable MethodGenerator createMethodGenerator() {
+            if (this.generatorInfo == null) {
+                return null;
+            }
+            final GeneratedMethodHolder.ConstructorCallData original = this.generatorInfo.original();
+            return factory -> {
+                this.generatorInfo.holder().generateConstructor(
+                    factory,
+                    new GeneratedMethodHolder.MethodCallData(Opcodes.INVOKESTATIC, this.staticRedirectOwner(), this.methodName(), this.descriptor(), false),
+                    original
+                );
+            };
         }
     }
 
@@ -158,17 +174,17 @@ public interface StaticRewrite extends FilteredMethodRewriteRule {
         }
 
         @Override
-        default Rewrite createRewrite(final ClassProcessingContext context, final MethodTypeDesc descriptor, final MethodCallData callData) {
-            return StaticRewrite.super.createRewrite(context, descriptor, callData).withFactory(modified -> {
-                return factory -> this.generateMethod(factory, modified, callData);
-            });
+        default Rewrite<MethodCallData> createRewrite(final ClassProcessingContext context, final MethodTypeDesc descriptor, final MethodCallData originalCallData) {
+            return StaticRewrite.super.createRewrite(context, descriptor, originalCallData)
+                .withName(GENERATED_PREFIX + originalCallData.name())
+                .withGeneratorInfo(this, originalCallData);
         }
 
         @Override
-        default Rewrite createConstructorRewrite(final ClassProcessingContext context, final String name, final MethodTypeDesc descriptor, final ConstructorCallData callData) {
-            return StaticRewrite.super.createConstructorRewrite(context, name, descriptor, callData).withFactory(modified -> {
-                return factory -> this.generateConstructor(factory, modified, callData);
-            });
+        default Rewrite<ConstructorCallData> createConstructorRewrite(final ClassProcessingContext context, final String name, final MethodTypeDesc descriptor, final ConstructorCallData originalCallData) {
+            return StaticRewrite.super.createConstructorRewrite(context, name, descriptor, originalCallData)
+                .withName(GENERATED_PREFIX + name)
+                .withGeneratorInfo(this, originalCallData);
         }
 
         interface Param extends Generated, StaticRewriteGeneratedMethodHolder.Param {
@@ -176,7 +192,7 @@ public interface StaticRewrite extends FilteredMethodRewriteRule {
             @Override
             default MethodTypeDesc transformInvokedDescriptor(final MethodTypeDesc original, final Set<Integer> context) {
                 // To create the generated method descriptor from the existing (in source) descriptor, we replace the
-                // existing type with the fuzzy param
+                // legacy param with the new param
                 return replaceParameters(original, isEqual(this.methodMatcher().targetType()), this.existingType(), context);
             }
         }

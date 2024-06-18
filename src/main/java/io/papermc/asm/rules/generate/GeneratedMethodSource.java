@@ -17,11 +17,13 @@ import static io.papermc.asm.util.OpcodeUtils.isVirtual;
 public interface GeneratedMethodSource<C> extends GeneratedMethodHolder {
 
     /**
-     * Modifies the descriptor for the actual method for the generated method.
+     * Transforms the descriptor of the generated method to the descriptor
+     * of the method that will be called within the generated method. This
+     * should be the method that actually exists in source.
      *
-     * @param original the original method descriptor from plugin bytecode
+     * @param original the method descriptor of the generated method that the bytecode was redirected to
      * @param context context for the generator
-     * @return the modified descriptor
+     * @return the descriptor of the method that will be called inside the generated method
      */
     MethodTypeDesc transformInvokedDescriptor(final MethodTypeDesc original, final C context);
 

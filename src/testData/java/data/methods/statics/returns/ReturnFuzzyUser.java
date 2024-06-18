@@ -1,7 +1,4 @@
-package data.methods.statics;
-
-import data.methods.Methods;
-import data.types.hierarchy.Entity;
+package data.methods.statics.returns;
 
 @SuppressWarnings("unused")
 final class ReturnFuzzyUser {
