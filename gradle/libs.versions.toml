@@ -1,0 +1,19 @@
+[versions]
+asm = "9.6"
+junit = "5.10.2"
+indra = "3.1.3"
+
+[libraries]
+asm = { module = "org.ow2.asm:asm", version.ref = "asm" }
+asmCommons = { module = "org.ow2.asm:asm-commons", version.ref = "asm" }
+checkerQual = "org.checkerframework:checker-qual:3.43.0"
+
+jupiterApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
+jupiterEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+jupiterParams = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit" }
+
+[plugins]
+indra = { id = "net.kyori.indra", version.ref = "indra" }
+indraCheckstyle = { id = "net.kyori.indra.checkstyle", version.ref = "indra" }
+indraPublishing = { id = "net.kyori.indra.publishing", version.ref = "indra" }
+javadocLinks = { id = "org.incendo.cloud-build-logic.javadoc-links", version = "0.0.15" }
