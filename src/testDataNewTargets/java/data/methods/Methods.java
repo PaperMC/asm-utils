@@ -2,7 +2,6 @@ package data.methods;
 
 import data.types.hierarchy.Entity;
 import data.types.hierarchy.Player;
-import data.types.hierarchy.loc.Location;
 import data.types.hierarchy.loc.Position;
 import data.types.hierarchy.loc.PositionImpl;
 

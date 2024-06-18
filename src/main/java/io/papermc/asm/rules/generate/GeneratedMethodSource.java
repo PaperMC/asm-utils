@@ -2,7 +2,6 @@ package io.papermc.asm.rules.generate;
 
 import io.papermc.asm.rules.RewriteRule;
 import io.papermc.asm.rules.method.StaticRewrite;
-import io.papermc.asm.util.OpcodeUtils;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
 import org.objectweb.asm.Opcodes;

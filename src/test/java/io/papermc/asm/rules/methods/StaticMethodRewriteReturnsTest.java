@@ -2,8 +2,6 @@ package io.papermc.asm.rules.methods;
 
 import data.methods.Methods;
 import data.methods.Redirects;
-import data.types.hierarchy.Entity;
-import data.types.hierarchy.Player;
 import data.types.hierarchy.loc.Location;
 import data.types.hierarchy.loc.Position;
 import io.papermc.asm.TransformerTest;
@@ -16,6 +14,7 @@ class StaticMethodRewriteReturnsTest {
 
     static final ClassDesc LOCATION = Location.class.describeConstable().orElseThrow();
     static final ClassDesc POSITION = Position.class.describeConstable().orElseThrow();
+
     @TransformerTest("data/methods/statics/returns/ReturnDirectUser")
     void testReturnDirectStaticRewrite(final TransformerCheck check) throws NoSuchMethodException {
         final Method handler = Redirects.class.getDeclaredMethod("wrapPosition", Position.class);

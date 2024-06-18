@@ -42,6 +42,7 @@ public interface StaticRewrite extends FilteredMethodRewriteRule {
      * Intermediate means that it has been modified from the
      * original accounting for the virtual/interface/static/constructor-ness
      * of the method call.
+     * </p>
      *
      * @param intermediateDescriptor the intermediate descriptor
      * @return the final descriptor to be used in the rewritten bytecode

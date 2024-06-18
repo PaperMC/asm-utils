@@ -40,4 +40,7 @@ public final class Redirects {
 
     public static void wrapObject(final Object object) {
     }
+
+    private Redirects() {
+    }
 }

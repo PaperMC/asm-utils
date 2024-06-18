@@ -1,13 +1,8 @@
 package io.papermc.asm.rules.builder;
 
 import io.papermc.asm.rules.builder.matcher.MethodMatcher;
-import io.papermc.asm.rules.builder.matcher.TargetedMethodMatcher;
-import java.lang.constant.ClassDesc;
-import java.lang.reflect.Method;
 import java.util.Set;
 import java.util.function.Consumer;
-
-import static io.papermc.asm.util.DescriptorUtils.desc;
 
 public interface ConfiguredRuleFactory extends RuleFactory {
 
