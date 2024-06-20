@@ -121,7 +121,7 @@ public interface MethodRewriteRule extends RewriteRule {
 
         Rewrite<D> withGeneratorInfo(GeneratedMethodHolder holder, D original);
 
-        Rewrite<D> withName(String name);
+        Rewrite<D> withNamePrefix(String prefix);
 
         @Nullable MethodGenerator createMethodGenerator();
     }
@@ -163,8 +163,8 @@ public interface MethodRewriteRule extends RewriteRule {
         }
 
         @Override
-        public Rewrite<GeneratedMethodHolder.MethodCallData> withName(final String name) {
-            return new RewriteSingle(this.opcode(), this.owner(), name, this.descriptor(), this.isInterface(), this.isInvokeDynamic(), this.generatorInfo());
+        public Rewrite<GeneratedMethodHolder.MethodCallData> withNamePrefix(final String prefix) {
+            return new RewriteSingle(this.opcode(), this.owner(), prefix + this.name(), this.descriptor(), this.isInterface(), this.isInvokeDynamic(), this.generatorInfo());
         }
 
         @Override

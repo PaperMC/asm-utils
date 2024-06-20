@@ -70,7 +70,7 @@ public interface RuleFactory {
 
     void changeReturnTypeDirectWithContext(ClassDesc newReturnType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
 
-    void changeFieldToMethod(FieldMatcher fieldMatcher, @Nullable String getterName, @Nullable String setterName, boolean isInterfaceMethod);
+    void changeFieldToMethod(Consumer<? super FieldMatcher.Builder> builderConsumer, @Nullable String getterName, @Nullable String setterName, boolean isInterfaceMethod);
 
     void addRule(RewriteRule rule);
 

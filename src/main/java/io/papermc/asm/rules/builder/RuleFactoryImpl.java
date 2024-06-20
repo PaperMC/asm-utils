@@ -74,8 +74,8 @@ class RuleFactoryImpl implements RuleFactory {
     }
 
     @Override
-    public void changeFieldToMethod(final FieldMatcher fieldMatcher, final @Nullable String getterName, final @Nullable String setterName, final boolean isInterfaceMethod) {
-        this.addRule(new FieldRewrites.ToMethodSameOwner(this.owners, fieldMatcher, getterName, setterName, isInterfaceMethod));
+    public void changeFieldToMethod(final Consumer<? super FieldMatcher.Builder> builderConsumer, final @Nullable String getterName, final @Nullable String setterName, final boolean isInterfaceMethod) {
+        this.addRule(new FieldRewrites.ToMethodSameOwner(this.owners, build(builderConsumer, FieldMatcher::builder), getterName, setterName, isInterfaceMethod));
     }
 
     @Override

@@ -51,12 +51,30 @@ public interface StaticRewrite extends FilteredMethodRewriteRule {
         return intermediateDescriptor;
     }
 
-    default Rewrite<GeneratedMethodHolder.MethodCallData> createRewrite(final ClassProcessingContext context, final MethodTypeDesc descriptor, final GeneratedMethodHolder.MethodCallData originalCallData) {
-        return new RewriteSingle(staticOp(originalCallData.isInvokeDynamic()), this.staticRedirectOwner(context), originalCallData.name(), this.transformToRedirectDescriptor(descriptor), false, originalCallData.isInvokeDynamic());
+    /**
+     * Creates a rewrite for the given method call data.
+     *
+     * @param context the context
+     * @param intermediateDescriptor the descriptor modified from the original to account for the method call type (interface, virtual, static, etc.)
+     * @param originalCallData the original method call data
+     * @return the rewrite
+     */
+    default Rewrite<GeneratedMethodHolder.MethodCallData> createRewrite(final ClassProcessingContext context, final MethodTypeDesc intermediateDescriptor, final GeneratedMethodHolder.MethodCallData originalCallData) {
+        return new RewriteSingle(staticOp(originalCallData.isInvokeDynamic()), this.staticRedirectOwner(context), originalCallData.name(), this.transformToRedirectDescriptor(intermediateDescriptor), false, originalCallData.isInvokeDynamic());
     }
 
-    default Rewrite<GeneratedMethodHolder.ConstructorCallData> createConstructorRewrite(final ClassProcessingContext context, final String name, final MethodTypeDesc descriptor, final GeneratedMethodHolder.ConstructorCallData originalCallData) {
-        return new RewriteConstructor(this.staticRedirectOwner(context), toOwner(originalCallData.owner()), name, this.transformToRedirectDescriptor(descriptor));
+    /**
+     * Creates a rewrite for the given constructor call data.
+     *
+     * @param context the context
+     * @param intermediateDescriptor the descriptor modified from the original to include a return type
+     * @param originalCallData the original constructor call data
+     * @return the rewrite
+     */
+    default Rewrite<GeneratedMethodHolder.ConstructorCallData> createConstructorRewrite(final ClassProcessingContext context, final MethodTypeDesc intermediateDescriptor, final GeneratedMethodHolder.ConstructorCallData originalCallData) {
+        final String ownerString = toOwner(originalCallData.owner());
+        final String staticMethodName = "create" + ownerString.substring(ownerString.lastIndexOf('/') + 1);
+        return new RewriteConstructor(this.staticRedirectOwner(context), toOwner(originalCallData.owner()), staticMethodName, this.transformToRedirectDescriptor(intermediateDescriptor));
     }
 
     @Override
@@ -66,10 +84,8 @@ public interface StaticRewrite extends FilteredMethodRewriteRule {
             modifiedDescriptor = modifiedDescriptor.insertParameterTypes(0, owner);
         } else if (isSpecial(opcode, isInvokeDynamic)) {
             if (CONSTRUCTOR_METHOD_NAME.equals(name)) {
-                final String ownerString = toOwner(owner);
-                final String newName = "create" + ownerString.substring(ownerString.lastIndexOf('/') + 1);
                 modifiedDescriptor = modifiedDescriptor.changeReturnType(owner);
-                return this.createConstructorRewrite(context, newName, modifiedDescriptor, new GeneratedMethodHolder.ConstructorCallData(opcode, owner, descriptor));
+                return this.createConstructorRewrite(context, modifiedDescriptor, new GeneratedMethodHolder.ConstructorCallData(opcode, owner, descriptor));
             } else {
                 throw new UnsupportedOperationException("Unhandled static rewrite: " + opcode + " " + owner + " " + name + " " + descriptor);
             }
@@ -87,15 +103,22 @@ public interface StaticRewrite extends FilteredMethodRewriteRule {
 
         @Override
         public void apply(final MethodVisitor delegate, final MethodNode context) {
+            // the bytecode instruction sequence for constructors is:
+            // NEW <owner>
+            // DUP
+            // <other instructions that might set up parameters>
+            // INVOKESPECIAL <owner>/<init>
+            // This detects that pattern and correctly removes instructions that
+            // are no longer needed after the static redirect
             AbstractInsnNode insn = context.instructions.getLast();
-            boolean wasDup = false;
+            boolean lastInsnWasDup = false;
             boolean handled = false;
             final Deque<String> typeStack = new ArrayDeque<>();
             while (insn != null) {
                 if (insn.getOpcode() == Opcodes.INVOKESPECIAL && CONSTRUCTOR_METHOD_NAME.equals(((MethodInsnNode) insn).name)) {
                     typeStack.push(((MethodInsnNode) insn).owner);
                 }
-                if (wasDup && insn.getOpcode() == Opcodes.NEW) {
+                if (lastInsnWasDup && insn.getOpcode() == Opcodes.NEW) {
                     final TypeInsnNode newNode = (TypeInsnNode) insn;
                     if (typeStack.isEmpty()) {
                         if (!newNode.desc.equals(this.constructorOwner())) {
@@ -113,7 +136,7 @@ public interface StaticRewrite extends FilteredMethodRewriteRule {
                         }
                     }
                 }
-                wasDup = insn.getOpcode() == Opcodes.DUP;
+                lastInsnWasDup = insn.getOpcode() == Opcodes.DUP;
                 insn = insn.getPrevious();
             }
             if (!handled) {
@@ -128,8 +151,8 @@ public interface StaticRewrite extends FilteredMethodRewriteRule {
         }
 
         @Override
-        public Rewrite<GeneratedMethodHolder.ConstructorCallData> withName(final String name) {
-            return new RewriteConstructor(this.staticRedirectOwner(), this.constructorOwner(), name, this.descriptor(), this.generatorInfo());
+        public Rewrite<GeneratedMethodHolder.ConstructorCallData> withNamePrefix(final String prefix) {
+            return new RewriteConstructor(this.staticRedirectOwner(), this.constructorOwner(), prefix + this.methodName(), this.descriptor(), this.generatorInfo());
         }
 
         @Override
@@ -175,16 +198,16 @@ public interface StaticRewrite extends FilteredMethodRewriteRule {
         }
 
         @Override
-        default Rewrite<MethodCallData> createRewrite(final ClassProcessingContext context, final MethodTypeDesc descriptor, final MethodCallData originalCallData) {
-            return StaticRewrite.super.createRewrite(context, descriptor, originalCallData)
-                .withName(GENERATED_PREFIX + originalCallData.name())
+        default Rewrite<MethodCallData> createRewrite(final ClassProcessingContext context, final MethodTypeDesc intermediateDescriptor, final MethodCallData originalCallData) {
+            return StaticRewrite.super.createRewrite(context, intermediateDescriptor, originalCallData)
+                .withNamePrefix(GENERATED_PREFIX)
                 .withGeneratorInfo(this, originalCallData);
         }
 
         @Override
-        default Rewrite<ConstructorCallData> createConstructorRewrite(final ClassProcessingContext context, final String name, final MethodTypeDesc descriptor, final ConstructorCallData originalCallData) {
-            return StaticRewrite.super.createConstructorRewrite(context, name, descriptor, originalCallData)
-                .withName(GENERATED_PREFIX + name)
+        default Rewrite<ConstructorCallData> createConstructorRewrite(final ClassProcessingContext context, final MethodTypeDesc intermediateDescriptor, final ConstructorCallData originalCallData) {
+            return StaticRewrite.super.createConstructorRewrite(context, intermediateDescriptor, originalCallData)
+                .withNamePrefix(GENERATED_PREFIX)
                 .withGeneratorInfo(this, originalCallData);
         }
 
