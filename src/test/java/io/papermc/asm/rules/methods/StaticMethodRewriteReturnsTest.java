@@ -18,7 +18,7 @@ class StaticMethodRewriteReturnsTest {
     @TransformerTest("data/methods/statics/returns/ReturnDirectUser")
     void testReturnDirectStaticRewrite(final TransformerCheck check) throws NoSuchMethodException {
         final Method handler = Redirects.class.getDeclaredMethod("wrapPosition", Position.class);
-        final RewriteRule rule = RewriteRule.forOwner(Methods.class, builder -> {
+        final RewriteRule rule = RewriteRule.forOwnerClass(Methods.class, builder -> {
             builder.changeReturnTypeDirect(
                 POSITION,
                 handler,
@@ -31,7 +31,7 @@ class StaticMethodRewriteReturnsTest {
     @TransformerTest("data/methods/statics/returns/ReturnDirectWithContextUser")
     void testReturnDirectWithContextStaticRewrite(final TransformerCheck check) throws NoSuchMethodException {
         final Method handler = Redirects.class.getDeclaredMethod("wrapPositionWithContext", Methods.class, Position.class);
-        final RewriteRule rule = RewriteRule.forOwner(Methods.class, builder -> {
+        final RewriteRule rule = RewriteRule.forOwnerClass(Methods.class, builder -> {
             builder.changeReturnTypeDirectWithContext(
                 POSITION,
                 handler,

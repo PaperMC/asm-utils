@@ -56,7 +56,7 @@ public final class BaseReflectionRules {
     }
 
     private RewriteRule createClassRule() {
-        return RewriteRule.forOwner(Class.class, rf -> {
+        return RewriteRule.forOwnerClass(Class.class, rf -> {
             rf.plainStaticRewrite(this.proxy, b -> b
                 .match("forName").desc("(Ljava/lang/String;)Ljava/lang/Class;")
                 .match("getField", "getDeclaredField").desc("(Ljava/lang/String;)Ljava/lang/reflect/Field;")
@@ -66,7 +66,7 @@ public final class BaseReflectionRules {
     }
 
     private RewriteRule createMethodHandlesLookupRule() {
-        return RewriteRule.forOwner(MethodHandles.Lookup.class, rf -> {
+        return RewriteRule.forOwnerClass(MethodHandles.Lookup.class, rf -> {
             rf.plainStaticRewrite(this.proxy, b -> b
                 .match("findStatic", "findVirtual").desc("(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;")
                 .match("findClass").desc("(Ljava/lang/String;)Ljava/lang/Class;")
@@ -79,7 +79,7 @@ public final class BaseReflectionRules {
     }
 
     private RewriteRule createLamdaMetafactoryRule() {
-        return RewriteRule.forOwner(LambdaMetafactory.class, rf -> {
+        return RewriteRule.forOwnerClass(LambdaMetafactory.class, rf -> {
             rf.plainStaticRewrite(this.proxy, b -> b
                 .match("metafactory").desc("(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;")
                 .match("altMetafactory").desc("(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;[Ljava/lang/Object;)Ljava/lang/invoke/CallSite;")
@@ -88,7 +88,7 @@ public final class BaseReflectionRules {
     }
 
     private RewriteRule createConstantBootstrapsRule() {
-        return RewriteRule.forOwner(ConstantBootstraps.class, rf -> {
+        return RewriteRule.forOwnerClass(ConstantBootstraps.class, rf -> {
             rf.plainStaticRewrite(this.proxy, b -> b
                 .match("getStaticFinal").desc(
                     "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/Class;)Ljava/lang/Object;",
@@ -100,7 +100,7 @@ public final class BaseReflectionRules {
     }
 
     private RewriteRule createMethodTypeRule() {
-        return RewriteRule.forOwner(MethodType.class, rf -> {
+        return RewriteRule.forOwnerClass(MethodType.class, rf -> {
             rf.plainStaticRewrite(this.proxy, b -> b
                 .match("fromMethodDescriptorString").desc("(Ljava/lang/String;Ljava/lang/ClassLoader;)Ljava/lang/invoke/MethodType;")
             );

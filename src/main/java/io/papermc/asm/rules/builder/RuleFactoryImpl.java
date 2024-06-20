@@ -20,10 +20,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 class RuleFactoryImpl implements RuleFactory {
 
-    final Set<Class<?>> owners;
+    final Set<ClassDesc> owners;
     final List<RewriteRule> rules = new ArrayList<>();
 
-    RuleFactoryImpl(final Set<Class<?>> owners) {
+    RuleFactoryImpl(final Set<ClassDesc> owners) {
         this.owners = Set.copyOf(owners);
     }
 

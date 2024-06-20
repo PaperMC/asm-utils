@@ -1,6 +1,7 @@
 package io.papermc.asm.rules.builder;
 
 import io.papermc.asm.rules.builder.matcher.MethodMatcher;
+import java.lang.constant.ClassDesc;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -8,7 +9,7 @@ public class ConfiguredRuleFactoryImpl extends RuleFactoryImpl implements Config
 
     private final RuleFactoryConfiguration config;
 
-    ConfiguredRuleFactoryImpl(final Set<Class<?>> owners, final RuleFactoryConfiguration config) {
+    ConfiguredRuleFactoryImpl(final Set<ClassDesc> owners, final RuleFactoryConfiguration config) {
         super(owners);
         this.config = config;
     }

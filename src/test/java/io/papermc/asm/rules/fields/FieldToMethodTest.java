@@ -14,7 +14,7 @@ class FieldToMethodTest {
 
     @TransformerTest("data/fields/FieldToMethodSameOwnerUser")
     void testFieldToMethodSameOwner(final TransformerCheck check) {
-        final RewriteRule rule = RewriteRule.forOwner(FieldHolder.class, builder -> {
+        final RewriteRule rule = RewriteRule.forOwnerClass(FieldHolder.class, builder -> {
             builder.changeFieldToMethod(
                 b -> b.names("staticField").desc(STRING),
                 "getStaticField", "setStaticField",

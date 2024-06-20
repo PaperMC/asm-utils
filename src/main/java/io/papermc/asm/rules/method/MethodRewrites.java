@@ -28,7 +28,7 @@ public final class MethodRewrites {
      * @param oldParamType the parameter type that will be found in bytecode that needs to be transformed
      * @param newParamType the parameter type that is valid for existing method
      */
-    public record SuperTypeParam(Set<Class<?>> owners, MethodMatcher methodMatcher, ClassDesc oldParamType, ClassDesc newParamType) implements FilteredMethodRewriteRule {
+    public record SuperTypeParam(Set<ClassDesc> owners, MethodMatcher methodMatcher, ClassDesc oldParamType, ClassDesc newParamType) implements OwnableMethodRewriteRule.Filtered {
 
         @Override
         public Rewrite<?> rewrite(final ClassProcessingContext context, final boolean isInvokeDynamic, final int opcode, final ClassDesc owner, final String name, final MethodTypeDesc descriptor, final boolean isInterface) {
@@ -49,7 +49,7 @@ public final class MethodRewrites {
      * @param oldReturnType the return type that will be found in bytecode that needs to be transformed
      * @param newReturnType the return type that is valid for existing method
      */
-    public record SubTypeReturn(Set<Class<?>> owners, MethodMatcher methodMatcher, ClassDesc oldReturnType, ClassDesc newReturnType) implements FilteredMethodRewriteRule {
+    public record SubTypeReturn(Set<ClassDesc> owners, MethodMatcher methodMatcher, ClassDesc oldReturnType, ClassDesc newReturnType) implements OwnableMethodRewriteRule.Filtered {
 
         @Override
         public @Nullable Rewrite<?> rewrite(final ClassProcessingContext context, final boolean isInvokeDynamic, final int opcode, final ClassDesc owner, final String name, final MethodTypeDesc descriptor, final boolean isInterface) {

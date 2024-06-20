@@ -14,7 +14,7 @@ import static io.papermc.asm.util.DescriptorUtils.desc;
 
 public interface RuleFactory {
 
-    static RuleFactory create(final Set<Class<?>> owners) {
+    static RuleFactory create(final Set<ClassDesc> owners) {
         return new RuleFactoryImpl(owners);
     }
 

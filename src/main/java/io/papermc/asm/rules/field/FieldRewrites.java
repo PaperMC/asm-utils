@@ -15,7 +15,7 @@ public final class FieldRewrites {
     private FieldRewrites() {
     }
 
-    public record ToMethodSameOwner(Set<Class<?>> owners, FieldMatcher fieldMatcher, @Nullable String getterName, @Nullable String setterName, boolean isInterfaceMethod) implements FilteredFieldRewriteRule {
+    public record ToMethodSameOwner(Set<ClassDesc> owners, FieldMatcher fieldMatcher, @Nullable String getterName, @Nullable String setterName, boolean isInterfaceMethod) implements FilteredFieldRewriteRule {
 
         public ToMethodSameOwner {
             if (getterName == null && setterName == null) {

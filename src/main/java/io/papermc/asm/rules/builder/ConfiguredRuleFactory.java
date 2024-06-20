@@ -1,12 +1,13 @@
 package io.papermc.asm.rules.builder;
 
 import io.papermc.asm.rules.builder.matcher.MethodMatcher;
+import java.lang.constant.ClassDesc;
 import java.util.Set;
 import java.util.function.Consumer;
 
 public interface ConfiguredRuleFactory extends RuleFactory {
 
-    static ConfiguredRuleFactory create(final Set<Class<?>> owners, final RuleFactoryConfiguration config) {
+    static ConfiguredRuleFactory create(final Set<ClassDesc> owners, final RuleFactoryConfiguration config) {
         return new ConfiguredRuleFactoryImpl(owners, config);
     }
 

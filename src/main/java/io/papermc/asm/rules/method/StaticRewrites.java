@@ -26,7 +26,7 @@ public final class StaticRewrites {
     // a generated method. That generated method descriptor will have targeted params replaced with Object (the fuzzy-ness). The generated method will
     // load all the arguments into the stack but after loading a "legacy" argument, it will invoke the staticHandler to convert it to the new type. Then
     // it will call the target with the new param type and return the result.
-    public record FuzzyParam(Set<Class<?>> owners, ClassDesc existingType, TargetedMethodMatcher methodMatcher, Method staticHandler) implements StaticRewrite.Generated.Param {
+    public record FuzzyParam(Set<ClassDesc> owners, ClassDesc existingType, TargetedMethodMatcher methodMatcher, Method staticHandler) implements StaticRewrite.Generated.Param {
 
         @Override
         public MethodTypeDesc transformToRedirectDescriptor(final MethodTypeDesc intermediateDescriptor) {
@@ -46,19 +46,19 @@ public final class StaticRewrites {
     // Uses the methodMatcher against bytecode from plugins. Any matching descriptors will have their name/owner changed to point towards a
     // generated method with the same descriptor. As the generated method is loading arguments on the stack to prepare for the call to the actual existing method
     // it will call the staticHandler on all parameters that need to be converted.
-    public record DirectParam(Set<Class<?>> owners, ClassDesc existingType, TargetedMethodMatcher methodMatcher, Method staticHandler) implements StaticRewrite.Generated.Param {
+    public record DirectParam(Set<ClassDesc> owners, ClassDesc existingType, TargetedMethodMatcher methodMatcher, Method staticHandler) implements StaticRewrite.Generated.Param {
     }
 
     // Uses the methodMatcher against bytecode from plugins. Any matching descriptors will have the method name/owner changed to point towards
     // a generated method of the same descriptor. That generated method will call the original method and pass the return value
     // to staticHandler. staticHandler will then convert the object to the plugin bytecode's expected type.
-    public record DirectReturn(Set<Class<?>> owners, ClassDesc existingType, TargetedMethodMatcher methodMatcher, Method staticHandler, boolean includeOwnerContext) implements StaticRewrite.Generated.Return {
+    public record DirectReturn(Set<ClassDesc> owners, ClassDesc existingType, TargetedMethodMatcher methodMatcher, Method staticHandler, boolean includeOwnerContext) implements StaticRewrite.Generated.Return {
 
         public DirectReturn {
             if (includeOwnerContext && owners.size() > 1) {
                 throw new IllegalArgumentException("Can't include owner context with multiple owners");
             }
-            final Class<?> owner = owners.iterator().next();
+            final ClassDesc owner = owners.iterator().next();
             if (!desc(staticHandler.getReturnType()).equals(methodMatcher.targetType())) {
                 throw new IllegalArgumentException("Return type of staticHandler doesn't match target from methodMatcher");
             }
@@ -73,7 +73,7 @@ public final class StaticRewrites {
     }
 
     // does a plain static rewrite with exact matching parameters
-    public record Plain(Set<Class<?>> owners, MethodMatcher methodMatcher, ClassDesc staticRedirectOwner) implements StaticRewrite {
+    public record Plain(Set<ClassDesc> owners, MethodMatcher methodMatcher, ClassDesc staticRedirectOwner) implements StaticRewrite {
 
         @Override
         public ClassDesc staticRedirectOwner(final ClassProcessingContext context) {

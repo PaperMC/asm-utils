@@ -4,6 +4,7 @@ import io.papermc.asm.rules.RewriteRule;
 import java.lang.constant.ClassDesc;
 import java.util.Collections;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public interface RuleFactoryConfiguration {
 
@@ -17,11 +18,19 @@ public interface RuleFactoryConfiguration {
 
         RuleFactoryConfiguration configuration();
 
-        default RewriteRule forOwner(final Class<?> owner, final ConfiguredRuleFactory.Factory firstFactoryConsumer, final ConfiguredRuleFactory.Factory ...factoryConsumers) {
+        default RewriteRule forOwnerClass(final Class<?> owner, final ConfiguredRuleFactory.Factory firstFactoryConsumer, final ConfiguredRuleFactory.Factory ...factoryConsumers) {
+            return this.forOwnerClasses(Collections.singleton(owner), firstFactoryConsumer, factoryConsumers);
+        }
+
+        default RewriteRule forOwnerClasses(final Set<Class<?>> owners, final ConfiguredRuleFactory.Factory firstFactoryConsumer, final ConfiguredRuleFactory.Factory ...factoryConsumers) {
+            return this.forOwners(owners.stream().map(c -> c.describeConstable().orElseThrow()).collect(Collectors.toUnmodifiableSet()), firstFactoryConsumer, factoryConsumers);
+        }
+
+        default RewriteRule forOwner(final ClassDesc owner, final ConfiguredRuleFactory.Factory firstFactoryConsumer, final ConfiguredRuleFactory.Factory ...factoryConsumers) {
             return this.forOwners(Collections.singleton(owner), firstFactoryConsumer, factoryConsumers);
         }
 
-        default RewriteRule forOwners(final Set<Class<?>> owners, final ConfiguredRuleFactory.Factory firstFactoryConsumer, final ConfiguredRuleFactory.Factory ...factoryConsumers) {
+        default RewriteRule forOwners(final Set<ClassDesc> owners, final ConfiguredRuleFactory.Factory firstFactoryConsumer, final ConfiguredRuleFactory.Factory ...factoryConsumers) {
             final ConfiguredRuleFactory factory = ConfiguredRuleFactory.create(owners, this.configuration());
             firstFactoryConsumer.accept(factory);
             for (final ConfiguredRuleFactory.Factory factoryConsumer : factoryConsumers) {

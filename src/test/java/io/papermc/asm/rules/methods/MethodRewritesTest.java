@@ -15,7 +15,7 @@ class MethodRewritesTest {
 
     @TransformerTest("data/methods/inplace/SuperTypeParamUser")
     void testSuperTypeParam(final TransformerCheck check) {
-        final RewriteRule rule = RewriteRule.forOwner(Methods.class, builder -> {
+        final RewriteRule rule = RewriteRule.forOwnerClass(Methods.class, builder -> {
             builder.changeParamToSuper(
                 Player.class,
                 Entity.class,
@@ -29,7 +29,7 @@ class MethodRewritesTest {
 
     @TransformerTest("data/methods/inplace/SubTypeReturnUser")
     void testSubTypeReturn(final TransformerCheck check) {
-        final RewriteRule rule = RewriteRule.forOwner(Methods.class, builder -> {
+        final RewriteRule rule = RewriteRule.forOwnerClass(Methods.class, builder -> {
             builder.changeReturnTypeToSub(
                 Entity.class,
                 Player.class,
