@@ -13,6 +13,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
@@ -146,8 +147,9 @@ public interface StaticRewrite extends OwnableMethodRewriteRule.Filtered {
         }
 
         @Override
-        public Handle createHandle() {
-            return new Handle(Opcodes.H_INVOKESTATIC, toOwner(this.staticRedirectOwner()), this.methodName(), this.descriptor().descriptorString(), false);
+        public void applyToBootstrapArguments(final Object[] arguments) {
+            arguments[BOOTSTRAP_HANDLE_IDX] = new Handle(Opcodes.H_INVOKESTATIC, toOwner(this.staticRedirectOwner()), this.methodName(), this.descriptor().descriptorString(), false);
+            arguments[DYNAMIC_TYPE_IDX] = Type.getMethodType(this.descriptor().descriptorString());
         }
 
         @Override

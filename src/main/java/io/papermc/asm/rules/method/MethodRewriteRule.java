@@ -12,6 +12,7 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.tree.MethodNode;
 
@@ -78,7 +79,7 @@ public interface MethodRewriteRule extends RewriteRule {
                                 final MethodTypeDesc handleDesc = methodDesc(handle.getDesc());
                                 final @Nullable Rewrite<?> rewrite = MethodRewriteRule.this.rewrite(context, true, handle.getTag(), handleOwner, handle.getName(), handleDesc, handle.isInterface());
                                 if (rewrite != null) {
-                                    bootstrapMethodArguments[1] = rewrite.createHandle();
+                                    rewrite.applyToBootstrapArguments(bootstrapMethodArguments);
                                     final @Nullable MethodGenerator willGenerate = rewrite.createMethodGenerator();
                                     if (willGenerate != null) {
                                         methodsToGenerate.put(new MethodKey(handle.getOwner(), handle.getName(), handleDesc), willGenerate);
@@ -115,9 +116,12 @@ public interface MethodRewriteRule extends RewriteRule {
 
     interface Rewrite<D extends GeneratedMethodHolder.CallData> {
 
+        int BOOTSTRAP_HANDLE_IDX = 1;
+        int DYNAMIC_TYPE_IDX = 2;
+
         void apply(MethodVisitor delegate, MethodNode context);
 
-        Handle createHandle();
+        void applyToBootstrapArguments(Object[] arguments);
 
         Rewrite<D> withGeneratorInfo(GeneratedMethodHolder holder, D original);
 
@@ -158,8 +162,20 @@ public interface MethodRewriteRule extends RewriteRule {
         }
 
         @Override
-        public Handle createHandle() {
-            return new Handle(this.opcode(), toOwner(this.owner()), this.name(), this.descriptor().descriptorString(), this.isInterface());
+        public void applyToBootstrapArguments(final Object[] arguments) {
+            arguments[BOOTSTRAP_HANDLE_IDX] = new Handle(this.opcode(), toOwner(this.owner()), this.name(), this.descriptor().descriptorString(), this.isInterface());
+            // so here's what's happening...
+            // the dynamicMethodType needs to match the parameters being passed in at
+            // runtime. The dynamicReturnType is then updated to match the descriptor
+            // of the method handle, except it sometimes drop the first parameter ensuring
+            // the parameter count doesn't change
+            final Type dynamicMethodType = (Type) arguments[DYNAMIC_TYPE_IDX];
+            final Type[] argumentTypes = dynamicMethodType.getArgumentTypes();
+            final MethodTypeDesc newDynamicMethodType = this.descriptor()
+                .dropParameterTypes(0, this.descriptor().parameterCount() - argumentTypes.length)
+                // preserve original return type due to boxing/unboxing
+                .changeReturnType(ClassDesc.ofDescriptor(dynamicMethodType.getReturnType().getDescriptor()));
+            arguments[DYNAMIC_TYPE_IDX] = Type.getMethodType(newDynamicMethodType.descriptorString());
         }
 
         @Override

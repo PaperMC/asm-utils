@@ -132,8 +132,9 @@ public final class TestUtil {
                 return;
             } else {
                 // Try to get a javap diff
-                final boolean proceed = checkJavapDiff(name, expected.get(name), processed.get(name), Arrays.asList("javap", "-c", "-p"));
-                if (proceed) checkJavapDiff(name, expected.get(name), processed.get(name), Arrays.asList("javap", "-c", "-p", "-v"));
+                // final boolean proceed = checkJavapDiff(name, expected.get(name), processed.get(name), Arrays.asList("javap", "-c", "-p"));
+                // verbose is too useful for invokedynamic debugging to omit
+                checkJavapDiff(name, expected.get(name), processed.get(name), Arrays.asList("javap", "-c", "-p", "-v"));
 
                 // If javap failed, just assert the bytes equal
                 assertArrayEquals(
