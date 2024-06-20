@@ -102,11 +102,11 @@ public final class TestUtil {
         final String className,
         final Processor<T> processor
     ) {
-        final Map<String, byte[]> input = inputBytes(className);
+        final Map<String, byte[]> input = inputBytes(className.replace(".", "/"));
         final Map<String, byte[]> processed = processClassBytes(input, processor);
         final Map<String, byte[]> expected;
         try {
-            expected = expectedBytes(className);
+            expected = expectedBytes(className.replace(".", "/"));
         } catch (final RuntimeException e) {
             if (e.getCause() instanceof FileNotFoundException) {
                 final Path expectedDir = Path.of("src/testData/resources/expected");
@@ -204,7 +204,7 @@ public final class TestUtil {
         final TestUtil.Processor<?> proc,
         final String methodName
     ) {
-        final Map<String, byte[]> input = TestUtil.inputBytes(className);
+        final Map<String, byte[]> input = TestUtil.inputBytes(className.replace(".", "/"));
         final Map<String, byte[]> processed = TestUtil.processClassBytes(input, proc);
 
         final var loader = new URLClassLoader(new URL[]{}, TestUtil.class.getClassLoader()) {
@@ -220,7 +220,7 @@ public final class TestUtil {
         };
 
         try {
-            final Class<?> loaded = loader.findClass(className.replace("/", "."));
+            final Class<?> loaded = loader.findClass(className);
             final Method main = loaded.getDeclaredMethod(methodName);
             main.trySetAccessible();
             main.invoke(null);

@@ -5,7 +5,7 @@ import io.papermc.asm.checks.TransformerCheck;
 
 class RenameRuleTest {
 
-    @TransformerTest("data/rename/RenameTest")
+    @TransformerTest("data.rename.RenameTest")
     void testAnnotationSpecificRenames(final TransformerCheck check) {
         final RenameRule rule = RenameRule.builder()
             .type("data/types/rename/TestEnum", "data/types/rename/RenamedTestEnum")

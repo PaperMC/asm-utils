@@ -18,7 +18,7 @@ class StaticMethodRewriteParamsTest {
     static final ClassDesc PLAYER = Player.class.describeConstable().orElseThrow();
     static final ClassDesc ENTITY = Entity.class.describeConstable().orElseThrow();
 
-    @TransformerTest("data/methods/statics/PlainUser")
+    @TransformerTest("data.methods.statics.PlainUser")
     void testPlainStaticRewrite(final TransformerCheck check) {
         final RewriteRule rule = RewriteRule.forOwnerClass(Player.class, builder -> {
             builder.plainStaticRewrite(
@@ -42,7 +42,7 @@ class StaticMethodRewriteParamsTest {
     static final ClassDesc LOCATION = Location.class.describeConstable().orElseThrow();
     static final ClassDesc POSITION = Position.class.describeConstable().orElseThrow();
 
-    @TransformerTest("data/methods/statics/param/ParamDirectUser")
+    @TransformerTest("data.methods.statics.param.ParamDirectUser")
     void testParamDirectStaticRewrite(final TransformerCheck check) throws NoSuchMethodException {
         final Method handler = Redirects.class.getDeclaredMethod("toPosition", Location.class);
         final RewriteRule rule = RewriteRule.forOwnerClass(Methods.class, builder -> {
@@ -62,7 +62,7 @@ class StaticMethodRewriteParamsTest {
         check.run(RewriteRule.chain(rule, ctorRule));
     }
 
-    @TransformerTest("data/methods/statics/param/ParamFuzzyUser")
+    @TransformerTest("data.methods.statics.param.ParamFuzzyUser")
     void testParamFuzzyStaticRewrite(final TransformerCheck check) throws NoSuchMethodException {
         final Method handler = Redirects.class.getDeclaredMethod("toPositionFuzzy", Object.class);
         final RewriteRule rule = RewriteRule.forOwnerClass(Methods.class, builder -> {

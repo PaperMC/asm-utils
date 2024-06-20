@@ -12,7 +12,7 @@ class FieldToMethodTest {
 
     static final ClassDesc STRING = desc(String.class);
 
-    @TransformerTest("data/fields/FieldToMethodSameOwnerUser")
+    @TransformerTest("data.fields.FieldToMethodSameOwnerUser")
     void testFieldToMethodSameOwner(final TransformerCheck check) {
         final RewriteRule rule = RewriteRule.forOwnerClass(FieldHolder.class, builder -> {
             builder.changeFieldToMethod(

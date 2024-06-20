@@ -13,7 +13,7 @@ class MethodRewritesTest {
     static final ClassDesc PLAYER = Player.class.describeConstable().orElseThrow();
     static final ClassDesc ENTITY = Entity.class.describeConstable().orElseThrow();
 
-    @TransformerTest("data/methods/inplace/SuperTypeParamUser")
+    @TransformerTest("data.methods.inplace.SuperTypeParamUser")
     void testSuperTypeParam(final TransformerCheck check) {
         final RewriteRule rule = RewriteRule.forOwnerClass(Methods.class, builder -> {
             builder.changeParamToSuper(
@@ -27,7 +27,7 @@ class MethodRewritesTest {
         check.run(rule);
     }
 
-    @TransformerTest("data/methods/inplace/SubTypeReturnUser")
+    @TransformerTest("data.methods.inplace.SubTypeReturnUser")
     void testSubTypeReturn(final TransformerCheck check) {
         final RewriteRule rule = RewriteRule.forOwnerClass(Methods.class, builder -> {
             builder.changeReturnTypeToSub(

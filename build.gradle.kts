@@ -67,6 +67,8 @@ allprojects {
 
         compileOnlyApi(rootProject.libs.checkerQual)
         testCompileOnly(rootProject.libs.checkerQual)
+        compileOnly(rootProject.libs.jetbrainsAnnotations)
+        testCompileOnly(rootProject.libs.jetbrainsAnnotations)
 
         testImplementation(rootProject.libs.jupiterApi)
         testImplementation(rootProject.libs.jupiterParams)

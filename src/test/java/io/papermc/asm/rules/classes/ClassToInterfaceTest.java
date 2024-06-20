@@ -8,7 +8,7 @@ import io.papermc.asm.rules.RewriteRule;
 
 class ClassToInterfaceTest {
 
-    @TransformerTest("data/classes/ClassToInterfaceUser")
+    @TransformerTest("data.classes.ClassToInterfaceUser")
     void testWithNoReplacement(final TransformerCheck check) {
         final RewriteRule rule = new ClassToInterfaceRule(
             SomeAbstractClass.class.describeConstable().orElseThrow(),
@@ -18,7 +18,7 @@ class ClassToInterfaceTest {
         check.run(rule);
     }
 
-    @TransformerTest("data/classes/ClassToInterfaceRedirectUser")
+    @TransformerTest("data.classes.ClassToInterfaceRedirectUser")
     void testWithReplacement(final TransformerCheck check) {
         final RewriteRule rule = new ClassToInterfaceRule(
             SomeAbstractClass.class.describeConstable().orElseThrow(),
