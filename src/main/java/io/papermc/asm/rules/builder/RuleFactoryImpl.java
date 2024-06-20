@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 class RuleFactoryImpl implements RuleFactory {
 
@@ -58,30 +59,23 @@ class RuleFactoryImpl implements RuleFactory {
     }
 
     @Override
-    public void changeReturnTypeFuzzy(final ClassDesc newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.addRule(StaticRewrites.returnRewrite(this.owners, newReturnType, build(builderConsumer, MethodMatcher::targeted), isStatic(staticHandler), StaticRewrites.OBJECT_DESC, false));
-    }
-
-    @Override
     public void changeReturnTypeDirect(final ClassDesc newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        final TargetedMethodMatcher matcher = build(builderConsumer, MethodMatcher::targeted);
-        this.addRule(StaticRewrites.returnRewrite(this.owners, newReturnType, matcher, isStatic(staticHandler), matcher.targetType(), false));
-    }
-
-    @Override
-    public void changeReturnTypeFuzzyWithContext(final ClassDesc newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.addRule(StaticRewrites.returnRewrite(this.owners, newReturnType, build(builderConsumer, MethodMatcher::targeted), isStatic(staticHandler), StaticRewrites.OBJECT_DESC, true));
+        this.changeReturnTypeDirect(newReturnType, staticHandler, builderConsumer, false);
     }
 
     @Override
     public void changeReturnTypeDirectWithContext(final ClassDesc newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
+        this.changeReturnTypeDirect(newReturnType, staticHandler, builderConsumer, true);
+    }
+
+    private void changeReturnTypeDirect(final ClassDesc newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer, final boolean includeOwnerContext) {
         final TargetedMethodMatcher matcher = build(builderConsumer, MethodMatcher::targeted);
-        this.addRule(StaticRewrites.returnRewrite(this.owners, newReturnType, matcher, isStatic(staticHandler), matcher.targetType(), true));
+        this.addRule(new StaticRewrites.DirectReturn(this.owners, newReturnType, matcher, isStatic(staticHandler), includeOwnerContext));
     }
 
     @Override
-    public void renameField(final String newName, final Consumer<? super FieldMatcher.Builder> builderConsumer) {
-        this.addRule(new FieldRewrites.Rename(this.owners, build(builderConsumer, FieldMatcher::builder), newName));
+    public void changeFieldToMethod(final FieldMatcher fieldMatcher, final @Nullable String getterName, final @Nullable String setterName, final boolean isInterfaceMethod) {
+        this.addRule(new FieldRewrites.ToMethodSameOwner(this.owners, fieldMatcher, getterName, setterName, isInterfaceMethod));
     }
 
     @Override
@@ -94,10 +88,6 @@ class RuleFactoryImpl implements RuleFactory {
             throw new IllegalArgumentException(staticHandler + " isn't a static method");
         }
         return staticHandler;
-    }
-
-    private static Supplier<ClassDesc> convert(final Supplier<Class<?>> classSupplier) {
-        return () -> classSupplier.get().describeConstable().orElseThrow();
     }
 
     @Override

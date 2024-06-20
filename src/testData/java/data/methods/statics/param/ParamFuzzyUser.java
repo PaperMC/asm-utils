@@ -17,5 +17,8 @@ public final class ParamFuzzyUser {
         final Methods methods = new Methods();
         final boolean b1 = methods.consumePos(loc);
         final boolean bb1 = methods.consumePos(pos);
+
+        new Methods.PosWrapper(pos);
+        new Methods.PosWrapper(loc);
     }
 }

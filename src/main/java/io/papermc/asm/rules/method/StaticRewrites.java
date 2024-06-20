@@ -8,6 +8,7 @@ import java.lang.constant.MethodTypeDesc;
 import java.lang.reflect.Method;
 import java.util.Set;
 
+import static io.papermc.asm.util.DescriptorUtils.desc;
 import static io.papermc.asm.util.DescriptorUtils.replaceParameters;
 import static java.util.function.Predicate.isEqual;
 
@@ -48,27 +49,27 @@ public final class StaticRewrites {
     public record DirectParam(Set<Class<?>> owners, ClassDesc existingType, TargetedMethodMatcher methodMatcher, Method staticHandler) implements StaticRewrite.Generated.Param {
     }
 
-    public static StaticRewrite.Generated.Return returnRewrite(final Set<Class<?>> owners, final ClassDesc existingType, final TargetedMethodMatcher methodMatcher, final Method staticHandler, final ClassDesc intermediateType, final boolean includeOwnerContext) {
-        if (includeOwnerContext && owners.size() > 1) {
-            throw new IllegalArgumentException("Can't include owner context with multiple owners");
-        }
-        final Class<?> owner = owners.iterator().next();
-        if (!staticHandler.getReturnType().describeConstable().orElseThrow().equals(methodMatcher.targetType())) {
-            throw new IllegalArgumentException("Return type of staticHandler doesn't match target from methodMatcher");
-        }
-        if (staticHandler.getParameterCount() != (includeOwnerContext ? 2 : 1)) {
-            throw new IllegalArgumentException("staticHandler should only have %s parameter of type %s".formatted(includeOwnerContext ? 2 : 1, (includeOwnerContext ? owner + " and " : "") + intermediateType));
-        }
-        if (!staticHandler.getParameterTypes()[includeOwnerContext ? 1 : 0].describeConstable().orElseThrow().equals(existingType)) {
-            throw new IllegalArgumentException("staticHandler param type isn't " + existingType);
-        }
-        return new Return(owners, existingType, methodMatcher, staticHandler, includeOwnerContext);
-    }
-
     // Uses the methodMatcher against bytecode from plugins. Any matching descriptors will have the method name/owner changed to point towards
     // a generated method of the same descriptor. That generated method will call the original method and pass the return value
     // to staticHandler. staticHandler will then convert the object to the plugin bytecode's expected type.
-    private record Return(Set<Class<?>> owners, ClassDesc existingType, TargetedMethodMatcher methodMatcher, Method staticHandler, boolean includeOwnerContext) implements StaticRewrite.Generated.Return {
+    public record DirectReturn(Set<Class<?>> owners, ClassDesc existingType, TargetedMethodMatcher methodMatcher, Method staticHandler, boolean includeOwnerContext) implements StaticRewrite.Generated.Return {
+
+        public DirectReturn {
+            if (includeOwnerContext && owners.size() > 1) {
+                throw new IllegalArgumentException("Can't include owner context with multiple owners");
+            }
+            final Class<?> owner = owners.iterator().next();
+            if (!desc(staticHandler.getReturnType()).equals(methodMatcher.targetType())) {
+                throw new IllegalArgumentException("Return type of staticHandler doesn't match target from methodMatcher");
+            }
+            final int expectedStaticHandlerParamCount = includeOwnerContext ? 2 : 1;
+            if (staticHandler.getParameterCount() != expectedStaticHandlerParamCount) {
+                throw new IllegalArgumentException("staticHandler should only have %s parameter(s) of type %s".formatted(expectedStaticHandlerParamCount, (includeOwnerContext ? owner + " and " : "") + methodMatcher.targetType()));
+            }
+            if (!staticHandler.getParameterTypes()[includeOwnerContext ? 1 : 0].describeConstable().orElseThrow().equals(existingType)) {
+                throw new IllegalArgumentException("staticHandler param type isn't " + existingType);
+            }
+        }
     }
 
     // does a plain static rewrite with exact matching parameters

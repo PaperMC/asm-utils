@@ -1,5 +1,6 @@
 package io.papermc.asm.rules.builder.matcher;
 
+import io.papermc.asm.rules.method.StaticRewrite;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.util.Collection;
@@ -20,6 +21,10 @@ public interface TargetedMethodMatcher extends MethodMatcher {
         private @MonotonicNonNull ClassDesc oldType;
 
         Builder() {
+        }
+
+        public Builder ctor() {
+            return this.names(StaticRewrite.CONSTRUCTOR_METHOD_NAME);
         }
 
         public Builder names(final String... names) {

@@ -2,6 +2,7 @@ package data.methods;
 
 import data.types.hierarchy.Entity;
 import data.types.hierarchy.Player;
+import data.types.hierarchy.loc.Location;
 import data.types.hierarchy.loc.Position;
 import data.types.hierarchy.loc.PositionImpl;
 
@@ -53,5 +54,26 @@ public class Methods {
         position.position();
         System.out.println(position.getClass());
         return true;
+    }
+
+    public static class Wrapper {
+
+        public Wrapper(Entity player) {
+            System.out.println(player.getClass());
+            System.out.println(player.getName());
+        }
+
+        public Wrapper(Position position) {
+            position.position();
+            System.out.println(position.getClass());
+        }
+    }
+
+    public static class PosWrapper {
+
+        public PosWrapper(Position position) {
+            position.position();
+            System.out.println(position.getClass());
+        }
     }
 }

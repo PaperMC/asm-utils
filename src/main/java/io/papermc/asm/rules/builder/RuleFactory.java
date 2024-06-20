@@ -8,6 +8,7 @@ import java.lang.constant.ClassDesc;
 import java.lang.reflect.Method;
 import java.util.Set;
 import java.util.function.Consumer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static io.papermc.asm.util.DescriptorUtils.desc;
 
@@ -57,23 +58,11 @@ public interface RuleFactory {
 
     void changeReturnTypeToSub(ClassDesc oldReturnType, ClassDesc newReturnType, Consumer<? super MethodMatcher.Builder> builderConsumer);
 
-    default void changeReturnTypeFuzzy(final Class<?> newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.changeReturnTypeFuzzy(desc(newReturnType), staticHandler, builderConsumer);
-    }
-
-    void changeReturnTypeFuzzy(ClassDesc newReturnType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
-
     default void changeReturnTypeDirect(final Class<?> newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
         this.changeReturnTypeDirect(desc(newReturnType), staticHandler, builderConsumer);
     }
 
     void changeReturnTypeDirect(ClassDesc newReturnType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
-
-    default void changeReturnTypeFuzzyWithContext(final Class<?> newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.changeReturnTypeFuzzyWithContext(desc(newReturnType), staticHandler, builderConsumer);
-    }
-
-    void changeReturnTypeFuzzyWithContext(ClassDesc newReturnType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
 
     default void changeReturnTypeDirectWithContext(final Class<?> newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
         this.changeReturnTypeDirectWithContext(desc(newReturnType), staticHandler, builderConsumer);
@@ -81,7 +70,7 @@ public interface RuleFactory {
 
     void changeReturnTypeDirectWithContext(ClassDesc newReturnType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
 
-    void renameField(String newName, Consumer<? super FieldMatcher.Builder> builderConsumer);
+    void changeFieldToMethod(FieldMatcher fieldMatcher, @Nullable String getterName, @Nullable String setterName, boolean isInterfaceMethod);
 
     void addRule(RewriteRule rule);
 

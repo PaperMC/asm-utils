@@ -15,6 +15,8 @@ import static io.papermc.asm.util.OpcodeUtils.isVirtual;
 
 public interface GeneratedMethodSource<C> extends GeneratedMethodHolder {
 
+    ClassDesc VOID = Void.TYPE.describeConstable().orElseThrow();
+
     /**
      * Transforms the descriptor of the generated method to the descriptor
      * of the method that will be called within the generated method. This
@@ -37,12 +39,13 @@ public interface GeneratedMethodSource<C> extends GeneratedMethodHolder {
         final ClassDesc methodOwner = original.owner();
         final C context = this.createNewContext();
         final GeneratorAdapter methodGenerator = factory.create(Opcodes.ACC_PUBLIC | Opcodes.ACC_SYNTHETIC | Opcodes.ACC_STATIC, modified.name(), modified.descriptor().descriptorString());
-        final MethodTypeDesc transformedInvokedDescriptor = this.transformInvokedDescriptor(original.descriptor(), context);
+        final MethodTypeDesc transformedInvokedDescriptor = this.transformInvokedDescriptor(modified.descriptor(), context);
         final Type type = Type.getType(methodOwner.descriptorString());
         methodGenerator.newInstance(type);
         methodGenerator.dup();
         this.generateParameters(methodGenerator, modified.descriptor(), context);
-        methodGenerator.invokeConstructor(type, new Method(StaticRewrite.CONSTRUCTOR_METHOD_NAME, transformedInvokedDescriptor.descriptorString()));
+        // change return type to VOID because we are calling a constructor
+        methodGenerator.invokeConstructor(type, new Method(StaticRewrite.CONSTRUCTOR_METHOD_NAME, transformedInvokedDescriptor.changeReturnType(VOID).descriptorString()));
         this.generateReturnValue(methodGenerator, original);
         methodGenerator.endMethod();
     }

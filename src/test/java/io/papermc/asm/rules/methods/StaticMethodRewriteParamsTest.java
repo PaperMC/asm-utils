@@ -15,6 +15,7 @@ import java.lang.reflect.Method;
 class StaticMethodRewriteParamsTest {
 
     static final ClassDesc REDIRECTS = Redirects.class.describeConstable().orElseThrow();
+    static final ClassDesc PLAYER = Player.class.describeConstable().orElseThrow();
     static final ClassDesc ENTITY = Entity.class.describeConstable().orElseThrow();
 
     @TransformerTest("data/methods/statics/PlainUser")
@@ -27,7 +28,15 @@ class StaticMethodRewriteParamsTest {
                     .desc(d -> d.parameterList().contains(ENTITY))
             );
         });
-        check.run(rule);
+        final RewriteRule ctorRule = RewriteRule.forOwner(Methods.Wrapper.class, builder -> {
+            builder.plainStaticRewrite(
+                REDIRECTS,
+                b -> b
+                    .ctor()
+                    .desc(d -> d.parameterList().contains(PLAYER))
+            );
+        });
+        check.run(RewriteRule.chain(rule, ctorRule));
     }
 
     static final ClassDesc LOCATION = Location.class.describeConstable().orElseThrow();
@@ -43,7 +52,14 @@ class StaticMethodRewriteParamsTest {
                 b -> b.names("consumeLoc", "consumeLocStatic").containsParam(LOCATION)
             );
         });
-        check.run(rule);
+        final RewriteRule ctorRule = RewriteRule.forOwner(Methods.Wrapper.class, builder -> {
+            builder.changeParamDirect(
+                POSITION,
+                handler,
+                b -> b.ctor().containsParam(LOCATION)
+            );
+        });
+        check.run(RewriteRule.chain(rule, ctorRule));
     }
 
     @TransformerTest("data/methods/statics/param/ParamFuzzyUser")
@@ -56,6 +72,13 @@ class StaticMethodRewriteParamsTest {
                 b -> b.names("consumePos", "consumePosStatic").containsParam(POSITION)
             );
         });
-        check.run(rule);
+        final RewriteRule ctorRule = RewriteRule.forOwner(Methods.PosWrapper.class, builder -> {
+            builder.changeParamFuzzy(
+                POSITION,
+                handler,
+                b -> b.ctor().containsParam(POSITION)
+            );
+        });
+        check.run(RewriteRule.chain(rule, ctorRule));
     }
 }

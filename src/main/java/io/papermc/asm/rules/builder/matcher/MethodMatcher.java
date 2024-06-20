@@ -1,6 +1,7 @@
 package io.papermc.asm.rules.builder.matcher;
 
 import io.papermc.asm.rules.NameAndDescPredicate;
+import io.papermc.asm.rules.method.StaticRewrite;
 import java.lang.constant.MethodTypeDesc;
 import java.util.Arrays;
 import java.util.Collection;
@@ -52,6 +53,10 @@ public interface MethodMatcher {
                 Builder.this.byName = Builder.this.byName.or(this.names::contains);
                 return Builder.this;
             }
+        }
+
+        public MatchBuilder ctor() {
+            return this.match(StaticRewrite.CONSTRUCTOR_METHOD_NAME);
         }
 
         public MatchBuilder match(final String name) {

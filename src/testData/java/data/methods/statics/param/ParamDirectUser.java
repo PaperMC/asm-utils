@@ -12,5 +12,7 @@ final class ParamDirectUser {
 
         final Methods methods = new Methods();
         final boolean b1 = methods.consumeLoc(loc);
+
+        final Methods.Wrapper wrapper = new Methods.Wrapper(loc);
     }
 }

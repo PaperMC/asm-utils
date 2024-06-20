@@ -52,4 +52,19 @@ public class Methods {
         position.position();
         return true;
     }
+
+    public static class Wrapper {
+
+        public Wrapper(Player player) {
+        }
+
+        public Wrapper(Location location) {
+        }
+    }
+
+    public static class PosWrapper {
+
+        public PosWrapper(Position position) {
+        }
+    }
 }

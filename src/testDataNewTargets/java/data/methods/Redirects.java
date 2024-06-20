@@ -17,6 +17,10 @@ public final class Redirects {
         entity.getName();
     }
 
+    public static Methods.Wrapper createMethods$Wrapper(final Player entity) {
+        return new Methods.Wrapper(entity);
+    }
+
     public static Position toPosition(final Location location) {
         return new PositionImpl(location.x(), location.y(), location.z());
     }
