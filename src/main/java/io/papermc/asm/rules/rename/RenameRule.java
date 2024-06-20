@@ -83,14 +83,14 @@ public final class RenameRule implements RewriteRule {
         }
 
         /**
-         * Note that you also have to remap the method for the annotation attribute
+         * Note that you also have to remap the method for the annotation attribute.
          */
         public Builder annotationAttribute(final ClassDesc owner, final String legacyName, final String newName) {
             return this.annotationAttribute(owner.descriptorString(), legacyName, newName);
         }
 
         /**
-         * Note that you also have to remap the method for the annotation attribute
+         * Note that you also have to remap the method for the annotation attribute.
          */
         public Builder annotationAttribute(final String ownerDescriptor, final String legacyName, final String newName) {
             if (!ownerDescriptor.startsWith("L") || !ownerDescriptor.endsWith(";")) {
