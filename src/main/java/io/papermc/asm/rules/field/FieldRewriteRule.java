@@ -3,7 +3,6 @@ package io.papermc.asm.rules.field;
 import io.papermc.asm.ClassProcessingContext;
 import io.papermc.asm.rules.RewriteRule;
 import java.lang.constant.ClassDesc;
-import java.lang.constant.MethodTypeDesc;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
@@ -38,30 +37,9 @@ public interface FieldRewriteRule extends RewriteRule {
         };
     }
 
-    @Nullable Rewrite rewrite(ClassProcessingContext context, int opcode, String owner, String name, ClassDesc desc);
+    @Nullable Rewrite rewrite(ClassProcessingContext context, int opcode, String owner, String name, ClassDesc fieldTypeDesc);
 
     interface Rewrite {
         void apply(MethodVisitor delegate);
-    }
-
-    record RewriteField(int opcode, String owner, String name, ClassDesc descriptor) implements Rewrite {
-
-        @Override
-        public void apply(final MethodVisitor delegate) {
-            delegate.visitFieldInsn(this.opcode(), this.owner(), this.name(), this.descriptor().descriptorString());
-        }
-    }
-
-    record RewriteToMethod(int opcode, String owner, String name, MethodTypeDesc descriptor, boolean isInterface) implements Rewrite {
-        public RewriteToMethod {
-            if (descriptor.parameterCount() != 0 && descriptor.parameterCount() != 1) {
-                throw new IllegalArgumentException("Can only have 0 or 1 param on a method replacing a field");
-            }
-        }
-
-        @Override
-        public void apply(final MethodVisitor delegate) {
-            delegate.visitMethodInsn(this.opcode(), this.owner(), this.name(), this.descriptor().descriptorString(), this.isInterface());
-        }
     }
 }

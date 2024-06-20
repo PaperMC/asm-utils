@@ -69,6 +69,7 @@ allprojects {
         testCompileOnly(rootProject.libs.checkerQual)
 
         testImplementation(rootProject.libs.jupiterApi)
+        testImplementation(rootProject.libs.jupiterParams)
         testRuntimeOnly(rootProject.libs.jupiterEngine)
     }
 }

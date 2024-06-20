@@ -48,7 +48,7 @@ public final class DescriptorUtils {
         return replaceParameters(descriptor, oldParam, newParam, null);
     }
 
-    public static MethodTypeDesc replaceParameters(MethodTypeDesc descriptor, final Predicate<? super ClassDesc> oldParam, final ClassDesc newParam, final @Nullable Set<Integer> positionCollector) {
+    public static MethodTypeDesc replaceParameters(MethodTypeDesc descriptor, final Predicate<? super ClassDesc> oldParam, final ClassDesc newParam, final @Nullable Set<? super Integer> positionCollector) {
         for (int i = 0; i < descriptor.parameterCount(); i++) {
             if (oldParam.test(descriptor.parameterType(i))) {
                 descriptor = descriptor.changeParameterType(i, newParam);

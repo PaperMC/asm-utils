@@ -10,8 +10,10 @@ import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -48,7 +50,7 @@ public final class TestUtil {
         @Override
         public byte[] process(final byte[] bytes) {
             final ClassReader classReader = new ClassReader(bytes);
-            final ClassWriter classWriter = new ClassWriter(classReader, 0);
+            final ClassWriter classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_MAXS);
             classReader.accept(this.factory.createVisitor(classWriter), 0);
             return classWriter.toByteArray();
         }
@@ -59,6 +61,41 @@ public final class TestUtil {
         final RewriteRuleVisitorFactory factory
     ) {
         assertProcessedMatchesExpected_(className, new DefaultProcessor(factory));
+    }
+
+    private static boolean checkJavapDiff(final String name, final byte[] expected, final byte[] processed, final List<String> javapCommand) {
+        try {
+            Path tmp = Files.createTempDirectory("tmpasmutils");
+            Path cls = tmp.resolve("cls.class");
+            Files.write(cls, expected);
+            final List<String> command = new ArrayList<>(javapCommand);
+            command.add("cls");
+            final Process proc = new ProcessBuilder(command)
+                .directory(tmp.toFile())
+                .redirectErrorStream(true)
+                .start();
+            final String expectedJavap = new String(proc.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            proc.waitFor(5, TimeUnit.SECONDS);
+
+            tmp = Files.createTempDirectory("tmpasmutils");
+            cls = tmp.resolve("cls.class");
+            Files.write(cls, processed);
+            final Process proc1 = new ProcessBuilder(command)
+                .directory(tmp.toFile())
+                .redirectErrorStream(true)
+                .start();
+            final String actualJavap = new String(proc1.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            proc1.waitFor(5, TimeUnit.SECONDS);
+
+            assertEquals(expectedJavap, actualJavap, () -> "Transformed class bytes did not match expected for " + name);
+        } catch (final IOException exception) {
+            exception.printStackTrace();
+            System.err.println("Failed to diff class bytes using javap, falling back to direct byte comparison.");
+            return false;
+        } catch (final InterruptedException interruptedException) {
+            Thread.currentThread().interrupt();
+        }
+        return true;
     }
 
     private static <T extends Throwable> void assertProcessedMatchesExpected_(
@@ -90,47 +127,21 @@ public final class TestUtil {
             throw e;
         }
         for (final String name : input.keySet()) {
-            if (!Arrays.equals(expected.get(name), processed.get(name))) {
-                // Try to get a javap diff
-                try {
-                    Path tmp = Files.createTempDirectory("tmpasmutils");
-                    Path cls = tmp.resolve("cls.class");
-                    Files.write(cls, expected.get(name));
-                    final Process proc = new ProcessBuilder("javap", "-c", "-p", "cls")
-                        .directory(tmp.toFile())
-                        .redirectErrorStream(true)
-                        .start();
-                    final String expectedJavap = new String(proc.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-                    proc.waitFor(5, TimeUnit.SECONDS);
-
-                    tmp = Files.createTempDirectory("tmpasmutils");
-                    cls = tmp.resolve("cls.class");
-                    Files.write(cls, processed.get(name));
-                    final Process proc1 = new ProcessBuilder("javap", "-c", "-p", "cls")
-                        .directory(tmp.toFile())
-                        .redirectErrorStream(true)
-                        .start();
-                    final String actualJavap = new String(proc1.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-                    proc1.waitFor(5, TimeUnit.SECONDS);
-
-                    assertEquals(expectedJavap, actualJavap, () -> "Transformed class bytes did not match expected for " + name);
-                } catch (final IOException ioException) {
-                    ioException.printStackTrace();
-                    System.err.println("Failed to diff class bytes using javap, falling back to direct byte comparison.");
-                } catch (final InterruptedException interruptedException) {
-                    Thread.currentThread().interrupt();
-                }
-            } else {
+            if (Arrays.equals(expected.get(name), processed.get(name))) {
                 // Bytes equal
                 return;
-            }
+            } else {
+                // Try to get a javap diff
+                final boolean proceed = checkJavapDiff(name, expected.get(name), processed.get(name), Arrays.asList("javap", "-c", "-p"));
+                if (proceed) checkJavapDiff(name, expected.get(name), processed.get(name), Arrays.asList("javap", "-c", "-p", "-v"));
 
-            // If javap failed, just assert the bytes equal
-            assertArrayEquals(
-                expected.get(name),
-                processed.get(name),
-                () -> "Transformed class bytes did not match expected for " + name
-            );
+                // If javap failed, just assert the bytes equal
+                assertArrayEquals(
+                    expected.get(name),
+                    processed.get(name),
+                    () -> "Transformed class bytes did not match expected for " + name
+                );
+            }
         }
     }
 
@@ -210,6 +221,7 @@ public final class TestUtil {
         try {
             final Class<?> loaded = loader.findClass(className.replace("/", "."));
             final Method main = loaded.getDeclaredMethod(methodName);
+            main.trySetAccessible();
             main.invoke(null);
         } catch (final ReflectiveOperationException e) {
             throw new RuntimeException(e);
