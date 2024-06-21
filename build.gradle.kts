@@ -22,6 +22,7 @@ allprojects {
     indra {
         javaVersions {
             target(17)
+            strictVersions(true)
         }
 
         publishSnapshotsTo("paperSnapshots", "https://repo.papermc.io/repository/maven-snapshots/")
