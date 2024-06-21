@@ -86,6 +86,14 @@ val filtered = tasks.register<FilterTestClasspath>("filteredTestClasspath") {
     new.from(testDataNewTargets.output)
 }
 
+val javapPath = javaToolchains.launcherFor {
+    languageVersion.set(JavaLanguageVersion.of(17))
+}.map { it.metadata.installationPath.asFile.toPath().resolve("bin/javap") }
+
+tasks.withType<Test> {
+    environment("JAVAP_PATH", javapPath.get())
+}
+
 dependencies {
     testImplementation(files(filtered.flatMap { it.outputDir }))
     testImplementation(testDataNewTargets.output)

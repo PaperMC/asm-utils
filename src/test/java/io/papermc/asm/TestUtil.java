@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -33,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public final class TestUtil {
     private TestUtil() {
     }
+    private static final String JAVAP_PATH = Objects.requireNonNullElse(System.getenv("JAVAP_PATH"), "javap");// fallback to hoping its on actual PATH
 
     public static RewriteRuleVisitorFactory testingVisitorFactory(final RewriteRule rewriteRule) {
         return RewriteRuleVisitorFactory.create(Opcodes.ASM9, rewriteRule, ClassInfoProvider.basic());
@@ -132,9 +134,9 @@ public final class TestUtil {
                 return;
             } else {
                 // Try to get a javap diff
-                // final boolean proceed = checkJavapDiff(name, expected.get(name), processed.get(name), Arrays.asList("javap", "-c", "-p"));
+                // final boolean proceed = checkJavapDiff(name, expected.get(name), processed.get(name), Arrays.asList(JAVAP_PATH, "-c", "-p"));
                 // verbose is too useful for invokedynamic debugging to omit
-                checkJavapDiff(name, expected.get(name), processed.get(name), Arrays.asList("javap", "-c", "-p", "-v"));
+                checkJavapDiff(name, expected.get(name), processed.get(name), Arrays.asList(JAVAP_PATH, "-c", "-p", "-v"));
 
                 // If javap failed, just assert the bytes equal
                 assertArrayEquals(
