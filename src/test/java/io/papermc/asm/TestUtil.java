@@ -33,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public final class TestUtil {
     private TestUtil() {
     }
+
     private static final ToolProvider JAVAP_PROVIDER = ToolProvider.findFirst("javap").orElseThrow(() -> new IllegalStateException("javap not found"));
 
     public static RewriteRuleVisitorFactory testingVisitorFactory(final RewriteRule rewriteRule) {
