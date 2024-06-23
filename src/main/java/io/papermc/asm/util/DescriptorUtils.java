@@ -8,16 +8,16 @@ import java.lang.reflect.Method;
 import java.util.Set;
 import java.util.function.Predicate;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.objectweb.asm.Type;
 
 public final class DescriptorUtils {
 
     public static ClassDesc fromOwner(final String owner) {
-        return ClassDesc.ofDescriptor("L" + owner + ";");
+        return ClassDesc.ofDescriptor(Type.getObjectType(owner).getDescriptor());
     }
 
     public static String toOwner(final ClassDesc desc) {
-        final String descriptor = desc.descriptorString();
-        return descriptor.substring(1, descriptor.length() - 1);
+        return Type.getType(desc.descriptorString()).getInternalName();
     }
 
     public static ClassDesc desc(final Class<?> clazz) {
