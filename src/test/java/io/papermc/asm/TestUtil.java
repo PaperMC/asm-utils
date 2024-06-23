@@ -4,19 +4,19 @@ import io.papermc.asm.rules.RewriteRule;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.spi.ToolProvider;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
@@ -33,6 +33,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public final class TestUtil {
     private TestUtil() {
     }
+
+    private static final ToolProvider JAVAP_PROVIDER = ToolProvider.findFirst("javap").orElseThrow(() -> new IllegalStateException("javap not found"));
 
     public static RewriteRuleVisitorFactory testingVisitorFactory(final RewriteRule rewriteRule) {
         return RewriteRuleVisitorFactory.create(Opcodes.ASM9, rewriteRule, ClassInfoProvider.basic());
@@ -63,37 +65,36 @@ public final class TestUtil {
         assertProcessedMatchesExpected_(className, new DefaultProcessor(factory));
     }
 
-    private static boolean checkJavapDiff(final String name, final byte[] expected, final byte[] processed, final List<String> javapCommand) {
+    private static boolean checkJavapDiff(final String name, final byte[] expected, final byte[] processed, final List<String> javapArgs) {
+        final String[] command = new String[javapArgs.size() + 1];
+        for (int i = 0; i < javapArgs.size(); i++) {
+            command[i] = javapArgs.get(i);
+        }
         try {
             Path tmp = Files.createTempDirectory("tmpasmutils");
             Path cls = tmp.resolve("cls.class");
             Files.write(cls, expected);
-            final List<String> command = new ArrayList<>(javapCommand);
-            command.add("cls");
-            final Process proc = new ProcessBuilder(command)
-                .directory(tmp.toFile())
-                .redirectErrorStream(true)
-                .start();
-            final String expectedJavap = new String(proc.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-            proc.waitFor(5, TimeUnit.SECONDS);
+            command[javapArgs.size()] = cls.toAbsolutePath().toString();
+
+            final StringWriter expectedStringWriter = new StringWriter();
+            final PrintWriter expectedWriter = new PrintWriter(expectedStringWriter);
+            JAVAP_PROVIDER.run(expectedWriter, expectedWriter, command);
+            final String expectedJavap = expectedStringWriter.toString();
 
             tmp = Files.createTempDirectory("tmpasmutils");
             cls = tmp.resolve("cls.class");
             Files.write(cls, processed);
-            final Process proc1 = new ProcessBuilder(command)
-                .directory(tmp.toFile())
-                .redirectErrorStream(true)
-                .start();
-            final String actualJavap = new String(proc1.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-            proc1.waitFor(5, TimeUnit.SECONDS);
+            command[javapArgs.size()] = cls.toAbsolutePath().toString();
+            final StringWriter actualStringWriter = new StringWriter();
+            final PrintWriter actualWriter = new PrintWriter(actualStringWriter);
+            JAVAP_PROVIDER.run(actualWriter, actualWriter, command);
+            final String actualJavap = actualStringWriter.toString();
 
             assertEquals(expectedJavap, actualJavap, () -> "Transformed class bytes did not match expected for " + name);
         } catch (final IOException exception) {
             exception.printStackTrace();
             System.err.println("Failed to diff class bytes using javap, falling back to direct byte comparison.");
             return false;
-        } catch (final InterruptedException interruptedException) {
-            Thread.currentThread().interrupt();
         }
         return true;
     }
@@ -132,9 +133,9 @@ public final class TestUtil {
                 return;
             } else {
                 // Try to get a javap diff
-                // final boolean proceed = checkJavapDiff(name, expected.get(name), processed.get(name), Arrays.asList("javap", "-c", "-p"));
+                // final boolean proceed = checkJavapDiff(name, expected.get(name), processed.get(name), Arrays.asList(JAVAP_PATH, "-c", "-p"));
                 // verbose is too useful for invokedynamic debugging to omit
-                checkJavapDiff(name, expected.get(name), processed.get(name), Arrays.asList("javap", "-c", "-p", "-v"));
+                checkJavapDiff(name, expected.get(name), processed.get(name), Arrays.asList("-c", "-p", "-v"));
 
                 // If javap failed, just assert the bytes equal
                 assertArrayEquals(
