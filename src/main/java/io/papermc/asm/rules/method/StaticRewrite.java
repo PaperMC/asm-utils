@@ -149,6 +149,7 @@ public interface StaticRewrite extends OwnableMethodRewriteRule.Filtered {
         @Override
         public void applyToBootstrapArguments(final Object[] arguments) {
             arguments[BOOTSTRAP_HANDLE_IDX] = new Handle(Opcodes.H_INVOKESTATIC, toOwner(this.staticRedirectOwner()), this.methodName(), this.descriptor().descriptorString(), false);
+            // TODO not really needed on **every** rewrite, just the fuzzy param ones, but it doesn't seem to break anything since it will always be the same
             arguments[DYNAMIC_TYPE_IDX] = Type.getMethodType(this.descriptor().descriptorString());
         }
 

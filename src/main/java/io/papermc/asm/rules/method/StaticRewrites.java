@@ -7,6 +7,7 @@ import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.lang.reflect.Method;
 import java.util.Set;
+import org.objectweb.asm.Type;
 
 import static io.papermc.asm.util.DescriptorUtils.desc;
 import static io.papermc.asm.util.DescriptorUtils.replaceParameters;
@@ -40,6 +41,20 @@ public final class StaticRewrites {
             // To create the generated method descriptor from the descriptor, we replace the
             // fuzzy type with the fuzzy param
             return replaceParameters(original, isEqual(OBJECT_DESC), this.existingType(), context);
+        }
+
+        @Override
+        public Rewrite<MethodCallData> createRewrite(final ClassProcessingContext context, final MethodTypeDesc intermediateDescriptor, final MethodCallData originalCallData) {
+            return Generated.Param.super.createRewrite(context, intermediateDescriptor, originalCallData)
+                // so here's what's happening...
+                // the dynamicMethodType needs to match the parameters being passed in at
+                // runtime. The dynamicReturnType is run through the redirect transformer
+                // to replace correct parameters .
+                .withHandleExtras(arguments -> {
+                    final Type dynamicMethodType = (Type) arguments[Rewrite.DYNAMIC_TYPE_IDX];
+                    final MethodTypeDesc newDynamicMethodType = this.transformToRedirectDescriptor(MethodTypeDesc.ofDescriptor(dynamicMethodType.getDescriptor()));
+                    arguments[Rewrite.DYNAMIC_TYPE_IDX] = Type.getMethodType(newDynamicMethodType.descriptorString());
+                });
         }
     }
 

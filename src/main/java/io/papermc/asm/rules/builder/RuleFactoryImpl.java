@@ -44,13 +44,13 @@ class RuleFactoryImpl implements RuleFactory {
     }
 
     @Override
-    public void changeParamFuzzy(final ClassDesc modernParamType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.addRule(new StaticRewrites.FuzzyParam(this.owners, modernParamType, build(builderConsumer, MethodMatcher::targeted), isStatic(staticHandler)));
+    public void changeParamFuzzy(final ClassDesc newParamType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
+        this.addRule(new StaticRewrites.FuzzyParam(this.owners, newParamType, build(builderConsumer, MethodMatcher::targeted), isStatic(staticHandler)));
     }
 
     @Override
-    public void changeParamDirect(final ClassDesc existingParam, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.addRule(new StaticRewrites.DirectParam(this.owners, existingParam, build(builderConsumer, MethodMatcher::targeted), isStatic(staticHandler)));
+    public void changeParamDirect(final ClassDesc newParamType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
+        this.addRule(new StaticRewrites.DirectParam(this.owners, newParamType, build(builderConsumer, MethodMatcher::targeted), isStatic(staticHandler)));
     }
 
     @Override

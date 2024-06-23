@@ -7,12 +7,12 @@ import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.tree.MethodNode;
 
@@ -127,6 +127,10 @@ public interface MethodRewriteRule extends RewriteRule {
 
         Rewrite<D> withNamePrefix(String prefix);
 
+        default Rewrite<D> withHandleExtras(final Consumer<Object[]> extras) {
+            return this;
+        }
+
         @Nullable MethodGenerator createMethodGenerator();
     }
 
@@ -150,10 +154,19 @@ public interface MethodRewriteRule extends RewriteRule {
      * @param isInvokeDynamic if the replaced method is an invokedynamic
      * @param generatorInfo info for generating the method (optional)
      */
-    record RewriteSingle(int opcode, ClassDesc owner, String name, MethodTypeDesc descriptor, boolean isInterface, boolean isInvokeDynamic, @Nullable GeneratorInfo<GeneratedMethodHolder.MethodCallData> generatorInfo) implements Rewrite<GeneratedMethodHolder.MethodCallData> {
+    record RewriteSingle(
+        int opcode,
+        ClassDesc owner,
+        String name,
+        MethodTypeDesc descriptor,
+        boolean isInterface,
+        boolean isInvokeDynamic,
+        @Nullable GeneratorInfo<GeneratedMethodHolder.MethodCallData> generatorInfo,
+        @Nullable Consumer<Object[]> handleExtras
+    ) implements Rewrite<GeneratedMethodHolder.MethodCallData> {
 
         public RewriteSingle(final int opcode, final ClassDesc owner, final String name, final MethodTypeDesc descriptor, final boolean isInterface, final boolean isInvokeDynamic) {
-            this(opcode, owner, name, descriptor, isInterface, isInvokeDynamic, null);
+            this(opcode, owner, name, descriptor, isInterface, isInvokeDynamic, null, null);
         }
 
         @Override
@@ -164,28 +177,24 @@ public interface MethodRewriteRule extends RewriteRule {
         @Override
         public void applyToBootstrapArguments(final Object[] arguments) {
             arguments[BOOTSTRAP_HANDLE_IDX] = new Handle(this.opcode(), toOwner(this.owner()), this.name(), this.descriptor().descriptorString(), this.isInterface());
-            // so here's what's happening...
-            // the dynamicMethodType needs to match the parameters being passed in at
-            // runtime. The dynamicReturnType is then updated to match the descriptor
-            // of the method handle, except it sometimes drop the first parameter ensuring
-            // the parameter count doesn't change
-            final Type dynamicMethodType = (Type) arguments[DYNAMIC_TYPE_IDX];
-            final Type[] argumentTypes = dynamicMethodType.getArgumentTypes();
-            final MethodTypeDesc newDynamicMethodType = this.descriptor()
-                .dropParameterTypes(0, this.descriptor().parameterCount() - argumentTypes.length)
-                // preserve original return type due to boxing/unboxing
-                .changeReturnType(ClassDesc.ofDescriptor(dynamicMethodType.getReturnType().getDescriptor()));
-            arguments[DYNAMIC_TYPE_IDX] = Type.getMethodType(newDynamicMethodType.descriptorString());
+            if (this.handleExtras != null) {
+                this.handleExtras.accept(arguments);
+            }
         }
 
         @Override
         public Rewrite<GeneratedMethodHolder.MethodCallData> withNamePrefix(final String prefix) {
-            return new RewriteSingle(this.opcode(), this.owner(), prefix + this.name(), this.descriptor(), this.isInterface(), this.isInvokeDynamic(), this.generatorInfo());
+            return new RewriteSingle(this.opcode(), this.owner(), prefix + this.name(), this.descriptor(), this.isInterface(), this.isInvokeDynamic(), this.generatorInfo(), this.handleExtras());
         }
 
         @Override
         public Rewrite<GeneratedMethodHolder.MethodCallData> withGeneratorInfo(final GeneratedMethodHolder holder, final GeneratedMethodHolder.MethodCallData original) {
-            return new RewriteSingle(this.opcode(), this.owner(), this.name(), this.descriptor(), this.isInterface(), this.isInvokeDynamic(), new GeneratorInfo<>(holder, original));
+            return new RewriteSingle(this.opcode(), this.owner(), this.name(), this.descriptor(), this.isInterface(), this.isInvokeDynamic(), new GeneratorInfo<>(holder, original), this.handleExtras());
+        }
+
+        @Override
+        public Rewrite<GeneratedMethodHolder.MethodCallData> withHandleExtras(final Consumer<Object[]> extras) {
+            return new RewriteSingle(this.opcode(), this.owner(), this.name(), this.descriptor(), this.isInterface(), this.isInvokeDynamic(), this.generatorInfo(), extras);
         }
 
         @Override

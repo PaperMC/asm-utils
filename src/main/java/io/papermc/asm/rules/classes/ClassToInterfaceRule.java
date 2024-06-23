@@ -43,7 +43,7 @@ public class ClassToInterfaceRule implements RewriteRule.Delegate {
         }
 
         @Override
-        public Rewrite<?> rewrite(final ClassProcessingContext context, final boolean isInvokeDynamic, final int opcode, final ClassDesc owner, final String name, final MethodTypeDesc descriptor, final boolean isInterface) {
+        public @Nullable Rewrite<?> rewrite(final ClassProcessingContext context, final boolean isInvokeDynamic, final int opcode, final ClassDesc owner, final String name, final MethodTypeDesc descriptor, final boolean isInterface) {
             if (isStatic(opcode, isInvokeDynamic)) {
                 return new RewriteSingle(opcode, owner, name, descriptor, true, isInvokeDynamic);
             }
@@ -55,7 +55,7 @@ public class ClassToInterfaceRule implements RewriteRule.Delegate {
             } else if (ClassToInterfaceRule.this.redirectExtension != null && opcode == Opcodes.INVOKESPECIAL && StaticRewrite.CONSTRUCTOR_METHOD_NAME.equals(name)) {
                 return new RewriteSingle(opcode, ClassToInterfaceRule.this.redirectExtension, name, descriptor, isInterface, isInvokeDynamic);
             } else {
-                throw new IllegalStateException("Unexpected opcode: " + opcode + ". There should only be invokevirtual or h_invokevirtual opcodes here.");
+                return null; // just don't rewrite if nothing matches (maybe they already compiled against the interface)
             }
             return new RewriteSingle(newOpcode, owner, name, descriptor, true, isInvokeDynamic);
         }
