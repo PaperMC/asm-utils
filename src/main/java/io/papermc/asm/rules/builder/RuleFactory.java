@@ -70,7 +70,13 @@ public interface RuleFactory {
 
     void changeReturnTypeDirectWithContext(ClassDesc newReturnType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
 
-    void changeFieldToMethod(Consumer<? super FieldMatcher.Builder> builderConsumer, @Nullable String getterName, @Nullable String setterName, boolean isInterfaceMethod);
+    void changeFieldToMethod(@Nullable String getterName, @Nullable String setterName, boolean isInterfaceMethod, Consumer<? super FieldMatcher.Builder> builderConsumer);
+
+    default void moveInstanceMethod(final Class<?> newOwner, final String newMethodName, final Consumer<? super MethodMatcher.Builder> builderConsumer) {
+        this.moveInstanceMethod(desc(newOwner), newMethodName, builderConsumer);
+    }
+
+    void moveInstanceMethod(ClassDesc newOwner, String newMethodName, Consumer<? super MethodMatcher.Builder> builderConsumer);
 
     void addRule(RewriteRule rule);
 

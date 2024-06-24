@@ -5,6 +5,8 @@ import io.papermc.asm.ClassInfoProvider;
 import io.papermc.asm.ClassProcessingContext;
 import io.papermc.asm.rules.RewriteRule;
 import io.papermc.asm.rules.method.MethodRewriteRule;
+import io.papermc.asm.rules.method.rewrite.MethodRewrite;
+import io.papermc.asm.rules.method.rewrite.SimpleRewrite;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.util.Set;
@@ -42,7 +44,7 @@ public final class DefineClassRule implements MethodRewriteRule {
     // extend (S)CL. However since the MethodHandles.Lookup portion always needs to run, the actual benefit would
     // be beyond minute (if not actually worse).
     @Override
-    public @Nullable Rewrite<?> rewrite(
+    public @Nullable MethodRewrite<?> rewrite(
         final ClassProcessingContext context,
         final boolean isInvokeDynamic,
         final int opcode,
@@ -57,7 +59,7 @@ public final class DefineClassRule implements MethodRewriteRule {
         }
         if (owner.equals("java/lang/invoke/MethodHandles$Lookup") && descriptor.descriptorString().equals("([B)Ljava/lang/Class;")) {
             descriptor = descriptor.insertParameterTypes(0, fromOwner("java/lang/invoke/MethodHandles$Lookup"));
-            new RewriteSingle(staticOp(isInvokeDynamic), this.proxy, name, descriptor, false, isInvokeDynamic);
+            new SimpleRewrite(staticOp(isInvokeDynamic), this.proxy, name, descriptor, false, isInvokeDynamic);
         }
         final @Nullable String superName = context.processingClassSuperClassName();
         if (superName != null) {
@@ -74,9 +76,9 @@ public final class DefineClassRule implements MethodRewriteRule {
         return null;
     }
 
-    private MethodRewriteRule.Rewrite<?> classLoaderRewrite(final boolean isInvokeDynamic, final String name, MethodTypeDesc descriptor) {
+    private MethodRewrite<?> classLoaderRewrite(final boolean isInvokeDynamic, final String name, MethodTypeDesc descriptor) {
         descriptor = descriptor.insertParameterTypes(0, fromOwner("java/lang/Object"));
-        return new RewriteSingle(staticOp(isInvokeDynamic), this.proxy, name, descriptor, false, isInvokeDynamic);
+        return new SimpleRewrite(staticOp(isInvokeDynamic), this.proxy, name, descriptor, false, isInvokeDynamic);
     }
 
     private boolean isSecureClassLoader(final ClassInfoProvider classInfoProvider, final String className) {

@@ -4,6 +4,8 @@ import io.papermc.asm.ClassProcessingContext;
 import io.papermc.asm.rules.RewriteRule;
 import io.papermc.asm.rules.method.OwnableMethodRewriteRule;
 import io.papermc.asm.rules.method.StaticRewrite;
+import io.papermc.asm.rules.method.rewrite.MethodRewrite;
+import io.papermc.asm.rules.method.rewrite.SimpleRewrite;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.util.Set;
@@ -14,12 +16,21 @@ import org.objectweb.asm.Opcodes;
 import static io.papermc.asm.util.DescriptorUtils.toOwner;
 import static io.papermc.asm.util.OpcodeUtils.isStatic;
 
+/**
+ * Rewrites all methods on a target class to be interface methods.
+ */
 public class ClassToInterfaceRule implements RewriteRule.Delegate {
 
     private final ClassDesc owner;
     private final @Nullable ClassDesc redirectExtension;
     private final RewriteRule rule;
 
+    /**
+     * Rewrites all methods on a target class to be interface methods.
+     *
+     * @param owner the class to target
+     * @param redirectExtension an optional new owner for the methods to maintain more compatibility if the bytecode extended the owner type
+     */
     public ClassToInterfaceRule(final ClassDesc owner, final @Nullable ClassDesc redirectExtension) {
         this.owner = owner;
         this.redirectExtension = redirectExtension;
@@ -43,9 +54,9 @@ public class ClassToInterfaceRule implements RewriteRule.Delegate {
         }
 
         @Override
-        public @Nullable Rewrite<?> rewrite(final ClassProcessingContext context, final boolean isInvokeDynamic, final int opcode, final ClassDesc owner, final String name, final MethodTypeDesc descriptor, final boolean isInterface) {
+        public @Nullable MethodRewrite<?> rewrite(final ClassProcessingContext context, final boolean isInvokeDynamic, final int opcode, final ClassDesc owner, final String name, final MethodTypeDesc descriptor, final boolean isInterface) {
             if (isStatic(opcode, isInvokeDynamic)) {
-                return new RewriteSingle(opcode, owner, name, descriptor, true, isInvokeDynamic);
+                return new SimpleRewrite(opcode, owner, name, descriptor, true, isInvokeDynamic);
             }
             final int newOpcode;
             if (isInvokeDynamic && opcode == Opcodes.H_INVOKEVIRTUAL) {
@@ -53,11 +64,11 @@ public class ClassToInterfaceRule implements RewriteRule.Delegate {
             } else if (!isInvokeDynamic && opcode == Opcodes.INVOKEVIRTUAL) {
                 newOpcode = Opcodes.INVOKEINTERFACE;
             } else if (ClassToInterfaceRule.this.redirectExtension != null && opcode == Opcodes.INVOKESPECIAL && StaticRewrite.CONSTRUCTOR_METHOD_NAME.equals(name)) {
-                return new RewriteSingle(opcode, ClassToInterfaceRule.this.redirectExtension, name, descriptor, isInterface, isInvokeDynamic);
+                return new SimpleRewrite(opcode, ClassToInterfaceRule.this.redirectExtension, name, descriptor, isInterface, isInvokeDynamic);
             } else {
                 return null; // just don't rewrite if nothing matches (maybe they already compiled against the interface)
             }
-            return new RewriteSingle(newOpcode, owner, name, descriptor, true, isInvokeDynamic);
+            return new SimpleRewrite(newOpcode, owner, name, descriptor, true, isInvokeDynamic);
         }
     }
 

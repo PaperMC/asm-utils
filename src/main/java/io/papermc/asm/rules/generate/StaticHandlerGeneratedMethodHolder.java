@@ -9,11 +9,11 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 
 import static io.papermc.asm.util.OpcodeUtils.isStatic;
 
-public interface StaticRewriteGeneratedMethodHolder extends GeneratedMethodHolder {
+public interface StaticHandlerGeneratedMethodHolder extends GeneratedMethodHolder {
 
     Method staticHandler();
 
-    interface Param extends StaticRewriteGeneratedMethodHolder, GeneratedMethodSource<Set<Integer>> {
+    interface Param extends StaticHandlerGeneratedMethodHolder, GeneratedMethodSource<Set<Integer>> {
 
         @Override
         default void generateParameters(final GeneratorAdapter methodGenerator, final MethodTypeDesc descriptor, final Set<Integer> oldParamPositions) {
@@ -31,7 +31,7 @@ public interface StaticRewriteGeneratedMethodHolder extends GeneratedMethodHolde
         }
     }
 
-    interface Return extends StaticRewriteGeneratedMethodHolder, GeneratedMethodSource.NoContext {
+    interface Return extends StaticHandlerGeneratedMethodHolder, GeneratedMethodSource.NoContext {
 
         boolean includeOwnerContext();
 

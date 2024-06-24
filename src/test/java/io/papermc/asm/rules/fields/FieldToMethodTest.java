@@ -16,14 +16,14 @@ class FieldToMethodTest {
     void testFieldToMethodSameOwner(final TransformerCheck check) {
         final RewriteRule rule = RewriteRule.forOwnerClass(FieldHolder.class, builder -> {
             builder.changeFieldToMethod(
-                b -> b.names("staticField").desc(STRING),
                 "getStaticField", "setStaticField",
-                false
+                false,
+                b -> b.names("staticField").desc(STRING)
             );
             builder.changeFieldToMethod(
-                b -> b.names("instanceField").desc(STRING),
                 "getInstanceField", "setInstanceField",
-                false
+                false,
+                b -> b.names("instanceField").desc(STRING)
             );
         });
 

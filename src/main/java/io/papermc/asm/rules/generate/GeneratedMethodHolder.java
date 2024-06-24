@@ -3,8 +3,20 @@ package io.papermc.asm.rules.generate;
 import io.papermc.asm.rules.RewriteRule;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.commons.GeneratorAdapter;
 
 public interface GeneratedMethodHolder {
+
+    static void loadParameters(final GeneratorAdapter adapter, final MethodTypeDesc descriptor) {
+        for (int i = 0; i < descriptor.parameterCount(); i++) {
+            adapter.loadArg(i);
+        }
+    }
+
+    default GeneratorAdapter createAdapter(final RewriteRule.GeneratorAdapterFactory factory, final MethodCallData modified) {
+        return factory.create(Opcodes.ACC_PUBLIC | Opcodes.ACC_SYNTHETIC | Opcodes.ACC_STATIC, modified.name(), modified.descriptor().descriptorString());
+    }
 
     /**
      * Generates a method with the provided information.

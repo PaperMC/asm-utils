@@ -12,16 +12,17 @@ import org.objectweb.asm.commons.SimpleRemapper;
 
 import static io.papermc.asm.util.DescriptorUtils.toOwner;
 
-public final class RenameRule implements RewriteRule {
+/**
+ * Applies the provided {@link Remapper} to the bytecode.
+ * This is better than {@code asm-commons}'s {@link org.objectweb.asm.commons.ClassRemapper} because this
+ * remaps enum names in annotations.
+ *
+ * @param remapper the remapper to apply
+ */
+public record RenameRule(Remapper remapper) implements RewriteRule {
 
     public static Builder builder() {
         return new Builder();
-    }
-
-    private final Remapper remapper;
-
-    public RenameRule(final Remapper remapper) {
-        this.remapper = remapper;
     }
 
     @Override

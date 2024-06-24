@@ -3,8 +3,8 @@ package io.papermc.asm.rules.generate;
 import io.papermc.asm.rules.RewriteRule;
 import io.papermc.asm.rules.method.StaticRewrite;
 import java.lang.constant.ClassDesc;
+import java.lang.constant.ConstantDescs;
 import java.lang.constant.MethodTypeDesc;
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
@@ -14,8 +14,6 @@ import static io.papermc.asm.util.OpcodeUtils.isStatic;
 import static io.papermc.asm.util.OpcodeUtils.isVirtual;
 
 public interface GeneratedMethodSource<C> extends GeneratedMethodHolder {
-
-    ClassDesc VOID = Void.TYPE.describeConstable().orElseThrow();
 
     /**
      * Transforms the descriptor of the generated method to the descriptor
@@ -29,23 +27,21 @@ public interface GeneratedMethodSource<C> extends GeneratedMethodHolder {
     MethodTypeDesc transformInvokedDescriptor(final MethodTypeDesc original, final C context);
 
     default void generateParameters(final GeneratorAdapter methodGenerator, final MethodTypeDesc descriptor, final C context) {
-        for (int i = 0; i < descriptor.parameterCount(); i++) {
-            methodGenerator.loadArg(i);
-        }
+        GeneratedMethodHolder.loadParameters(methodGenerator, descriptor);
     }
 
     @Override
     default void generateConstructor(final RewriteRule.GeneratorAdapterFactory factory, final MethodCallData modified, final ConstructorCallData original) {
         final ClassDesc methodOwner = original.owner();
         final C context = this.createNewContext();
-        final GeneratorAdapter methodGenerator = factory.create(Opcodes.ACC_PUBLIC | Opcodes.ACC_SYNTHETIC | Opcodes.ACC_STATIC, modified.name(), modified.descriptor().descriptorString());
+        final GeneratorAdapter methodGenerator = this.createAdapter(factory, modified);
         final MethodTypeDesc transformedInvokedDescriptor = this.transformInvokedDescriptor(modified.descriptor(), context);
         final Type type = Type.getType(methodOwner.descriptorString());
         methodGenerator.newInstance(type);
         methodGenerator.dup();
         this.generateParameters(methodGenerator, modified.descriptor(), context);
         // change return type to VOID because we are calling a constructor
-        methodGenerator.invokeConstructor(type, new Method(StaticRewrite.CONSTRUCTOR_METHOD_NAME, transformedInvokedDescriptor.changeReturnType(VOID).descriptorString()));
+        methodGenerator.invokeConstructor(type, new Method(StaticRewrite.CONSTRUCTOR_METHOD_NAME, transformedInvokedDescriptor.changeReturnType(ConstantDescs.CD_void).descriptorString()));
         this.generateReturnValue(methodGenerator, original);
         methodGenerator.endMethod();
     }
@@ -54,7 +50,7 @@ public interface GeneratedMethodSource<C> extends GeneratedMethodHolder {
     default void generateMethod(final RewriteRule.GeneratorAdapterFactory factory, final MethodCallData modified, final MethodCallData original) {
         final ClassDesc methodOwner = original.owner();
         final C context = this.createNewContext();
-        final GeneratorAdapter methodGenerator = factory.create(Opcodes.ACC_PUBLIC | Opcodes.ACC_SYNTHETIC | Opcodes.ACC_STATIC, modified.name(), modified.descriptor().descriptorString());
+        final GeneratorAdapter methodGenerator = this.createAdapter(factory, modified);
         MethodTypeDesc transformedInvokedDescriptor = this.transformInvokedDescriptor(modified.descriptor(), context);
         final boolean isInterfaceCall = isInterface(original.opcode(), original.isInvokeDynamic());
         if (isVirtual(original.opcode(), original.isInvokeDynamic()) || isInterfaceCall) {
