@@ -19,7 +19,7 @@ import static io.papermc.asm.util.OpcodeUtils.isStatic;
 /**
  * Rewrites all methods on a target class to be interface methods.
  */
-public class ClassToInterfaceRule implements RewriteRule.Delegate {
+public final class ClassToInterfaceRule implements RewriteRule.Delegate {
 
     private final ClassDesc owner;
     private final @Nullable ClassDesc redirectExtension;

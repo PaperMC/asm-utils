@@ -90,7 +90,7 @@ public final class TestUtil {
             JAVAP_PROVIDER.run(actualWriter, actualWriter, command);
             final String actualJavap = actualStringWriter.toString();
 
-            assertEquals(expectedJavap, actualJavap, () -> "Transformed class bytes did not match expected for " + name);
+            assertEquals(expectedJavap, actualJavap, () -> "Transformed class bytes did not match expected for " + name + ".class");
         } catch (final IOException exception) {
             exception.printStackTrace();
             System.err.println("Failed to diff class bytes using javap, falling back to direct byte comparison.");
@@ -141,7 +141,7 @@ public final class TestUtil {
                 assertArrayEquals(
                     expected.get(name),
                     processed.get(name),
-                    () -> "Transformed class bytes did not match expected for " + name
+                    () -> "Transformed class bytes did not match expected for " + name + ".class"
                 );
             }
         }

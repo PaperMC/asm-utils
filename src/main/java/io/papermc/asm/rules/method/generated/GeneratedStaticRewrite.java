@@ -8,6 +8,7 @@ import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
 
 import static io.papermc.asm.util.DescriptorUtils.fromOwner;
+import static io.papermc.asm.util.DescriptorUtils.toOwner;
 
 /**
  * A static rewrite which generates the method that the bytecode will be redirected to.
@@ -24,14 +25,14 @@ public interface GeneratedStaticRewrite extends StaticRewrite, GeneratedMethodHo
     @Override
     default MethodRewrite<MethodCallData> createRewrite(final ClassProcessingContext context, final MethodTypeDesc intermediateDescriptor, final MethodCallData originalCallData) {
         return StaticRewrite.super.createRewrite(context, intermediateDescriptor, originalCallData)
-            .withNamePrefix(GENERATED_PREFIX)
+            .withNamePrefix(GENERATED_PREFIX + toOwner(originalCallData.owner()).replace('/', '_') + "$")
             .withGeneratorInfo(this, originalCallData);
     }
 
     @Override
     default MethodRewrite<ConstructorCallData> createConstructorRewrite(final ClassProcessingContext context, final MethodTypeDesc intermediateDescriptor, final ConstructorCallData originalCallData) {
         return StaticRewrite.super.createConstructorRewrite(context, intermediateDescriptor, originalCallData)
-            .withNamePrefix(GENERATED_PREFIX)
+            .withNamePrefix(GENERATED_PREFIX + toOwner(originalCallData.owner()).replace('/', '_') + "$")
             .withGeneratorInfo(this, originalCallData);
     }
 }
