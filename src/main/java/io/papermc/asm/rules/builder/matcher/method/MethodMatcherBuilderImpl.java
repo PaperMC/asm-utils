@@ -1,7 +1,6 @@
 package io.papermc.asm.rules.builder.matcher.method;
 
 import io.papermc.asm.rules.method.StaticRewrite;
-import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.util.Arrays;
 import java.util.Collection;
@@ -43,16 +42,7 @@ class MethodMatcherBuilderImpl implements MethodMatcherBuilder {
     }
 
     @Override
-    public MethodMatcherBuilder hasParam(final ClassDesc paramClassDesc) {
-        return this.desc(d -> d.parameterList().contains(paramClassDesc));
-    }
-
-    @Override
-    public MethodMatcherBuilder hasReturn(final ClassDesc returnClassDesc) {
-        return this.desc(d -> d.returnType().equals(returnClassDesc));
-    }
-
-    private MethodMatcherBuilder desc(final Predicate<? super MethodTypeDesc> descPredicate) {
+    public MethodMatcherBuilder desc(final Predicate<? super MethodTypeDesc> descPredicate) {
         this.matcher = this.matcher.and(descPredicate);
         return this;
     }
@@ -74,39 +64,9 @@ class MethodMatcherBuilderImpl implements MethodMatcherBuilder {
         }
 
         @Override
-        public MatchBuilder virtual() {
-            return this.type(MethodType.VIRTUAL);
-        }
-
-        @Override
-        public MatchBuilder statik() {
-            return this.type(MethodType.STATIC);
-        }
-
-        @Override
         public MatchBuilder type(final MethodType...types) {
             this.opcodePredicate = (o, b) -> Arrays.stream(types).anyMatch(type -> type.matches(o, b));
             return this;
-        }
-
-        @Override
-        public MatchBuilder hasParam(final ClassDesc paramClassDesc) {
-            return this.desc(d -> d.parameterList().contains(paramClassDesc));
-        }
-
-        @Override
-        public MatchBuilder hasReturn(final ClassDesc returnClassDesc) {
-            return this.desc(d -> d.returnType().equals(returnClassDesc));
-        }
-
-        @Override
-        public MatchBuilder desc(final String...descriptors) {
-            return this.desc(desc -> Arrays.stream(descriptors).anyMatch(d -> desc.descriptorString().equals(d)));
-        }
-
-        @Override
-        public MatchBuilder desc(final MethodTypeDesc...descriptors) {
-            return this.desc(desc -> Arrays.asList(descriptors).contains(desc));
         }
 
         @Override

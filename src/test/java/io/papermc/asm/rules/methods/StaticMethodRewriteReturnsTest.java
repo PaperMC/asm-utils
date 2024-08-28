@@ -27,7 +27,7 @@ class StaticMethodRewriteReturnsTest {
                 TargetedMethodMatcher.builder()
                     .match("getLoc", b -> b.virtual())
                     .match("getLocStatic", b -> b.statik())
-                    .hasReturn(LOCATION)
+                    .targetReturn(LOCATION)
                     .build()
             );
         });
@@ -45,7 +45,7 @@ class StaticMethodRewriteReturnsTest {
                 TargetedMethodMatcher.builder()
                     .match("getLoc", b -> b.virtual())
                     .match("getLocStatic", b -> b.statik())
-                    .hasReturn(LOCATION)
+                    .targetReturn(LOCATION)
                     .build()
             );
         });

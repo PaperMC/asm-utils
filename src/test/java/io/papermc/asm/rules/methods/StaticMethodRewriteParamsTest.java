@@ -27,7 +27,7 @@ class StaticMethodRewriteParamsTest {
                 TargetedMethodMatcher.builder()
                     .match("consumeLoc", b -> b.virtual())
                     .match("consumeLocStatic", b -> b.statik())
-                    .hasParam(LOCATION)
+                    .targetParam(LOCATION)
                     .build()
             )
         );
@@ -35,7 +35,7 @@ class StaticMethodRewriteParamsTest {
             builder.changeParamDirect(
                 POSITION,
                 handler,
-                TargetedMethodMatcher.builder().ctor().hasParam(LOCATION).build()
+                TargetedMethodMatcher.builder().ctor().targetParam(LOCATION).build()
             );
         });
         check.run(RewriteRule.chain(rule, ctorRule));
@@ -52,7 +52,7 @@ class StaticMethodRewriteParamsTest {
                 TargetedMethodMatcher.builder()
                     .match("consumePos", b -> b.virtual())
                     .match("consumePosStatic", b -> b.statik())
-                    .hasParam(POSITION)
+                    .targetParam(POSITION)
                     .build()
             );
         });
@@ -60,7 +60,7 @@ class StaticMethodRewriteParamsTest {
             builder.changeParamFuzzy(
                 POSITION,
                 handler,
-                TargetedMethodMatcher.builder().ctor().hasParam(POSITION).build()
+                TargetedMethodMatcher.builder().ctor().targetParam(POSITION).build()
             );
         });
         check.run(RewriteRule.chain(rule, ctorRule));

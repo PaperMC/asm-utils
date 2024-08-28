@@ -17,7 +17,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 class TargetedMethodMatcherBuilderImpl implements TargetedMethodMatcherBuilder {
 
     private MethodMatcher matcher = (opcode, isInvokeDynamic, name, descriptor) -> false;
-    private @MonotonicNonNull Predicate<MethodTypeDesc> byDesc;
+    private Predicate<MethodTypeDesc> byDesc = $ -> true;
     private @MonotonicNonNull ClassDesc oldType;
 
     TargetedMethodMatcherBuilderImpl() {
@@ -43,28 +43,32 @@ class TargetedMethodMatcherBuilderImpl implements TargetedMethodMatcherBuilder {
     }
 
     @Override
-    public TargetedMethodMatcherBuilder hasParam(final ClassDesc classDesc) {
+    public TargetedMethodMatcherBuilder targetParam(final ClassDesc classDesc) {
         if (this.oldType != null) {
             throw new IllegalArgumentException("Targeted type was already set to " + this.oldType);
         }
         this.oldType = classDesc;
-        this.byDesc = d -> d.parameterList().contains(classDesc);
-        return this;
+        return this.hasParam(classDesc);
     }
 
     @Override
-    public TargetedMethodMatcherBuilder hasReturn(final ClassDesc classDesc) {
+    public TargetedMethodMatcherBuilder targetReturn(final ClassDesc classDesc) {
         if (this.oldType != null) {
             throw new IllegalArgumentException("Targeted type was already set to " + this.oldType);
         }
         this.oldType = classDesc;
-        this.byDesc = d -> d.returnType().equals(classDesc);
+        return this.hasReturn(classDesc);
+    }
+
+    @Override
+    public TargetedMethodMatcherBuilder desc(final Predicate<? super MethodTypeDesc> descPredicate) {
+        this.byDesc = this.byDesc.and(descPredicate);
         return this;
     }
 
     @Override
     public TargetedMethodMatcher build() {
-        if (this.oldType == null || this.byDesc == null) {
+        if (this.oldType == null) {
             throw new IllegalStateException("Targeted type was not set");
         }
         final MethodMatcher finalMatcher = this.matcher.and(this.byDesc);
@@ -74,7 +78,8 @@ class TargetedMethodMatcherBuilderImpl implements TargetedMethodMatcherBuilder {
     final class SpecificMatchBuilder implements TargetedMethodMatcherBuilder.MatchBuilder {
 
         private final Predicate<String> namePredicate;
-        private @MonotonicNonNull OpcodePredicate opcodePredicate;
+        private Predicate<? super MethodTypeDesc> bytecodeDescPredicate = $ -> true;
+        private OpcodePredicate opcodePredicate = ($, $$) -> true;
 
         private SpecificMatchBuilder(final Predicate<String> namePredicate) {
             this.namePredicate = namePredicate;
@@ -82,23 +87,21 @@ class TargetedMethodMatcherBuilderImpl implements TargetedMethodMatcherBuilder {
 
         private void apply() {
             TargetedMethodMatcherBuilderImpl.this.matcher = TargetedMethodMatcherBuilderImpl.this.matcher.or((o, isInvokeDynamic, n, d) -> {
-                return this.namePredicate.test(n) && this.opcodePredicate.matches(o, isInvokeDynamic);
+                return this.namePredicate.test(n)
+                    && this.opcodePredicate.matches(o, isInvokeDynamic)
+                    && this.bytecodeDescPredicate.test(MethodTypeDesc.ofDescriptor(d));
             });
-        }
-
-        @Override
-        public TargetedMethodMatcherBuilder.MatchBuilder virtual() {
-            return this.type(MethodType.VIRTUAL);
-        }
-
-        @Override
-        public TargetedMethodMatcherBuilder.MatchBuilder statik() {
-            return this.type(MethodType.STATIC);
         }
 
         @Override
         public TargetedMethodMatcherBuilder.MatchBuilder type(final MethodType... types) {
             this.opcodePredicate = (o, b) -> Arrays.stream(types).anyMatch(type -> type.matches(o, b));
+            return this;
+        }
+
+        @Override
+        public MatchBuilder desc(final Predicate<? super MethodTypeDesc> descPredicate) {
+            this.bytecodeDescPredicate = descPredicate;
             return this;
         }
     }
