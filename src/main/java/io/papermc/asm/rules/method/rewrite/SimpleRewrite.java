@@ -53,13 +53,12 @@ public record SimpleRewrite(
     }
 
     @Override
-    public MethodRewrite<GeneratedMethodHolder.MethodCallData> withNamePrefix(final String prefix) {
-        return new SimpleRewrite(this.opcode(), this.owner(), prefix + this.name(), this.descriptor(), this.isInterface(), this.isInvokeDynamic(), this.generatorInfo(), this.handleExtras());
-    }
-
-    @Override
     public MethodRewrite<GeneratedMethodHolder.MethodCallData> withGeneratorInfo(final GeneratedMethodHolder holder, final GeneratedMethodHolder.MethodCallData original) {
-        return new SimpleRewrite(this.opcode(), this.owner(), this.name(), this.descriptor(), this.isInterface(), this.isInvokeDynamic(), new GeneratorInfo<>(holder, original), this.handleExtras());
+        if (this.generatorInfo != null) {
+            throw new IllegalStateException("Generator info already set");
+        }
+        final String methodName = GENERATED_PREFIX + toOwner(original.owner()).replace('/', '_') + "$" + this.name();
+        return new SimpleRewrite(this.opcode(), this.owner(), methodName, this.descriptor(), this.isInterface(), this.isInvokeDynamic(), new GeneratorInfo<>(holder, original), this.handleExtras());
     }
 
     @Override

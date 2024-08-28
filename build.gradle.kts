@@ -76,6 +76,7 @@ allprojects {
         testRuntimeOnly(rootProject.libs.jupiterEngine)
     }
 }
+val mainForNewTargets = sourceSets.create("mainForNewTargets")
 
 val testDataSet = sourceSets.create("testData")
 val testDataNewTargets = sourceSets.create("testDataNewTargets")
@@ -87,8 +88,11 @@ val filtered = tasks.register<FilterTestClasspath>("filteredTestClasspath") {
 }
 
 dependencies {
+    implementation(mainForNewTargets.output)
     testImplementation(files(filtered.flatMap { it.outputDir }))
     testImplementation(testDataNewTargets.output)
+
+    testDataNewTargets.implementationConfigurationName(mainForNewTargets.output)
 }
 
 abstract class FilterTestClasspath : DefaultTask() {

@@ -23,6 +23,10 @@ public final class OpcodeUtils {
         return opcode == (invokeDynamic ? Opcodes.H_INVOKEINTERFACE : Opcodes.INVOKEINTERFACE);
     }
 
+    public static boolean isDynamic(final int opcode, final boolean invokeDynamic) {
+        return !invokeDynamic && opcode == Opcodes.INVOKEDYNAMIC;
+    }
+
     public static int virtualOp(final boolean invokeDynamic) {
         return invokeDynamic ? Opcodes.H_INVOKEVIRTUAL : Opcodes.INVOKEVIRTUAL;
     }

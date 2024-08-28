@@ -82,13 +82,9 @@ public record ConstructorRewrite(
     }
 
     @Override
-    public MethodRewrite<GeneratedMethodHolder.ConstructorCallData> withNamePrefix(final String prefix) {
-        return new ConstructorRewrite(this.staticRedirectOwner(), this.constructorOwner(), prefix + this.methodName(), this.descriptor(), this.generatorInfo());
-    }
-
-    @Override
     public MethodRewrite<GeneratedMethodHolder.ConstructorCallData> withGeneratorInfo(final GeneratedMethodHolder holder, final GeneratedMethodHolder.ConstructorCallData original) {
-        return new ConstructorRewrite(this.staticRedirectOwner(), this.constructorOwner(), this.methodName(), this.descriptor(), new GeneratorInfo<>(holder, original));
+        final String methodName = GENERATED_PREFIX + toOwner(original.owner()).replace('/', '_') + "$" + this.methodName();
+        return new ConstructorRewrite(this.staticRedirectOwner(), this.constructorOwner(), methodName, this.descriptor(), new GeneratorInfo<>(holder, original));
     }
 
     @Override

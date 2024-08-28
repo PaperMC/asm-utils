@@ -17,6 +17,7 @@ public interface MethodRewrite<D extends GeneratedMethodHolder.CallData> {
 
     int BOOTSTRAP_HANDLE_IDX = 1;
     int DYNAMIC_TYPE_IDX = 2;
+    String GENERATED_PREFIX = "paperAsmGenerated$";
 
     /**
      * Called to apply the rewrite when a matching invoke non-dynamic instruction is found.
@@ -41,14 +42,6 @@ public interface MethodRewrite<D extends GeneratedMethodHolder.CallData> {
      * @return the new rewrite
      */
     MethodRewrite<D> withGeneratorInfo(GeneratedMethodHolder holder, D original);
-
-    /**
-     * Creates a new {@link MethodRewrite} with the given name prefix.
-     *
-     * @param prefix the prefix to add to the method name
-     * @return the new rewrite
-     */
-    MethodRewrite<D> withNamePrefix(String prefix);
 
     /**
      * Creates a new {@link MethodRewrite} with the given "extras" handler. This

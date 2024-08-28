@@ -3,8 +3,10 @@ package io.papermc.asm.rules.builder.matcher;
 import io.papermc.asm.rules.method.StaticRewrite;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
@@ -18,6 +20,7 @@ public interface TargetedMethodMatcher extends MethodMatcher {
 
         private Predicate<String> byName = $ -> false;
         private Predicate<MethodTypeDesc> byDesc = $ -> false;
+        private IntPredicate opcodePredicate = $ -> true;
         private @MonotonicNonNull ClassDesc oldType;
 
         Builder() {
@@ -33,6 +36,11 @@ public interface TargetedMethodMatcher extends MethodMatcher {
 
         public Builder names(final Collection<String> names) {
             this.byName = this.byName.or(names::contains);
+            return this;
+        }
+
+        public Builder opcode(final int...opcodes) {
+            this.opcodePredicate = o -> Arrays.stream(opcodes).anyMatch(opcode -> opcode == o);
             return this;
         }
 
@@ -55,7 +63,9 @@ public interface TargetedMethodMatcher extends MethodMatcher {
 
         @Override
         public TargetedMethodMatcher build() {
-            return new TargetedMethodMatcherImpl(this.byName, this.byDesc, requireNonNull(this.oldType));
+            final MethodMatcher matcher = (opcode, isInvokeDynamic, name, descriptor) ->
+                this.opcodePredicate.test(opcode) && this.byName.test(name) && this.byDesc.test(MethodTypeDesc.ofDescriptor(descriptor));
+            return new TargetedMethodMatcherImpl(matcher, requireNonNull(this.oldType));
         }
     }
 }

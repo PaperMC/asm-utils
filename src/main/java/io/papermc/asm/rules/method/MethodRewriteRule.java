@@ -32,9 +32,10 @@ public interface MethodRewriteRule extends RewriteRule {
      * @param name the method name
      * @param descriptor the method descriptor
      * @param isInterface if the owning class is an interface
+     * @param isInvokeDynamic if the method call is from an invokedynamic instruction
      * @return true to continue processing the instruction
      */
-    default boolean shouldProcess(final ClassProcessingContext context, final int opcode, final String owner, final String name, final String descriptor, final boolean isInterface) {
+    default boolean shouldProcess(final ClassProcessingContext context, final int opcode, final String owner, final String name, final String descriptor, final boolean isInterface, final boolean isInvokeDynamic) {
         return true;
     }
 
@@ -67,7 +68,7 @@ public interface MethodRewriteRule extends RewriteRule {
                 return new MethodVisitor(this.api, mn) {
                     @Override
                     public void visitMethodInsn(final int opcode, final String owner, final String name, final String descriptor, final boolean isInterface) {
-                        if (MethodRewriteRule.this.shouldProcess(context, opcode, owner, name, descriptor, isInterface)) {
+                        if (MethodRewriteRule.this.shouldProcess(context, opcode, owner, name, descriptor, isInterface, false)) {
                             final ClassDesc methodOwner = fromOwner(owner);
                             final MethodTypeDesc methodDesc = methodDesc(descriptor);
                             final @Nullable MethodRewrite<?> rewrite = MethodRewriteRule.this.rewrite(context, false, opcode, methodOwner, name, methodDesc, isInterface);
@@ -86,7 +87,7 @@ public interface MethodRewriteRule extends RewriteRule {
                     @Override
                     public void visitInvokeDynamicInsn(final String name, final String descriptor, final Handle bootstrapMethodHandle, final Object... bootstrapMethodArguments) {
                         if (LAMBDA_METAFACTORY_OWNER.equals(bootstrapMethodHandle.getOwner()) && bootstrapMethodArguments.length > 1 && bootstrapMethodArguments[1] instanceof final Handle handle) {
-                            if (MethodRewriteRule.this.shouldProcess(context, handle.getTag(), handle.getOwner(), handle.getName(), handle.getDesc(), handle.isInterface())) {
+                            if (MethodRewriteRule.this.shouldProcess(context, handle.getTag(), handle.getOwner(), handle.getName(), handle.getDesc(), handle.isInterface(), true)) {
                                 final ClassDesc handleOwner = fromOwner(handle.getOwner());
                                 final MethodTypeDesc handleDesc = methodDesc(handle.getDesc());
                                 final @Nullable MethodRewrite<?> rewrite = MethodRewriteRule.this.rewrite(context, true, handle.getTag(), handleOwner, handle.getName(), handleDesc, handle.isInterface());

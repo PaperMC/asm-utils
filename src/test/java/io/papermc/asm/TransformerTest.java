@@ -18,4 +18,6 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 public @interface TransformerTest {
     @Language("jvm-class-name")
     String value();
+
+    boolean copyFromClassReader() default true;
 }

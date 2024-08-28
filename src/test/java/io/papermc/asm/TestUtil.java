@@ -48,11 +48,16 @@ public final class TestUtil {
         byte[] process(byte[] bytes) throws E;
     }
 
-    public record DefaultProcessor(RewriteRuleVisitorFactory factory) implements Processor<RuntimeException> {
+    public record DefaultProcessor(RewriteRuleVisitorFactory factory, boolean copyFromClassReader) implements Processor<RuntimeException> {
         @Override
         public byte[] process(final byte[] bytes) {
             final ClassReader classReader = new ClassReader(bytes);
-            final ClassWriter classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_MAXS);
+            final ClassWriter classWriter;
+            if (this.copyFromClassReader()) {
+                classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_MAXS);
+            } else {
+                classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+            }
             classReader.accept(this.factory.createVisitor(classWriter), 0);
             return classWriter.toByteArray();
         }
@@ -60,9 +65,10 @@ public final class TestUtil {
 
     public static void assertProcessedMatchesExpected(
         final String className,
-        final RewriteRuleVisitorFactory factory
+        final RewriteRuleVisitorFactory factory,
+        final boolean copyFromClassReader
     ) {
-        assertProcessedMatchesExpected_(className, new DefaultProcessor(factory));
+        assertProcessedMatchesExpected_(className, new DefaultProcessor(factory, copyFromClassReader));
     }
 
     private static boolean checkJavapDiff(final String name, final byte[] expected, final byte[] processed, final List<String> javapArgs) {

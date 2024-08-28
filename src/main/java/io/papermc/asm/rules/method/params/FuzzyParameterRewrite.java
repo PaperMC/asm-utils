@@ -46,7 +46,7 @@ public record FuzzyParameterRewrite(Set<ClassDesc> owners, ClassDesc existingTyp
             // so here's what's happening...
             // the dynamicMethodType needs to match the parameters being passed in at
             // runtime. The dynamicReturnType is run through the redirect transformer
-            // to replace correct parameters .
+            // to replace correct parameters.
             .withHandleExtras(arguments -> {
                 final Type dynamicMethodType = (Type) arguments[MethodRewrite.DYNAMIC_TYPE_IDX];
                 final MethodTypeDesc newDynamicMethodType = this.transformToRedirectDescriptor(MethodTypeDesc.ofDescriptor(dynamicMethodType.getDescriptor()));

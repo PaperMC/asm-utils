@@ -1,16 +1,25 @@
 package io.papermc.asm.rules.builder.matcher;
 
 import java.lang.constant.ClassDesc;
-import java.lang.constant.MethodTypeDesc;
-import java.util.function.Predicate;
 
-public class TargetedMethodMatcherImpl extends MethodMatcherImpl implements TargetedMethodMatcher {
+public class TargetedMethodMatcherImpl implements TargetedMethodMatcher {
 
+    private final MethodMatcher wrapped;
     private final ClassDesc oldType;
 
-    TargetedMethodMatcherImpl(final Predicate<String> byName, final Predicate<MethodTypeDesc> byDesc, final ClassDesc oldType) {
-        super(byName, (name, desc) -> byName.test(name) && byDesc.test(MethodTypeDesc.ofDescriptor(desc)));
+    TargetedMethodMatcherImpl(final MethodMatcher wrapped, final ClassDesc oldType) {
+        this.wrapped = wrapped;
         this.oldType = oldType;
+    }
+
+    @Override
+    public boolean matches(final int opcode, final boolean isInvokeDynamic, final String name, final String descriptor) {
+        return this.wrapped.matches(opcode, isInvokeDynamic, name, descriptor);
+    }
+
+    @Override
+    public MethodMatcher negate() {
+        return new TargetedMethodMatcherImpl(this.wrapped.negate(), this.oldType);
     }
 
     @Override
