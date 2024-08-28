@@ -1,7 +1,7 @@
 package io.papermc.asm.rules.method;
 
 import io.papermc.asm.ClassProcessingContext;
-import io.papermc.asm.rules.builder.matcher.MethodMatcher;
+import io.papermc.asm.rules.builder.matcher.method.MethodMatcher;
 import java.lang.constant.ClassDesc;
 import java.util.Set;
 

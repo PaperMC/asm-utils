@@ -1,9 +1,8 @@
 package io.papermc.asm.rules.builder;
 
-import io.papermc.asm.rules.builder.matcher.MethodMatcher;
+import io.papermc.asm.rules.builder.matcher.method.MethodMatcher;
 import java.lang.constant.ClassDesc;
 import java.util.Set;
-import java.util.function.Consumer;
 
 public class ConfiguredRuleFactoryImpl extends RuleFactoryImpl implements ConfiguredRuleFactory {
 
@@ -15,7 +14,7 @@ public class ConfiguredRuleFactoryImpl extends RuleFactoryImpl implements Config
     }
 
     @Override
-    public void plainStaticRewrite(final Consumer<? super MethodMatcher.Builder> builderConsumer) {
-        this.plainStaticRewrite(this.config.delegateOwner(), builderConsumer);
+    public void plainStaticRewrite(final MethodMatcher methodMatcher) {
+        this.plainStaticRewrite(this.config.delegateOwner(), methodMatcher);
     }
 }

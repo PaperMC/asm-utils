@@ -2,7 +2,7 @@ package io.papermc.asm.rules.method;
 
 import io.papermc.asm.ClassProcessingContext;
 import io.papermc.asm.rules.OwnableRewriteRule;
-import io.papermc.asm.rules.builder.matcher.MethodMatcher;
+import io.papermc.asm.rules.builder.matcher.method.MethodMatcher;
 
 /**
  * A rule that targets specific owners.

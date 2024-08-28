@@ -1,9 +1,9 @@
 package io.papermc.asm.rules.builder;
 
 import io.papermc.asm.rules.RewriteRule;
-import io.papermc.asm.rules.builder.matcher.FieldMatcher;
-import io.papermc.asm.rules.builder.matcher.MethodMatcher;
-import io.papermc.asm.rules.builder.matcher.TargetedMethodMatcher;
+import io.papermc.asm.rules.builder.matcher.field.FieldMatcher;
+import io.papermc.asm.rules.builder.matcher.method.MethodMatcher;
+import io.papermc.asm.rules.builder.matcher.method.targeted.TargetedMethodMatcher;
 import io.papermc.asm.rules.field.FieldToMethodRewrite;
 import io.papermc.asm.rules.method.DirectStaticRewrite;
 import io.papermc.asm.rules.method.MoveInstanceMethod;
@@ -39,43 +39,42 @@ class RuleFactoryImpl implements RuleFactory {
     }
 
     @Override
-    public void plainStaticRewrite(final ClassDesc newOwner, final Consumer<? super MethodMatcher.Builder> builderConsumer) {
-        this.addRule(new DirectStaticRewrite(this.owners, build(builderConsumer, MethodMatcher::builder), newOwner));
+    public void plainStaticRewrite(final ClassDesc newOwner, final MethodMatcher methodMatcher) {
+        this.addRule(new DirectStaticRewrite(this.owners, methodMatcher, newOwner));
     }
 
     @Override
-    public void changeParamToSuper(final ClassDesc legacyParamType, final ClassDesc newParamType, final Consumer<? super MethodMatcher.Builder> builderConsumer) {
-        this.addRule(new SuperTypeParamRewrite(this.owners, build(builderConsumer, MethodMatcher::builder), legacyParamType, newParamType));
+    public void changeParamToSuper(final ClassDesc legacyParamType, final ClassDesc newParamType, final MethodMatcher methodMatcher) {
+        this.addRule(new SuperTypeParamRewrite(this.owners, methodMatcher, legacyParamType, newParamType));
     }
 
     @Override
-    public void changeParamFuzzy(final ClassDesc newParamType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.addRule(new FuzzyParameterRewrite(this.owners, newParamType, build(builderConsumer, MethodMatcher::targeted), isStatic(staticHandler)));
+    public void changeParamFuzzy(final ClassDesc newParamType, final Method staticHandler, final TargetedMethodMatcher targetedMethodMatcher) {
+        this.addRule(new FuzzyParameterRewrite(this.owners, newParamType, targetedMethodMatcher, isStatic(staticHandler)));
     }
 
     @Override
-    public void changeParamDirect(final ClassDesc newParamType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.addRule(new DirectParameterRewrite(this.owners, newParamType, build(builderConsumer, MethodMatcher::targeted), isStatic(staticHandler)));
+    public void changeParamDirect(final ClassDesc newParamType, final Method staticHandler, final TargetedMethodMatcher targetedMethodMatcher) {
+        this.addRule(new DirectParameterRewrite(this.owners, newParamType, targetedMethodMatcher, isStatic(staticHandler)));
     }
 
     @Override
-    public void changeReturnTypeToSub(final ClassDesc oldReturnType, final ClassDesc newReturnType, final Consumer<? super MethodMatcher.Builder> builderConsumer) {
-        this.addRule(new SubTypeReturnRewrite(this.owners, build(builderConsumer, MethodMatcher::builder), oldReturnType, newReturnType));
+    public void changeReturnTypeToSub(final ClassDesc oldReturnType, final ClassDesc newReturnType, final MethodMatcher methodMatcher) {
+        this.addRule(new SubTypeReturnRewrite(this.owners, methodMatcher, oldReturnType, newReturnType));
     }
 
     @Override
-    public void changeReturnTypeDirect(final ClassDesc newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.changeReturnTypeDirect(newReturnType, staticHandler, builderConsumer, false);
+    public void changeReturnTypeDirect(final ClassDesc newReturnType, final Method staticHandler, final TargetedMethodMatcher targetedMethodMatcher) {
+        this.changeReturnTypeDirect(newReturnType, staticHandler, targetedMethodMatcher, false);
     }
 
     @Override
-    public void changeReturnTypeDirectWithContext(final ClassDesc newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.changeReturnTypeDirect(newReturnType, staticHandler, builderConsumer, true);
+    public void changeReturnTypeDirectWithContext(final ClassDesc newReturnType, final Method staticHandler, final TargetedMethodMatcher targetedMethodMatcher) {
+        this.changeReturnTypeDirect(newReturnType, staticHandler, targetedMethodMatcher, true);
     }
 
-    private void changeReturnTypeDirect(final ClassDesc newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer, final boolean includeOwnerContext) {
-        final TargetedMethodMatcher matcher = build(builderConsumer, MethodMatcher::targeted);
-        this.addRule(new DirectReturnRewrite(this.owners, newReturnType, matcher, isStatic(staticHandler), includeOwnerContext));
+    private void changeReturnTypeDirect(final ClassDesc newReturnType, final Method staticHandler, final TargetedMethodMatcher targetedMethodMatcher, final boolean includeOwnerContext) {
+        this.addRule(new DirectReturnRewrite(this.owners, newReturnType, targetedMethodMatcher, isStatic(staticHandler), includeOwnerContext));
     }
 
     @Override
@@ -84,8 +83,8 @@ class RuleFactoryImpl implements RuleFactory {
     }
 
     @Override
-    public void moveInstanceMethod(final ClassDesc newOwner, final String newMethodName, final Consumer<? super MethodMatcher.Builder> builderConsumer) {
-        this.addRule(new MoveInstanceMethod(this.owners, build(builderConsumer, MethodMatcher::builder), newOwner, newMethodName));
+    public void moveInstanceMethod(final ClassDesc newOwner, final String newMethodName, final MethodMatcher methodMatcher) {
+        this.addRule(new MoveInstanceMethod(this.owners, methodMatcher, newOwner, newMethodName));
     }
 
     @Override

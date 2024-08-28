@@ -1,6 +1,6 @@
 package io.papermc.asm.rules.method.params;
 
-import io.papermc.asm.rules.builder.matcher.TargetedMethodMatcher;
+import io.papermc.asm.rules.builder.matcher.method.targeted.TargetedMethodMatcher;
 import io.papermc.asm.rules.method.generated.TargetedTypeGeneratedStaticRewrite;
 import java.lang.constant.ClassDesc;
 import java.lang.reflect.Method;

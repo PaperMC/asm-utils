@@ -4,6 +4,7 @@ import io.papermc.asm.ClassInfo;
 import io.papermc.asm.ClassInfoProvider;
 import io.papermc.asm.ClassProcessingContext;
 import io.papermc.asm.rules.RewriteRule;
+import io.papermc.asm.rules.builder.matcher.method.MethodMatcher;
 import java.lang.constant.ClassDesc;
 import java.lang.invoke.ConstantBootstraps;
 import java.util.function.Predicate;
@@ -54,8 +55,9 @@ public final class EnumRule {
         final Predicate<String> ownerPredicate
     ) {
         final RewriteRule rewrite = RewriteRule.forOwnerClass(ConstantBootstraps.class, rf -> {
-            rf.plainStaticRewrite(ClassDesc.of(proxyClassName), b -> b
-                .match("enumConstant").desc("(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Enum;")
+            rf.plainStaticRewrite(ClassDesc.of(proxyClassName), MethodMatcher.builder()
+                .match("enumConstant", b -> b.desc("(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Enum;"))
+                .build()
             );
         });
         final RewriteRule enumRule = new RewriteRule() {

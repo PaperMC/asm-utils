@@ -1,5 +1,6 @@
-package io.papermc.asm.rules.builder.matcher;
+package io.papermc.asm.rules.builder.matcher.method.targeted;
 
+import io.papermc.asm.rules.builder.matcher.method.MethodMatcher;
 import java.lang.constant.ClassDesc;
 
 public class TargetedMethodMatcherImpl implements TargetedMethodMatcher {

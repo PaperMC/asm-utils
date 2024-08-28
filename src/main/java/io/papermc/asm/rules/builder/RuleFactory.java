@@ -1,9 +1,9 @@
 package io.papermc.asm.rules.builder;
 
 import io.papermc.asm.rules.RewriteRule;
-import io.papermc.asm.rules.builder.matcher.FieldMatcher;
-import io.papermc.asm.rules.builder.matcher.MethodMatcher;
-import io.papermc.asm.rules.builder.matcher.TargetedMethodMatcher;
+import io.papermc.asm.rules.builder.matcher.field.FieldMatcher;
+import io.papermc.asm.rules.builder.matcher.method.MethodMatcher;
+import io.papermc.asm.rules.builder.matcher.method.targeted.TargetedMethodMatcher;
 import java.lang.constant.ClassDesc;
 import java.lang.reflect.Method;
 import java.util.Set;
@@ -26,57 +26,57 @@ public interface RuleFactory {
         };
     }
 
-    void plainStaticRewrite(ClassDesc newOwner, Consumer<? super MethodMatcher.Builder> builderConsumer);
+    void plainStaticRewrite(ClassDesc newOwner, MethodMatcher methodMatcher);
 
-    default void changeParamToSuper(final Class<?> oldParamType, final Class<?> newParamType, final Consumer<? super MethodMatcher.Builder> builderConsumer) {
+    default void changeParamToSuper(final Class<?> oldParamType, final Class<?> newParamType, final MethodMatcher methodMatcher) {
         if (!newParamType.isAssignableFrom(oldParamType)) {
             throw new IllegalArgumentException(newParamType + " is not a superclass of " + oldParamType);
         }
-        this.changeParamToSuper(desc(oldParamType), desc(newParamType), builderConsumer);
+        this.changeParamToSuper(desc(oldParamType), desc(newParamType), methodMatcher);
     }
 
-    void changeParamToSuper(ClassDesc legacyParamType, ClassDesc newParamType, Consumer<? super MethodMatcher.Builder> builderConsumer);
+    void changeParamToSuper(ClassDesc legacyParamType, ClassDesc newParamType, MethodMatcher methodMatcher);
 
-    default void changeParamFuzzy(final Class<?> newParamType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.changeParamFuzzy(desc(newParamType), staticHandler, builderConsumer);
+    default void changeParamFuzzy(final Class<?> newParamType, final Method staticHandler, final TargetedMethodMatcher targetedMethodMatcher) {
+        this.changeParamFuzzy(desc(newParamType), staticHandler, targetedMethodMatcher);
     }
 
-    void changeParamFuzzy(ClassDesc newParamType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
+    void changeParamFuzzy(ClassDesc newParamType, Method staticHandler, TargetedMethodMatcher targetedMethodMatcher);
 
-    default void changeParamDirect(final Class<?> newParamType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.changeParamDirect(desc(newParamType), staticHandler, builderConsumer);
+    default void changeParamDirect(final Class<?> newParamType, final Method staticHandler, final TargetedMethodMatcher targetedMethodMatcher) {
+        this.changeParamDirect(desc(newParamType), staticHandler, targetedMethodMatcher);
     }
 
-    void changeParamDirect(ClassDesc newParamType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
+    void changeParamDirect(ClassDesc newParamType, Method staticHandler, TargetedMethodMatcher targetedMethodMatcher);
 
-    default void changeReturnTypeToSub(final Class<?> oldReturnType, final Class<?> newReturnType, final Consumer<? super MethodMatcher.Builder> builderConsumer) {
+    default void changeReturnTypeToSub(final Class<?> oldReturnType, final Class<?> newReturnType, final MethodMatcher methodMatcher) {
         if (!oldReturnType.isAssignableFrom(newReturnType)) {
             throw new IllegalArgumentException(newReturnType + " is not a subclass of " + oldReturnType);
         }
-        this.changeReturnTypeToSub(desc(oldReturnType), desc(newReturnType), builderConsumer);
+        this.changeReturnTypeToSub(desc(oldReturnType), desc(newReturnType), methodMatcher);
     }
 
-    void changeReturnTypeToSub(ClassDesc oldReturnType, ClassDesc newReturnType, Consumer<? super MethodMatcher.Builder> builderConsumer);
+    void changeReturnTypeToSub(ClassDesc oldReturnType, ClassDesc newReturnType, MethodMatcher methodMatcher);
 
-    default void changeReturnTypeDirect(final Class<?> newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.changeReturnTypeDirect(desc(newReturnType), staticHandler, builderConsumer);
+    default void changeReturnTypeDirect(final Class<?> newReturnType, final Method staticHandler, final TargetedMethodMatcher targetedMethodMatcher) {
+        this.changeReturnTypeDirect(desc(newReturnType), staticHandler, targetedMethodMatcher);
     }
 
-    void changeReturnTypeDirect(ClassDesc newReturnType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
+    void changeReturnTypeDirect(ClassDesc newReturnType, Method staticHandler, TargetedMethodMatcher targetedMethodMatcher);
 
-    default void changeReturnTypeDirectWithContext(final Class<?> newReturnType, final Method staticHandler, final Consumer<? super TargetedMethodMatcher.Builder> builderConsumer) {
-        this.changeReturnTypeDirectWithContext(desc(newReturnType), staticHandler, builderConsumer);
+    default void changeReturnTypeDirectWithContext(final Class<?> newReturnType, final Method staticHandler, final TargetedMethodMatcher targetedMethodMatcher) {
+        this.changeReturnTypeDirectWithContext(desc(newReturnType), staticHandler, targetedMethodMatcher);
     }
 
-    void changeReturnTypeDirectWithContext(ClassDesc newReturnType, Method staticHandler, Consumer<? super TargetedMethodMatcher.Builder> builderConsumer);
+    void changeReturnTypeDirectWithContext(ClassDesc newReturnType, Method staticHandler, TargetedMethodMatcher targetedMethodMatcher);
 
     void changeFieldToMethod(@Nullable String getterName, @Nullable String setterName, boolean isInterfaceMethod, Consumer<? super FieldMatcher.Builder> builderConsumer);
 
-    default void moveInstanceMethod(final Class<?> newOwner, final String newMethodName, final Consumer<? super MethodMatcher.Builder> builderConsumer) {
-        this.moveInstanceMethod(desc(newOwner), newMethodName, builderConsumer);
+    default void moveInstanceMethod(final Class<?> newOwner, final String newMethodName, final MethodMatcher methodMatcher) {
+        this.moveInstanceMethod(desc(newOwner), newMethodName, methodMatcher);
     }
 
-    void moveInstanceMethod(ClassDesc newOwner, String newMethodName, Consumer<? super MethodMatcher.Builder> builderConsumer);
+    void moveInstanceMethod(ClassDesc newOwner, String newMethodName, MethodMatcher methodMatcher);
 
     void addRule(RewriteRule rule);
 

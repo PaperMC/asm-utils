@@ -1,6 +1,6 @@
 package io.papermc.asm.rules.builder;
 
-import io.papermc.asm.rules.builder.matcher.MethodMatcher;
+import io.papermc.asm.rules.builder.matcher.method.MethodMatcher;
 import java.lang.constant.ClassDesc;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -19,7 +19,7 @@ public interface ConfiguredRuleFactory extends RuleFactory {
         };
     }
 
-    void plainStaticRewrite(Consumer<? super MethodMatcher.Builder> builderConsumer);
+    void plainStaticRewrite(MethodMatcher methodMatcher);
 
     @FunctionalInterface
     interface Factory extends Consumer<ConfiguredRuleFactory> {

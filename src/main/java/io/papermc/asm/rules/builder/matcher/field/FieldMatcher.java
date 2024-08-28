@@ -1,4 +1,4 @@
-package io.papermc.asm.rules.builder.matcher;
+package io.papermc.asm.rules.builder.matcher.field;
 
 import java.lang.constant.ClassDesc;
 import java.util.Collection;

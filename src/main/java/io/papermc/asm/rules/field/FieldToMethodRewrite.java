@@ -1,7 +1,7 @@
 package io.papermc.asm.rules.field;
 
 import io.papermc.asm.ClassProcessingContext;
-import io.papermc.asm.rules.builder.matcher.FieldMatcher;
+import io.papermc.asm.rules.builder.matcher.field.FieldMatcher;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.ConstantDescs;
 import java.lang.constant.MethodTypeDesc;

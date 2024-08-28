@@ -1,4 +1,4 @@
-package io.papermc.asm.rules.builder.matcher;
+package io.papermc.asm.rules.builder.matcher.method;
 
 import io.papermc.asm.util.OpcodeUtils;
 import java.util.function.BiPredicate;

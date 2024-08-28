@@ -2,7 +2,7 @@ package io.papermc.asm.rules.classes;
 
 import io.papermc.asm.ClassProcessingContext;
 import io.papermc.asm.rules.RewriteRule;
-import io.papermc.asm.rules.builder.matcher.MethodMatcher;
+import io.papermc.asm.rules.builder.matcher.method.MethodMatcher;
 import io.papermc.asm.rules.method.DirectStaticRewrite;
 import io.papermc.asm.rules.method.OwnableMethodRewriteRule;
 import io.papermc.asm.rules.method.generated.GeneratedStaticRewrite;
@@ -30,11 +30,11 @@ import static java.util.function.Predicate.isEqual;
 public class EnumToInterfaceRule implements RewriteRule.Delegate {
 
     private static final MethodMatcher ENUM_VIRTUAL_METHODS = MethodMatcher.builder()
-        .match("name").virtual().desc(MethodTypeDesc.of(ConstantDescs.CD_String))
-        .match("ordinal").virtual().desc(MethodTypeDesc.of(ConstantDescs.CD_int))
-        .match("compareTo").virtual().desc(MethodTypeDesc.of(ConstantDescs.CD_int, ConstantDescs.CD_Enum))
-        .match("getDeclaringClass").virtual().desc(MethodTypeDesc.of(ConstantDescs.CD_Class))
-        .match("describeConstable").virtual().desc(MethodTypeDesc.of(desc(Optional.class)))
+        .match("name", b -> b.virtual().desc(MethodTypeDesc.of(ConstantDescs.CD_String)))
+        .match("ordinal", b -> b.virtual().desc(MethodTypeDesc.of(ConstantDescs.CD_int)))
+        .match("compareTo", b -> b.virtual().desc(MethodTypeDesc.of(ConstantDescs.CD_int, ConstantDescs.CD_Enum)))
+        .match("getDeclaringClass", b -> b.virtual().desc(MethodTypeDesc.of(ConstantDescs.CD_Class)))
+        .match("describeConstable", b -> b.virtual().desc(MethodTypeDesc.of(desc(Optional.class))))
         .build();
     private static final MethodMatcher NOT_ENUM_METHODS_BASE = ENUM_VIRTUAL_METHODS.negate();
 
@@ -66,8 +66,8 @@ public class EnumToInterfaceRule implements RewriteRule.Delegate {
 
     private static MethodMatcher createStaticMatcher(final ClassDesc legacyEnumType) {
         return MethodMatcher.builder()
-            .match("values").statik().desc(MethodTypeDesc.of(legacyEnumType.arrayType()))
-            .match("valueOf").statik().desc(MethodTypeDesc.of(legacyEnumType, ConstantDescs.CD_String))
+            .match("values", b -> b.statik().desc(MethodTypeDesc.of(legacyEnumType.arrayType())))
+            .match("valueOf", b -> b.statik().desc(MethodTypeDesc.of(legacyEnumType, ConstantDescs.CD_String)))
             .build();
     }
 
