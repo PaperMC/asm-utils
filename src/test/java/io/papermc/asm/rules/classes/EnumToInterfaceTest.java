@@ -15,7 +15,7 @@ class EnumToInterfaceTest {
     private static final ClassDesc API_ENUM = desc(ApiEnum.class);
     private static final ClassDesc API_ENUM_IMPL = desc(ApiEnumImpl.class);
 
-    @TransformerTest(value = "data.classes.EnumToInterfaceUser", copyFromClassReader = false)
+    @TransformerTest("data.classes.EnumToInterfaceUser")
     void testEnumToInterface(final TransformerCheck check) {
         final RewriteRule rule = new EnumToInterfaceRule(Map.of(API_ENUM, API_ENUM_IMPL));
 

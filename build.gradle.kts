@@ -56,6 +56,11 @@ allprojects {
 
     repositories {
         mavenCentral()
+        maven("https://repository.ow2.org/nexus/content/repositories/snapshots") {
+            mavenContent {
+                includeGroup("org.ow2.asm")
+            }
+        }
     }
 
     dependencies {
