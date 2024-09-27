@@ -66,7 +66,7 @@ final class EnumValueOfRewriteRule implements GeneratedStaticRewrite {
         methodGenerator.visitLookupSwitchInsn(lookupSwitchEndLabel, lookupSwitchKeys, labels);
         for (int i = 0; i < labels.length; i++) {
             methodGenerator.mark(labels[i]);
-            // LocalVariableSorter inserts trailing int local for i == 0
+            // LocalVariableSorter will insert the trailing int local for this and all following visitFrame calls; adding it manually would cause duplicate locals in the frame
             methodGenerator.visitFrame(Opcodes.F_NEW, 1, new Object[]{"java/lang/String"}, 1, new Object[]{"java/lang/String"});
             // generate case
             final List<String> matchingStrings = hashToField.get(lookupSwitchKeys[i]);
@@ -120,7 +120,6 @@ final class EnumValueOfRewriteRule implements GeneratedStaticRewrite {
         methodGenerator.visitFrame(Opcodes.F_NEW, 1, new Object[]{"java/lang/String"}, 1, new Object[]{"java/lang/String"});
         methodGenerator.loadArg(0); // default to the passed in value
         methodGenerator.mark(tableSwitchEndLabel);
-        // LocalVariableSorter inserts trailing int local
         methodGenerator.visitFrame(Opcodes.F_NEW, 1, new Object[]{"java/lang/String"}, 2, new Object[]{"java/lang/String", "java/lang/String"});
         methodGenerator.invokeStatic(Type.getType(original.owner().descriptorString()), new Method(original.name(), original.descriptor().descriptorString()));
         methodGenerator.returnValue();
