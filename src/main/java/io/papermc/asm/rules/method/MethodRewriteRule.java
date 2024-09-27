@@ -5,8 +5,9 @@ import io.papermc.asm.rules.RewriteRule;
 import io.papermc.asm.rules.method.rewrite.MethodRewrite;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
-import java.util.LinkedHashMap;
+import java.util.Comparator;
 import java.util.Map;
+import java.util.TreeMap;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Handle;
@@ -56,9 +57,17 @@ public interface MethodRewriteRule extends RewriteRule {
 
     @Override
     default ClassVisitor createVisitor(final int api, final ClassVisitor parent, final ClassProcessingContext context) {
-        record MethodKey(String owner, String name, MethodTypeDesc descriptor) {
+        record MethodKey(String owner, String name, MethodTypeDesc descriptor) implements Comparable<MethodKey> {
+            private static final Comparator<MethodKey> COMPARATOR = Comparator.comparing(MethodKey::owner)
+                .thenComparing(MethodKey::name)
+                .thenComparing(key -> key.descriptor().descriptorString());
+
+            @Override
+            public int compareTo(final MethodKey o) {
+                return COMPARATOR.compare(this, o);
+            }
         }
-        final Map<MethodKey, MethodRewrite.MethodGenerator> methodsToGenerate = new LinkedHashMap<>();
+        final Map<MethodKey, MethodRewrite.MethodGenerator> methodsToGenerate = new TreeMap<>();
         return new ClassVisitor(api, parent) {
 
             @Override
