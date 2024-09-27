@@ -1,10 +1,14 @@
 package io.papermc.asm.rules.method.returns;
 
 import io.papermc.asm.ClassProcessingContext;
+import io.papermc.asm.rules.RewriteRule;
 import io.papermc.asm.rules.builder.matcher.method.MethodMatcher;
 import io.papermc.asm.rules.method.OwnableMethodRewriteRule;
 import io.papermc.asm.rules.method.rewrite.MethodRewrite;
 import io.papermc.asm.rules.method.rewrite.SimpleRewrite;
+import io.papermc.asm.versioned.ApiVersion;
+import io.papermc.asm.versioned.VersionedRuleFactory;
+import io.papermc.asm.versioned.matcher.VersionedMethodMatcher;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.util.Set;
@@ -31,5 +35,13 @@ public record SubTypeReturnRewrite(Set<ClassDesc> owners, MethodMatcher methodMa
 
     private MethodTypeDesc modifyMethodDescriptor(final MethodTypeDesc methodDescriptor) {
         return methodDescriptor.changeReturnType(this.newReturnType());
+    }
+
+    public record Versioned(Set<ClassDesc> owners, ClassDesc newReturnType, VersionedMethodMatcher versions) implements VersionedRuleFactory {
+
+        @Override
+        public RewriteRule createRule(final ApiVersion apiVersion) {
+            return this.versions.ruleForVersion(apiVersion, pair -> new SubTypeReturnRewrite(this.owners(), pair.matcher(), pair.legacyType(), this.newReturnType()));
+        }
     }
 }

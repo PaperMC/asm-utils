@@ -1,28 +1,63 @@
 package io.papermc.asm.versioned;
 
 import io.papermc.asm.rules.RewriteRule;
+import io.papermc.asm.util.DescriptorUtils;
+import java.lang.constant.ClassDesc;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.framework.qual.DefaultQualifier;
 
-@DefaultQualifier(NonNull.class)
 public interface VersionedRuleFactory {
+
+    VersionedRuleFactory EMPTY = apiVersion -> RewriteRule.EMPTY;
+
+    @SafeVarargs
+    static VersionedRuleFactory forOwnerClass(final Class<?> owner, final Consumer<? super VersionedRuleFactoryBuilder> firstFactoryConsumer, final Consumer<? super VersionedRuleFactoryBuilder>... factoryConsumers) {
+        return forOwnerClasses(Collections.singleton(owner), firstFactoryConsumer, factoryConsumers);
+    }
+
+    @SafeVarargs
+    static VersionedRuleFactory forOwnerClasses(final Set<Class<?>> owners, final Consumer<? super VersionedRuleFactoryBuilder> firstFactoryConsumer, final Consumer<? super VersionedRuleFactoryBuilder>... factoryConsumers) {
+        return forOwners(owners.stream().map(DescriptorUtils::desc).collect(Collectors.toUnmodifiableSet()), firstFactoryConsumer, factoryConsumers);
+    }
+
+    @SafeVarargs
+    static VersionedRuleFactory forOwner(final ClassDesc owner, final Consumer<? super VersionedRuleFactoryBuilder> firstFactoryConsumer, final Consumer<? super VersionedRuleFactoryBuilder>... factoryConsumers) {
+        return forOwners(Collections.singleton(owner), firstFactoryConsumer, factoryConsumers);
+    }
+
+    @SafeVarargs
+    static VersionedRuleFactory forOwners(final Set<ClassDesc> owners, final Consumer<? super VersionedRuleFactoryBuilder> firstFactoryConsumer, final Consumer<? super VersionedRuleFactoryBuilder>... factoryConsumers) {
+        final VersionedRuleFactoryBuilder factory = VersionedRuleFactoryBuilder.create(owners);
+        firstFactoryConsumer.accept(factory);
+        for (final Consumer<? super VersionedRuleFactoryBuilder> factoryConsumer : factoryConsumers) {
+            factoryConsumer.accept(factory);
+        }
+        return factory.build();
+    }
 
     static VersionedRuleFactory chain(final VersionedRuleFactory... factories) {
         return chain(Arrays.asList(factories));
     }
 
     static VersionedRuleFactory chain(final Collection<? extends VersionedRuleFactory> factories) {
+        if (factories.isEmpty()) {
+            return EMPTY;
+        } else if (factories.size() == 1) {
+            return factories.iterator().next();
+        }
         return new Chain(List.copyOf(factories));
     }
 
-    @Nullable RewriteRule createRule(ApiVersion apiVersion);
+    RewriteRule createRule(ApiVersion apiVersion);
 
-    record Chain(List<VersionedRuleFactory> factories) implements VersionedRuleFactory{
+    record Chain(List<VersionedRuleFactory> factories) implements VersionedRuleFactory {
 
         public Chain {
             factories = List.copyOf(factories);
@@ -33,7 +68,7 @@ public interface VersionedRuleFactory {
             final List<RewriteRule> rules = new ArrayList<>();
             for (final VersionedRuleFactory factory : this.factories) {
                 final @Nullable RewriteRule rule = factory.createRule(apiVersion);
-                if (rule != null) {
+                if (rule != RewriteRule.EMPTY) {
                     rules.add(rule);
                 }
             }

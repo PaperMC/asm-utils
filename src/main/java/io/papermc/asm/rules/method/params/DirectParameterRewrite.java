@@ -1,18 +1,14 @@
 package io.papermc.asm.rules.method.params;
 
-import io.papermc.asm.versioned.ApiVersion;
-import io.papermc.asm.versioned.VersionedRuleFactory;
 import io.papermc.asm.rules.RewriteRule;
 import io.papermc.asm.rules.builder.matcher.method.targeted.TargetedMethodMatcher;
 import io.papermc.asm.rules.method.generated.TargetedTypeGeneratedStaticRewrite;
+import io.papermc.asm.versioned.ApiVersion;
+import io.papermc.asm.versioned.VersionedRuleFactory;
+import io.papermc.asm.versioned.matcher.targeted.VersionedTargetedMethodMatcher;
 import java.lang.constant.ClassDesc;
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.Map;
-import java.util.NavigableMap;
 import java.util.Set;
-import java.util.TreeMap;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Rewrites matching bytecode to a generated method which will invoke the static handler on all parameters that need to be converted. That
@@ -25,20 +21,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public record DirectParameterRewrite(Set<ClassDesc> owners, ClassDesc existingType, TargetedMethodMatcher methodMatcher, Method staticHandler) implements TargetedTypeGeneratedStaticRewrite.Parameter {
 
-    public record Versioned(Set<ClassDesc> owners, ClassDesc existingType, NavigableMap<ApiVersion, Map.Entry<TargetedMethodMatcher, Method>> versions) implements VersionedRuleFactory {
-
-        public Versioned {
-            versions = Collections.unmodifiableNavigableMap(versions);
-        }
+    public record Versioned(Set<ClassDesc> owners, ClassDesc existingType, VersionedTargetedMethodMatcher versions) implements VersionedRuleFactory {
 
         @Override
-        public @Nullable RewriteRule createRule(final ApiVersion apiVersion) {
-            final Map.@Nullable Entry<ApiVersion, Map.Entry<TargetedMethodMatcher, Method>> apiVersionEntryEntry = this.versions.ceilingEntry(apiVersion);
-            if (apiVersionEntryEntry == null) {
-                return null;
-            }
-            final Map.Entry<TargetedMethodMatcher, Method> entry = apiVersionEntryEntry.getValue();
-            return new DirectParameterRewrite(this.owners, this.existingType, entry.getKey(), entry.getValue());
+        public RewriteRule createRule(final ApiVersion apiVersion) {
+            return this.versions.ruleForVersion(apiVersion, pair -> new DirectParameterRewrite(this.owners, this.existingType, pair.matcher(), pair.staticHandler()));
         }
     }
 }

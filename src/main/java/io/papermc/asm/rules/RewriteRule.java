@@ -2,6 +2,7 @@ package io.papermc.asm.rules;
 
 import io.papermc.asm.ClassProcessingContext;
 import io.papermc.asm.rules.builder.RuleFactory;
+import io.papermc.asm.util.DescriptorUtils;
 import java.lang.constant.ClassDesc;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,7 +27,7 @@ public interface RewriteRule {
 
     @SafeVarargs
     static RewriteRule forOwnerClasses(final Set<Class<?>> owners, final Consumer<? super RuleFactory> firstFactoryConsumer, final Consumer<? super RuleFactory>... factoryConsumers) {
-        return forOwners(owners.stream().map(c -> c.describeConstable().orElseThrow()).collect(Collectors.toUnmodifiableSet()), firstFactoryConsumer, factoryConsumers);
+        return forOwners(owners.stream().map(DescriptorUtils::desc).collect(Collectors.toUnmodifiableSet()), firstFactoryConsumer, factoryConsumers);
     }
 
     @SafeVarargs
@@ -49,7 +50,13 @@ public interface RewriteRule {
     }
 
     static RewriteRule chain(final Collection<? extends RewriteRule> rules) {
-        return new Chain(List.copyOf(rules));
+        final List<? extends RewriteRule> filteredRules = rules.stream().filter(r -> r != EMPTY).toList();
+        if (filteredRules.isEmpty()) {
+            return EMPTY;
+        } else if (filteredRules.size() == 1) {
+            return filteredRules.iterator().next();
+        }
+        return new Chain(filteredRules);
     }
 
     static ChainBuilder chain() {
@@ -73,16 +80,17 @@ public interface RewriteRule {
         }
     }
 
-    record Chain(List<RewriteRule> rules) implements RewriteRule {
-        public Chain(final List<RewriteRule> rules) {
-            this.rules = List.copyOf(rules);
+    record Chain(List<? extends RewriteRule> rules) implements RewriteRule {
+        public Chain {
+            rules = List.copyOf(rules);
         }
 
         @Override
         public ClassVisitor createVisitor(final int api, final ClassVisitor parent, final ClassProcessingContext context) {
             ClassVisitor visitor = parent;
-            for (final RewriteRule rule : this.rules) {
-                visitor = rule.createVisitor(api, visitor, context);
+            // iterate over this.rules backwards to ensure the first rule is the outermost visitor
+            for (int i = this.rules.size() - 1; i >= 0; i--) {
+                visitor = this.rules.get(i).createVisitor(api, visitor, context);
             }
             return visitor;
         }
@@ -109,7 +117,7 @@ public interface RewriteRule {
         }
 
         public RewriteRule build() {
-            return new Chain(this.rules);
+            return RewriteRule.chain(this.rules);
         }
     }
 }

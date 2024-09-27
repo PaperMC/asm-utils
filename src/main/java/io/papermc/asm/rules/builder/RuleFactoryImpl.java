@@ -101,9 +101,6 @@ class RuleFactoryImpl implements RuleFactory {
 
     @Override
     public RewriteRule build() {
-        if (this.rules.size() == 1) {
-            return this.rules.get(0);
-        }
         return RewriteRule.chain(this.rules);
     }
 }
