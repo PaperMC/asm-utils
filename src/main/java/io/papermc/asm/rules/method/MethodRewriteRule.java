@@ -61,6 +61,7 @@ public interface MethodRewriteRule extends RewriteRule {
             private static final Comparator<MethodKey> COMPARATOR = Comparator.comparing(MethodKey::owner)
                 .thenComparing(MethodKey::name)
                 .thenComparing(key -> key.descriptor().descriptorString());
+
             @Override
             public int compareTo(final MethodKey o) {
                 return COMPARATOR.compare(this, o);
