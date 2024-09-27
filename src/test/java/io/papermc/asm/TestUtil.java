@@ -54,9 +54,9 @@ public final class TestUtil {
             final ClassReader classReader = new ClassReader(bytes);
             final ClassWriter classWriter;
             if (this.copyFromClassReader()) {
-                classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+                classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_MAXS);
             } else {
-                classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+                classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
             }
             classReader.accept(this.factory.createVisitor(classWriter), 0);
             return classWriter.toByteArray();

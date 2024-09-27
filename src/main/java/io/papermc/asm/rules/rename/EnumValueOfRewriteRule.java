@@ -66,6 +66,8 @@ final class EnumValueOfRewriteRule implements GeneratedStaticRewrite {
         methodGenerator.visitLookupSwitchInsn(lookupSwitchEndLabel, lookupSwitchKeys, labels);
         for (int i = 0; i < labels.length; i++) {
             methodGenerator.mark(labels[i]);
+            // LocalVariableSorter inserts trailing int local for i == 0
+            methodGenerator.visitFrame(Opcodes.F_NEW, 1, new Object[]{"java/lang/String"}, 1, new Object[]{"java/lang/String"});
             // generate case
             final List<String> matchingStrings = hashToField.get(lookupSwitchKeys[i]);
             if (matchingStrings.size() == 1) {
@@ -93,11 +95,13 @@ final class EnumValueOfRewriteRule implements GeneratedStaticRewrite {
                     methodGenerator.goTo(lookupSwitchEndLabel);
                     if (nestedLabels[j] != lookupSwitchEndLabel) {
                         methodGenerator.mark(nestedLabels[j]); // mark start of next label (except last one)
+                        methodGenerator.visitFrame(Opcodes.F_NEW, 1, new Object[]{"java/lang/String"}, 1, new Object[]{"java/lang/String"});
                     }
                 }
             }
         }
         methodGenerator.mark(lookupSwitchEndLabel);
+        methodGenerator.visitFrame(Opcodes.F_NEW, 1, new Object[]{"java/lang/String"}, 1, new Object[]{"java/lang/String"});
         methodGenerator.loadLocal(tableSwitchIndexLocal);
         final Label[] tableSwitchLabels = new Label[tableSwitchIndexToRenamedField.length];
         for (int i = 0; i < tableSwitchLabels.length; i++) {
@@ -108,12 +112,16 @@ final class EnumValueOfRewriteRule implements GeneratedStaticRewrite {
         methodGenerator.visitTableSwitchInsn(0, tableSwitchIndexToRenamedField.length - 1, tableSwitchDefaultLabel, tableSwitchLabels);
         for (int i = 0; i < tableSwitchIndexToRenamedField.length; i++) {
             methodGenerator.mark(tableSwitchLabels[i]);
+            methodGenerator.visitFrame(Opcodes.F_NEW, 1, new Object[]{"java/lang/String"}, 1, new Object[]{"java/lang/String"});
             methodGenerator.push(tableSwitchIndexToRenamedField[i]);
             methodGenerator.goTo(tableSwitchEndLabel);
         }
         methodGenerator.mark(tableSwitchDefaultLabel);
+        methodGenerator.visitFrame(Opcodes.F_NEW, 1, new Object[]{"java/lang/String"}, 1, new Object[]{"java/lang/String"});
         methodGenerator.loadArg(0); // default to the passed in value
         methodGenerator.mark(tableSwitchEndLabel);
+        // LocalVariableSorter inserts trailing int local
+        methodGenerator.visitFrame(Opcodes.F_NEW, 1, new Object[]{"java/lang/String"}, 2, new Object[]{"java/lang/String", "java/lang/String"});
         methodGenerator.invokeStatic(Type.getType(original.owner().descriptorString()), new Method(original.name(), original.descriptor().descriptorString()));
         methodGenerator.returnValue();
         methodGenerator.endMethod();
