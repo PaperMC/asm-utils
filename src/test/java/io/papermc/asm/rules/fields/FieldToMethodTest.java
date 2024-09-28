@@ -18,12 +18,12 @@ class FieldToMethodTest {
             builder.changeFieldToMethod(
                 "getStaticField", "setStaticField",
                 false,
-                b -> b.names("staticField").desc(STRING)
+                b -> b.match("staticField", STRING)
             );
             builder.changeFieldToMethod(
                 "getInstanceField", "setInstanceField",
                 false,
-                b -> b.names("instanceField").desc(STRING)
+                b -> b.match("instanceField", STRING)
             );
         });
 

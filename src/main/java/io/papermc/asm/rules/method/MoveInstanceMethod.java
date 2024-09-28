@@ -25,7 +25,7 @@ public record MoveInstanceMethod(
     MethodMatcher methodMatcher,
     ClassDesc newOwner,
     String newMethodName
-) implements GeneratedStaticRewrite {
+) implements GeneratedStaticRewrite, OwnableMethodRewriteRule.Filtered {
 
     @Override
     public @Nullable MethodRewrite<?> rewrite(final ClassProcessingContext context, final boolean isInvokeDynamic, final int opcode, final ClassDesc owner, final String name, final MethodTypeDesc descriptor, final boolean isInterface) {

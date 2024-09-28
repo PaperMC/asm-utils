@@ -74,21 +74,20 @@ public record FieldToMethodRewrite(Set<ClassDesc> owners, FieldMatcher fieldMatc
     }
 
     @Override
-    public Rewrite rewrite(final ClassProcessingContext context, final int opcode, final String owner, final String name, final ClassDesc fieldTypeDesc) {
+    public @Nullable Rewrite rewrite(final ClassProcessingContext context, final int opcode, final String owner, final String name, final ClassDesc fieldTypeDesc) {
+        final Type type = switch (opcode) {
+            case Opcodes.GETFIELD, Opcodes.GETSTATIC -> Type.GETTER;
+            case Opcodes.PUTFIELD, Opcodes.PUTSTATIC -> Type.SETTER;
+            default -> throw new IllegalArgumentException("Unexpected opcode: " + opcode);
+        };
+        final @Nullable String methodName = switch (type) {
+            case GETTER -> this.getterName;
+            case SETTER -> this.setterName;
+        };
+        if (methodName == null) {
+            return null;
+        }
         return (delegate) -> {
-            final Type type = switch (opcode) {
-                case Opcodes.GETFIELD, Opcodes.GETSTATIC -> Type.GETTER;
-                case Opcodes.PUTFIELD, Opcodes.PUTSTATIC -> Type.SETTER;
-                default -> throw new IllegalArgumentException("Unexpected opcode: " + opcode);
-            };
-            final @Nullable String methodName = switch (type) {
-                case GETTER -> this.getterName;
-                case SETTER -> this.setterName;
-            };
-            if (methodName == null) {
-                return;
-            }
-
             delegate.visitMethodInsn(type.opcode(opcode), owner, methodName, type.desc(fieldTypeDesc).descriptorString(), this.isInterfaceMethod);
         };
     }

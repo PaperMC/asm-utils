@@ -36,9 +36,7 @@ public interface MethodRewriteRule extends RewriteRule {
      * @param isInvokeDynamic if the method call is from an invokedynamic instruction
      * @return true to continue processing the instruction
      */
-    default boolean shouldProcess(final ClassProcessingContext context, final int opcode, final String owner, final String name, final String descriptor, final boolean isInterface, final boolean isInvokeDynamic) {
-        return true;
-    }
+    boolean shouldProcess(final ClassProcessingContext context, final int opcode, final String owner, final String name, final String descriptor, final boolean isInterface, final boolean isInvokeDynamic);
 
     /**
      * Creates a {@link MethodRewrite} which will be applied to the processed bytecode.

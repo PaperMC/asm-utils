@@ -1,6 +1,7 @@
 package io.papermc.asm.rules.method.params;
 
 import io.papermc.asm.rules.builder.matcher.method.targeted.TargetedMethodMatcher;
+import io.papermc.asm.rules.method.OwnableMethodRewriteRule;
 import io.papermc.asm.rules.method.generated.TargetedTypeGeneratedStaticRewrite;
 import java.lang.constant.ClassDesc;
 import java.lang.reflect.Method;
@@ -15,5 +16,5 @@ import java.util.Set;
  * @param methodMatcher the method matcher to use which targets the legacy param type
  * @param staticHandler the method which will be used to convert the legacy type to the new type
  */
-public record DirectParameterRewrite(Set<ClassDesc> owners, ClassDesc existingType, TargetedMethodMatcher methodMatcher, Method staticHandler) implements TargetedTypeGeneratedStaticRewrite.Parameter {
+public record DirectParameterRewrite(Set<ClassDesc> owners, ClassDesc existingType, TargetedMethodMatcher methodMatcher, Method staticHandler) implements TargetedTypeGeneratedStaticRewrite.Parameter, OwnableMethodRewriteRule.Filtered {
 }

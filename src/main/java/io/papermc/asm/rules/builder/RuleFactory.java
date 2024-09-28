@@ -1,7 +1,7 @@
 package io.papermc.asm.rules.builder;
 
 import io.papermc.asm.rules.RewriteRule;
-import io.papermc.asm.rules.builder.matcher.field.FieldMatcher;
+import io.papermc.asm.rules.builder.matcher.field.FieldMatcherBuilder;
 import io.papermc.asm.rules.builder.matcher.method.MethodMatcher;
 import io.papermc.asm.rules.builder.matcher.method.targeted.TargetedMethodMatcher;
 import java.lang.constant.ClassDesc;
@@ -27,6 +27,8 @@ public interface RuleFactory {
     }
 
     void plainStaticRewrite(ClassDesc newOwner, MethodMatcher methodMatcher);
+
+    void plainStaticRewrite(ClassDesc newOwner, MethodMatcher methodMatcher, String staticMethodName);
 
     default void changeParamToSuper(final Class<?> oldParamType, final Class<?> newParamType, final MethodMatcher methodMatcher) {
         if (!newParamType.isAssignableFrom(oldParamType)) {
@@ -70,7 +72,7 @@ public interface RuleFactory {
 
     void changeReturnTypeDirectWithContext(ClassDesc newReturnType, Method staticHandler, TargetedMethodMatcher targetedMethodMatcher);
 
-    void changeFieldToMethod(@Nullable String getterName, @Nullable String setterName, boolean isInterfaceMethod, Consumer<? super FieldMatcher.Builder> builderConsumer);
+    void changeFieldToMethod(@Nullable String getterName, @Nullable String setterName, boolean isInterfaceMethod, Consumer<? super FieldMatcherBuilder> builderConsumer);
 
     default void moveInstanceMethod(final Class<?> newOwner, final String newMethodName, final MethodMatcher methodMatcher) {
         this.moveInstanceMethod(desc(newOwner), newMethodName, methodMatcher);

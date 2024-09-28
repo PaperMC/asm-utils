@@ -18,14 +18,14 @@ public interface TargetedTypeGeneratedStaticRewrite extends GeneratedStaticRewri
      */
     ClassDesc existingType();
 
-    /**
-     * Gets the targeted method matcher for the rewrite.
-     *
-     * @return the targeted method matcher
-     */
-    TargetedMethodMatcher methodMatcher();
-
     interface Parameter extends TargetedTypeGeneratedStaticRewrite, StaticHandlerGeneratedMethodHolder.Param {
+
+        /**
+         * Gets the targeted method matcher for the rewrite.
+         *
+         * @return the targeted method matcher
+         */
+        TargetedMethodMatcher methodMatcher();
 
         @Override
         default MethodTypeDesc transformInvokedDescriptor(final MethodTypeDesc original, final Set<Integer> context) {

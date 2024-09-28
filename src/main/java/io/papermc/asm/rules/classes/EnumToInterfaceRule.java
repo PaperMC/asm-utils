@@ -71,7 +71,7 @@ public class EnumToInterfaceRule implements RewriteRule.Delegate {
             .build();
     }
 
-    final class EnumVirtualMethods implements GeneratedStaticRewrite {
+    final class EnumVirtualMethods implements GeneratedStaticRewrite, OwnableMethodRewriteRule.Filtered {
 
         @Override
         public MethodMatcher methodMatcher() {

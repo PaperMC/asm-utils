@@ -16,7 +16,7 @@ import static io.papermc.asm.util.OpcodeUtils.isStatic;
 import static io.papermc.asm.util.OpcodeUtils.isVirtual;
 import static io.papermc.asm.util.OpcodeUtils.staticOp;
 
-public interface StaticRewrite extends OwnableMethodRewriteRule.Filtered {
+public interface StaticRewrite extends MethodRewriteRule {
 
     String CONSTRUCTOR_METHOD_NAME = "<init>";
 
