@@ -3,6 +3,7 @@ package io.papermc.asm.rules.method.params;
 import io.papermc.asm.ClassProcessingContext;
 import io.papermc.asm.rules.RewriteRule;
 import io.papermc.asm.rules.builder.matcher.method.targeted.TargetedMethodMatcher;
+import io.papermc.asm.rules.method.OwnableMethodRewriteRule;
 import io.papermc.asm.rules.method.generated.TargetedTypeGeneratedStaticRewrite;
 import io.papermc.asm.rules.method.rewrite.MethodRewrite;
 import io.papermc.asm.versioned.ApiVersion;
@@ -28,7 +29,7 @@ import static java.util.function.Predicate.isEqual;
  * @param methodMatcher the method matcher to use which targets the legacy param type
  * @param staticHandler the method which will be used to convert the legacy type to the new type
  */
-public record FuzzyParameterRewrite(Set<ClassDesc> owners, ClassDesc existingType, TargetedMethodMatcher methodMatcher, Method staticHandler) implements TargetedTypeGeneratedStaticRewrite.Parameter {
+public record FuzzyParameterRewrite(Set<ClassDesc> owners, ClassDesc existingType, TargetedMethodMatcher methodMatcher, Method staticHandler) implements TargetedTypeGeneratedStaticRewrite.Parameter, OwnableMethodRewriteRule.Filtered {
 
     @Override
     public MethodTypeDesc transformToRedirectDescriptor(final MethodTypeDesc intermediateDescriptor) {

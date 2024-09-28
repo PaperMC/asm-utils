@@ -40,6 +40,11 @@ public final class DefineClassRule implements MethodRewriteRule {
         this.assumeClassLoader = assumeClassLoader;
     }
 
+    @Override
+    public boolean shouldProcess(final ClassProcessingContext context, final int opcode, final String owner, final String name, final String descriptor, final boolean isInterface, final boolean isInvokeDynamic) {
+        return true; // see comment below
+    }
+
     // We could split this into multiple rules and return false for shouldProcess when the processing class doesn't
     // extend (S)CL. However since the MethodHandles.Lookup portion always needs to run, the actual benefit would
     // be beyond minute (if not actually worse).

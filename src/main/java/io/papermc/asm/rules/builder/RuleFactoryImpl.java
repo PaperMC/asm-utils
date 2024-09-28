@@ -2,6 +2,7 @@ package io.papermc.asm.rules.builder;
 
 import io.papermc.asm.rules.RewriteRule;
 import io.papermc.asm.rules.builder.matcher.field.FieldMatcher;
+import io.papermc.asm.rules.builder.matcher.field.FieldMatcherBuilder;
 import io.papermc.asm.rules.builder.matcher.method.MethodMatcher;
 import io.papermc.asm.rules.builder.matcher.method.targeted.TargetedMethodMatcher;
 import io.papermc.asm.rules.field.FieldToMethodRewrite;
@@ -44,6 +45,11 @@ class RuleFactoryImpl implements RuleFactory {
     }
 
     @Override
+    public void plainStaticRewrite(final ClassDesc newOwner, final MethodMatcher methodMatcher, final String staticMethodName) {
+        this.addRule(new DirectStaticRewrite(this.owners, staticMethodName, methodMatcher, newOwner));
+    }
+
+    @Override
     public void changeParamToSuper(final ClassDesc legacyParamType, final ClassDesc newParamType, final MethodMatcher methodMatcher) {
         this.addRule(new SuperTypeParamRewrite(this.owners, methodMatcher, legacyParamType, newParamType));
     }
@@ -78,7 +84,7 @@ class RuleFactoryImpl implements RuleFactory {
     }
 
     @Override
-    public void changeFieldToMethod(final @Nullable String getterName, final @Nullable String setterName, final boolean isInterfaceMethod, final Consumer<? super FieldMatcher.Builder> builderConsumer) {
+    public void changeFieldToMethod(final @Nullable String getterName, final @Nullable String setterName, final boolean isInterfaceMethod, final Consumer<? super FieldMatcherBuilder> builderConsumer) {
         this.addRule(new FieldToMethodRewrite(this.owners, build(builderConsumer, FieldMatcher::builder), getterName, setterName, isInterfaceMethod));
     }
 

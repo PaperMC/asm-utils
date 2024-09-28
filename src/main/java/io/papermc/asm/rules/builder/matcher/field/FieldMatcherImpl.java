@@ -16,11 +16,6 @@ public class FieldMatcherImpl implements FieldMatcher {
     }
 
     @Override
-    public boolean matchesName(final String name) {
-        return this.byName.test(name);
-    }
-
-    @Override
     public boolean matches(final String name, final String descriptor) {
         return this.byName.test(name) && this.byDesc.test(classDesc(descriptor));
     }

@@ -1,6 +1,7 @@
 package io.papermc.asm.rules.method.returns;
 
 import io.papermc.asm.rules.builder.matcher.method.targeted.TargetedMethodMatcher;
+import io.papermc.asm.rules.method.OwnableMethodRewriteRule;
 import io.papermc.asm.rules.method.generated.TargetedTypeGeneratedStaticRewrite;
 import java.lang.constant.ClassDesc;
 import java.lang.reflect.Method;
@@ -11,7 +12,7 @@ import static io.papermc.asm.util.DescriptorUtils.desc;
 // Uses the methodMatcher against bytecode from plugins. Any matching descriptors will have the method name/owner changed to point towards
 // a generated method of the same descriptor. That generated method will call the original method and pass the return value
 // to staticHandler. staticHandler will then convert the object to the plugin bytecode's expected type.
-public record DirectReturnRewrite(Set<ClassDesc> owners, ClassDesc existingType, TargetedMethodMatcher methodMatcher, Method staticHandler, boolean includeOwnerContext) implements TargetedTypeGeneratedStaticRewrite.Return {
+public record DirectReturnRewrite(Set<ClassDesc> owners, ClassDesc existingType, TargetedMethodMatcher methodMatcher, Method staticHandler, boolean includeOwnerContext) implements TargetedTypeGeneratedStaticRewrite.Return, OwnableMethodRewriteRule.Filtered {
 
     public DirectReturnRewrite {
         if (includeOwnerContext && owners.size() > 1) {

@@ -2,6 +2,7 @@ package io.papermc.asm.rules.rename;
 
 import io.papermc.asm.rules.builder.matcher.method.MethodMatcher;
 import io.papermc.asm.rules.generate.GeneratedMethodHolder;
+import io.papermc.asm.rules.method.OwnableMethodRewriteRule;
 import io.papermc.asm.rules.method.generated.GeneratedStaticRewrite;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.ConstantDescs;
@@ -20,7 +21,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
-final class EnumValueOfRewriteRule implements GeneratedStaticRewrite {
+final class EnumValueOfRewriteRule implements GeneratedStaticRewrite, OwnableMethodRewriteRule.Filtered {
 
     private final Set<ClassDesc> owners = new HashSet<>();
     private final MethodMatcher matcher;

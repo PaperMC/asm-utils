@@ -1,6 +1,7 @@
 package io.papermc.asm.rules.builder.matcher.method;
 
 import java.lang.constant.MethodTypeDesc;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 @FunctionalInterface
@@ -8,6 +9,10 @@ public interface MethodMatcher {
 
     static MethodMatcherBuilder builder() {
         return new MethodMatcherBuilderImpl();
+    }
+
+    static MethodMatcher single(final String name, final Consumer<MethodMatcherBuilder.MatchBuilder> matchBuilderConsumer) {
+        return builder().match(name, matchBuilderConsumer).build();
     }
 
     boolean matches(int opcode, boolean isInvokeDynamic, String name, String descriptor);

@@ -42,4 +42,12 @@ public interface FieldRewriteRule extends RewriteRule {
     interface Rewrite {
         void apply(MethodVisitor delegate);
     }
+
+    record SimpleRewrite(int opcode, String owner, String name, ClassDesc fieldTypeDesc) implements Rewrite {
+
+        @Override
+        public void apply(final MethodVisitor delegate) {
+            delegate.visitFieldInsn(this.opcode, this.owner, this.name, this.fieldTypeDesc.descriptorString());
+        }
+    }
 }
