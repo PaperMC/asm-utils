@@ -1,116 +1,86 @@
 package io.papermc.asm.rules.rename;
 
+import io.papermc.asm.util.Builder;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import static io.papermc.asm.util.DescriptorUtils.desc;
-import static io.papermc.asm.util.DescriptorUtils.toOwner;
 
-public final class RenameRuleBuilder implements io.papermc.asm.util.Builder<RenameRule> {
+public interface RenameRuleBuilder extends Builder<RenameRule> {
 
-    RenameRuleBuilder() {
+    //<editor-fold desc="methods" defaultstate="collapsed">
+    default RenameRuleBuilder methodByClass(final Set<Class<?>> owners, final String legacyMethodName, final MethodTypeDesc methodDesc, final String newMethodName) {
+        for (final Class<?> owner : owners) {
+            this.methodByClass(owner, legacyMethodName, methodDesc, newMethodName);
+        }
+        return this;
     }
 
-    final Map<String, String> mappings = new HashMap<>();
-    final Map<ClassDesc, EnumRenamer> enumValueOfFieldRenames = new HashMap<>();
+    default RenameRuleBuilder methodByClass(final Class<?> owner, final String legacyMethodName, final MethodTypeDesc methodDesc, final String newMethodName) {
+        return this.method(desc(owner), legacyMethodName, methodDesc, newMethodName);
+    }
 
-    public RenameRuleBuilder methodByDesc(final Iterable<ClassDesc> owners, final String legacyMethodName, final MethodTypeDesc desc, final String newMethodName) {
+    default RenameRuleBuilder method(final Set<ClassDesc> owners, final String legacyMethodName, final MethodTypeDesc methodDesc, final String newMethodName) {
         for (final ClassDesc owner : owners) {
-            this.methodByDesc(owner, legacyMethodName, desc, newMethodName);
+            this.method(owner, legacyMethodName, methodDesc, newMethodName);
         }
         return this;
     }
 
-    public RenameRuleBuilder methodByDesc(final ClassDesc owner, final String legacyMethodName, final MethodTypeDesc desc, final String newMethodName) {
-        return this.methodByInternal(toOwner(owner), legacyMethodName, desc.descriptorString(), newMethodName);
-    }
+    RenameRuleBuilder method(ClassDesc owner, String legacyMethodName, MethodTypeDesc methodDesc, final String newMethodName);
+    //</editor-fold>
 
-    public RenameRuleBuilder methodByInternal(final Iterable<String> owners, final String legacyMethodName, final MethodTypeDesc desc, final String newMethodName) {
-        for (final String owner : owners) {
-            this.methodByInternal(owner, legacyMethodName, desc.descriptorString(), newMethodName);
+    //<editor-fold desc="fields" defaultstate="collapsed">
+    default RenameRuleBuilder fieldByClass(final Set<Class<?>> owners, final String legacyFieldName, final String newFieldName) {
+        for (final Class<?> owner : owners) {
+            this.fieldByClass(owner, legacyFieldName, newFieldName);
         }
         return this;
     }
 
-    public RenameRuleBuilder methodByInternal(final String owner, final String legacyMethodName, final String desc, final String newMethodName) {
-        this.mappings.put("%s.%s%s".formatted(owner, legacyMethodName, desc), newMethodName);
-        return this;
+    default RenameRuleBuilder fieldByClass(final Class<?> owner, final String legacyFieldName, final String newFieldName) {
+        return this.field(desc(owner), legacyFieldName, newFieldName);
     }
 
-    public RenameRuleBuilder fieldByDesc(final Iterable<ClassDesc> owners, final String legacyFieldName, final String newFieldName) {
+    default RenameRuleBuilder field(final Set<ClassDesc> owners, final String legacyFieldName, final String newFieldName) {
         for (final ClassDesc owner : owners) {
-            this.fieldByDesc(owner, legacyFieldName, newFieldName);
+            this.field(owner, legacyFieldName, newFieldName);
         }
         return this;
     }
 
-    public RenameRuleBuilder fieldByDesc(final ClassDesc owner, final String legacyFieldName, final String newFieldName) {
-        return this.fieldByInternal(toOwner(owner), legacyFieldName, newFieldName);
-    }
+    RenameRuleBuilder field(ClassDesc owner, String legacyFieldName, String newFieldName);
+    //</editor-fold>
 
-    public RenameRuleBuilder fieldByInternal(final Iterable<String> owners, final String legacyFieldName, final String newFieldName) {
-        for (final String owner : owners) {
-            this.fieldByInternal(owner, legacyFieldName, newFieldName);
-        }
-        return this;
-    }
-
-    public RenameRuleBuilder fieldByInternal(final String owner, final String legacyFieldName, final String newFieldName) {
-        this.mappings.put("%s.%s".formatted(owner, legacyFieldName), newFieldName);
-        return this;
+    /**
+     * Note that you also have to remap the method for the annotation attribute.
+     */
+    default RenameRuleBuilder annotationAttribute(final Class<?> owner, final String legacyName, final String newName) {
+        return this.annotationAttribute(desc(owner), legacyName, newName);
     }
 
     /**
      * Note that you also have to remap the method for the annotation attribute.
      */
-    public RenameRuleBuilder annotationAttribute(final ClassDesc owner, final String legacyName, final String newName) {
-        return this.annotationAttribute(owner.descriptorString(), legacyName, newName);
-    }
+    RenameRuleBuilder annotationAttribute(ClassDesc owner, String legacyName, String newName);
 
     /**
-     * Note that you also have to remap the method for the annotation attribute.
+     * Use {@code /} instead of {@code .}.
      */
-    public RenameRuleBuilder annotationAttribute(final String ownerDescriptor, final String legacyName, final String newName) {
-        if (!ownerDescriptor.startsWith("L") || !ownerDescriptor.endsWith(";")) {
-            throw new IllegalArgumentException("Invalid owner descriptor: %s".formatted(ownerDescriptor));
-        }
-        // for some reason the remapper wants the Lpkg/name; format, but just for annotation attributes
-        this.mappings.put("%s.%s".formatted(ownerDescriptor, legacyName), newName);
-        return this;
+    default RenameRuleBuilder type(final String legacyType, final Class<?> newType) {
+        return this.type(legacyType, desc(newType));
     }
 
     /**
      * Use {@code /} instead of {@code .}.
      */
-    public RenameRuleBuilder type(final String legacyType, final ClassDesc newType) {
-        this.mappings.put(legacyType, toOwner(newType));
-        return this;
+    RenameRuleBuilder type(String legacyType, ClassDesc newType);
+
+    default RenameRuleBuilder editEnum(final Class<?> enumType, final Consumer<EnumRenameBuilder> renameBuilder) {
+        return this.editEnum(desc(enumType), renameBuilder);
     }
 
-    /**
-     * Use {@code /} instead of {@code .}.
-     */
-    public RenameRuleBuilder type(final String legacyType, final String newType) {
-        this.mappings.put(legacyType, newType);
-        return this;
-    }
-
-    public RenameRuleBuilder editEnum(final Class<?> enumTypeDesc, final Consumer<EnumRenameBuilder> renamer) {
-        return this.editEnum(desc(enumTypeDesc), renamer);
-    }
-
-    public RenameRuleBuilder editEnum(final ClassDesc enumTypeDesc, final Consumer<EnumRenameBuilder> renamer) {
-        final EnumRenameBuilder enumRenamer = new EnumRenameBuilder(enumTypeDesc);
-        renamer.accept(enumRenamer);
-        enumRenamer.apply(this);
-        return this;
-    }
-
-    @Override
-    public RenameRule build() {
-        return new RenameRule(this.mappings, this.enumValueOfFieldRenames);
-    }
+    RenameRuleBuilder editEnum(ClassDesc enumTypeDesc, Consumer<EnumRenameBuilder> renameBuilder);
 }

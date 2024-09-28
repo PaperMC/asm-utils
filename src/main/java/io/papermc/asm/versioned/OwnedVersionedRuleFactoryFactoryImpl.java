@@ -11,12 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class VersionedRuleFactoryBuilderImpl implements VersionedRuleFactoryBuilder {
+public class OwnedVersionedRuleFactoryFactoryImpl implements OwnedVersionedRuleFactoryFactory {
 
     final Set<ClassDesc> owners;
     private final List<VersionedRuleFactory> factories = new ArrayList<>();
 
-    public VersionedRuleFactoryBuilderImpl(final Set<ClassDesc> owners) {
+    public OwnedVersionedRuleFactoryFactoryImpl(final Set<ClassDesc> owners) {
         this.owners = Set.copyOf(owners);
     }
 
@@ -38,6 +38,11 @@ public class VersionedRuleFactoryBuilderImpl implements VersionedRuleFactoryBuil
     @Override
     public void changeReturnTypeToSub(final ClassDesc newReturnType, final VersionedMethodMatcher versions) {
         this.factories.add(new SubTypeReturnRewrite.Versioned(this.owners, newReturnType, versions));
+    }
+
+    @Override
+    public void addRuleFactory(final VersionedRuleFactory factory) {
+        this.factories.add(factory);
     }
 
     @Override

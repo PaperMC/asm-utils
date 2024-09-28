@@ -16,7 +16,11 @@ public abstract class VersionedMatcherBase<P> {
     }
 
     public RewriteRule ruleForVersion(final ApiVersion version, final Function<P, ? extends RewriteRule> creator) {
-        final Map.@Nullable Entry<ApiVersion, P> entry = this.map.ceilingEntry(version);
+        return ruleForVersion(this.map, version, creator);
+    }
+
+    public static <P> RewriteRule ruleForVersion(final NavigableMap<ApiVersion, P> versions, final ApiVersion version, final Function<P, ? extends RewriteRule> creator) {
+        final Map.@Nullable Entry<ApiVersion, P> entry = versions.ceilingEntry(version);
         if (entry == null) {
             return RewriteRule.EMPTY;
         }

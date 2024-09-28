@@ -10,22 +10,22 @@ import static io.papermc.asm.util.DescriptorUtils.desc;
 public final class EnumRenameBuilder {
 
     private final ClassDesc enumTypeDesc;
-    private @Nullable ClassDesc optionalEnumReplacementImpl;
+    private @Nullable ClassDesc alternateValueOfOwner;
     private final Map<String, String> enumFieldRenames = new HashMap<>();
 
     EnumRenameBuilder(final ClassDesc enumTypeDesc) {
         this.enumTypeDesc = enumTypeDesc;
     }
 
-    public EnumRenameBuilder enumReplacementImpl(final Class<?> type) {
-        return this.enumReplacementImpl(desc(type));
+    public EnumRenameBuilder alternateValueOfOwner(final Class<?> type) {
+        return this.alternateValueOfOwner(desc(type));
     }
 
-    public EnumRenameBuilder enumReplacementImpl(final ClassDesc type) {
+    public EnumRenameBuilder alternateValueOfOwner(final ClassDesc type) {
         if (this.enumTypeDesc.equals(type)) {
             throw new IllegalArgumentException("Cannot replace an enum with itself");
         }
-        this.optionalEnumReplacementImpl = type;
+        this.alternateValueOfOwner = type;
         return this;
     }
 
@@ -34,11 +34,7 @@ public final class EnumRenameBuilder {
         return this;
     }
 
-    void apply(final RenameRuleBuilder renameRuleBuilder) {
-        this.enumFieldRenames.forEach((legacyName, newName) -> {
-            renameRuleBuilder.fieldByDesc(this.enumTypeDesc, legacyName, newName);
-        });
-        final Map<String, String> copy = Map.copyOf(this.enumFieldRenames);
-        renameRuleBuilder.enumValueOfFieldRenames.put(this.enumTypeDesc, new EnumRenamer(this.enumTypeDesc, this.optionalEnumReplacementImpl, copy));
+    EnumRenamer build() {
+        return new EnumRenamer(this.enumTypeDesc, this.alternateValueOfOwner, Map.copyOf(this.enumFieldRenames));
     }
 }

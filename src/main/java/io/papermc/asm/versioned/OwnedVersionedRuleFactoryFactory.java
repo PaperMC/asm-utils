@@ -10,10 +10,10 @@ import java.util.Set;
 
 import static io.papermc.asm.util.DescriptorUtils.desc;
 
-public interface VersionedRuleFactoryBuilder {
+public interface OwnedVersionedRuleFactoryFactory {
 
-    static VersionedRuleFactoryBuilder create(final Set<ClassDesc> owners) {
-        return new VersionedRuleFactoryBuilderImpl(owners);
+    static OwnedVersionedRuleFactoryFactory create(final Set<ClassDesc> owners) {
+        return new OwnedVersionedRuleFactoryFactoryImpl(owners);
     }
 
     // plain static rewrite
@@ -81,6 +81,8 @@ public interface VersionedRuleFactoryBuilder {
 
     void changeReturnTypeToSub(ClassDesc newReturnType, VersionedMethodMatcher versions);
     //</editor-fold>
+
+    void addRuleFactory(VersionedRuleFactory factory);
 
     VersionedRuleFactory build();
 }

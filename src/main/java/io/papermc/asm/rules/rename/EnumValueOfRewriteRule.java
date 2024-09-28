@@ -28,8 +28,8 @@ final class EnumValueOfRewriteRule implements GeneratedStaticRewrite {
 
     EnumValueOfRewriteRule(final EnumRenamer renamer) {
         this.owners.add(renamer.typeDesc());
-        if (renamer.optionalReplacementImpl() != null) {
-            this.owners.add(renamer.optionalReplacementImpl());
+        if (renamer.alternateValueOfOwner() != null) {
+            this.owners.add(renamer.alternateValueOfOwner());
         }
         this.matcher = MethodMatcher.builder()
             .match("valueOf", b -> b.statik().desc(MethodTypeDesc.of(renamer.typeDesc(), ConstantDescs.CD_String)))

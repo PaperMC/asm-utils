@@ -18,25 +18,25 @@ public interface VersionedRuleFactory {
     VersionedRuleFactory EMPTY = apiVersion -> RewriteRule.EMPTY;
 
     @SafeVarargs
-    static VersionedRuleFactory forOwnerClass(final Class<?> owner, final Consumer<? super VersionedRuleFactoryBuilder> firstFactoryConsumer, final Consumer<? super VersionedRuleFactoryBuilder>... factoryConsumers) {
+    static VersionedRuleFactory forOwnerClass(final Class<?> owner, final Consumer<? super OwnedVersionedRuleFactoryFactory> firstFactoryConsumer, final Consumer<? super OwnedVersionedRuleFactoryFactory>... factoryConsumers) {
         return forOwnerClasses(Collections.singleton(owner), firstFactoryConsumer, factoryConsumers);
     }
 
     @SafeVarargs
-    static VersionedRuleFactory forOwnerClasses(final Set<Class<?>> owners, final Consumer<? super VersionedRuleFactoryBuilder> firstFactoryConsumer, final Consumer<? super VersionedRuleFactoryBuilder>... factoryConsumers) {
+    static VersionedRuleFactory forOwnerClasses(final Set<Class<?>> owners, final Consumer<? super OwnedVersionedRuleFactoryFactory> firstFactoryConsumer, final Consumer<? super OwnedVersionedRuleFactoryFactory>... factoryConsumers) {
         return forOwners(owners.stream().map(DescriptorUtils::desc).collect(Collectors.toUnmodifiableSet()), firstFactoryConsumer, factoryConsumers);
     }
 
     @SafeVarargs
-    static VersionedRuleFactory forOwner(final ClassDesc owner, final Consumer<? super VersionedRuleFactoryBuilder> firstFactoryConsumer, final Consumer<? super VersionedRuleFactoryBuilder>... factoryConsumers) {
+    static VersionedRuleFactory forOwner(final ClassDesc owner, final Consumer<? super OwnedVersionedRuleFactoryFactory> firstFactoryConsumer, final Consumer<? super OwnedVersionedRuleFactoryFactory>... factoryConsumers) {
         return forOwners(Collections.singleton(owner), firstFactoryConsumer, factoryConsumers);
     }
 
     @SafeVarargs
-    static VersionedRuleFactory forOwners(final Set<ClassDesc> owners, final Consumer<? super VersionedRuleFactoryBuilder> firstFactoryConsumer, final Consumer<? super VersionedRuleFactoryBuilder>... factoryConsumers) {
-        final VersionedRuleFactoryBuilder factory = VersionedRuleFactoryBuilder.create(owners);
+    static VersionedRuleFactory forOwners(final Set<ClassDesc> owners, final Consumer<? super OwnedVersionedRuleFactoryFactory> firstFactoryConsumer, final Consumer<? super OwnedVersionedRuleFactoryFactory>... factoryConsumers) {
+        final OwnedVersionedRuleFactoryFactory factory = OwnedVersionedRuleFactoryFactory.create(owners);
         firstFactoryConsumer.accept(factory);
-        for (final Consumer<? super VersionedRuleFactoryBuilder> factoryConsumer : factoryConsumers) {
+        for (final Consumer<? super OwnedVersionedRuleFactoryFactory> factoryConsumer : factoryConsumers) {
             factoryConsumer.accept(factory);
         }
         return factory.build();
