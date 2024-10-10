@@ -8,7 +8,7 @@ import io.papermc.asm.rules.RewriteRule;
 
 class ClassToInterfaceTest {
 
-    @TransformerTest(value = "data.classes.ClassToInterfaceUser", copyFromClassReader = false /*required until asm merges https://gitlab.ow2.org/asm/asm/-/merge_requests/403*/)
+    @TransformerTest("data.classes.ClassToInterfaceUser")
     void testWithNoReplacement(final TransformerCheck check) {
         final RewriteRule rule = new ClassToInterfaceRule(
             SomeAbstractClass.class.describeConstable().orElseThrow(),
@@ -18,7 +18,7 @@ class ClassToInterfaceTest {
         check.run(rule);
     }
 
-    @TransformerTest(value = "data.classes.ClassToInterfaceRedirectUser", copyFromClassReader = false /*required until asm merges https://gitlab.ow2.org/asm/asm/-/merge_requests/403*/)
+    @TransformerTest("data.classes.ClassToInterfaceRedirectUser")
     void testWithReplacement(final TransformerCheck check) {
         final RewriteRule rule = new ClassToInterfaceRule(
             SomeAbstractClass.class.describeConstable().orElseThrow(),
