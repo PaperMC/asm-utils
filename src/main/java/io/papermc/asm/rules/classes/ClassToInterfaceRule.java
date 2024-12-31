@@ -97,12 +97,4 @@ public final class ClassToInterfaceRule implements RewriteRule.Delegate {
             };
         }
     }
-
-    public record Versioned(NavigableMap<ApiVersion, ClassToInterfaceRule> versions) implements VersionedRuleFactory {
-
-        @Override
-        public RewriteRule createRule(final ApiVersion apiVersion) {
-            return null;
-        }
-    }
 }
