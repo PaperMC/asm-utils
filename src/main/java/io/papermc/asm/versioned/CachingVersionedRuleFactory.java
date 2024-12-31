@@ -6,6 +6,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.jetbrains.annotations.ApiStatus;
 
+/**
+ * Caches creating {@link RewriteRule}s for each {@link ApiVersion}.
+ */
 public abstract class CachingVersionedRuleFactory implements VersionedRuleFactory {
 
     private final Map<ApiVersion, RewriteRule> cache = new ConcurrentHashMap<>();

@@ -13,6 +13,10 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * A factory for {@link RewriteRule} that are determined
+ * by a {@link ApiVersion}.
+ */
 public interface VersionedRuleFactory {
 
     VersionedRuleFactory EMPTY = apiVersion -> RewriteRule.EMPTY;

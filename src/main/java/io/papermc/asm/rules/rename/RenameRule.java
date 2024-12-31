@@ -2,20 +2,17 @@ package io.papermc.asm.rules.rename;
 
 import io.papermc.asm.rules.RewriteRule;
 import io.papermc.asm.rules.rename.asm.FixedClassRemapper;
-import io.papermc.asm.versioned.ApiVersion;
-import io.papermc.asm.versioned.VersionedRuleFactory;
+import io.papermc.asm.versioned.Mergeable;
 import java.lang.constant.ClassDesc;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NavigableMap;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.objectweb.asm.commons.Remapper;
 import org.objectweb.asm.commons.SimpleRemapper;
 
-public final class RenameRule implements RewriteRule.Delegate {
+public final class RenameRule implements RewriteRule.Delegate, Mergeable<RenameRule> {
 
     public static RenameRuleBuilder builder() {
         return new RenameRuleBuilderImpl();
@@ -54,26 +51,14 @@ public final class RenameRule implements RewriteRule.Delegate {
         return this.rule;
     }
 
-    public record Versioned(NavigableMap<ApiVersion, RenameRule> versions) implements VersionedRuleFactory {
-
-        @Override
-        public RewriteRule createRule(final ApiVersion apiVersion) {
-            final List<RenameRule> toMerge = new ArrayList<>(this.versions.tailMap(apiVersion, true).values());
-            if (toMerge.isEmpty()) {
-                return RewriteRule.EMPTY;
-            } else if (toMerge.size() == 1) {
-                return toMerge.get(0);
-            }
-            Collections.reverse(toMerge);
-            final Map<String, String> regularRenames = new HashMap<>();
-            final Map<ClassDesc, EnumRenamer> enumFieldRenames = new HashMap<>();
-            for (final RenameRule renameRule : toMerge) {
-                regularRenames.putAll(renameRule.renames);
-                renameRule.enumFieldRenames.forEach((classDesc, renamer) -> {
-                    enumFieldRenames.merge(classDesc, renamer, EnumRenamer::overwrite);
-                });
-            }
-            return new RenameRule(regularRenames, enumFieldRenames);
-        }
+    @Override
+    public RenameRule merge(final RenameRule other) {
+        final Map<String, String> regularRenames = new HashMap<>(this.renames);
+        final Map<ClassDesc, EnumRenamer> enumFieldRenames = new HashMap<>(this.enumFieldRenames);
+        regularRenames.putAll(other.renames);
+        other.enumFieldRenames.forEach((cd, renamer) -> {
+            enumFieldRenames.merge(cd, renamer, EnumRenamer::overwrite);
+        });
+        return new RenameRule(regularRenames, enumFieldRenames);
     }
 }

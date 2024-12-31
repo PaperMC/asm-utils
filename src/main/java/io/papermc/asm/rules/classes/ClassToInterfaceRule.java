@@ -6,8 +6,11 @@ import io.papermc.asm.rules.method.OwnableMethodRewriteRule;
 import io.papermc.asm.rules.method.StaticRewrite;
 import io.papermc.asm.rules.method.rewrite.MethodRewrite;
 import io.papermc.asm.rules.method.rewrite.SimpleRewrite;
+import io.papermc.asm.versioned.ApiVersion;
+import io.papermc.asm.versioned.VersionedRuleFactory;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
+import java.util.NavigableMap;
 import java.util.Set;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.ClassVisitor;
@@ -92,6 +95,14 @@ public final class ClassToInterfaceRule implements RewriteRule.Delegate {
                     }
                 }
             };
+        }
+    }
+
+    public record Versioned(NavigableMap<ApiVersion, ClassToInterfaceRule> versions) implements VersionedRuleFactory {
+
+        @Override
+        public RewriteRule createRule(final ApiVersion apiVersion) {
+            return null;
         }
     }
 }
