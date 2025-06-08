@@ -76,6 +76,11 @@ allprojects {
         testImplementation(rootProject.libs.jupiterParams)
         testRuntimeOnly(rootProject.libs.jupiterEngine)
     }
+
+    javadocLinks {
+        override(startsWithAnyOf("org.ow2.asm:asm"), JavadocLinksExtension.LinkOverride.Simple("https://asm.ow2.io/javadoc"))
+        override(rootProject.libs.checkerQual, "https://checkerframework.org/api/")
+    }
 }
 val mainForNewTargets = sourceSets.create("mainForNewTargets")
 
@@ -96,9 +101,6 @@ dependencies {
     testDataNewTargets.implementationConfigurationName(mainForNewTargets.output)
 }
 
-javadocLinks {
-    override(startsWithAnyOf("org.ow2.asm:"), JavadocLinksExtension.LinkOverride.Simple("https://asm.ow2.io/javadoc"))
-}
 
 abstract class FilterTestClasspath : DefaultTask() {
     @get:InputFiles

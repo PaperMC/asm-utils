@@ -57,7 +57,7 @@ public record DirectStaticRewrite(Set<ClassDesc> owners, @Nullable String static
     public record Versioned(Set<ClassDesc> owners, ClassDesc staticRedirectOwner, @Nullable String staticMethodName, VersionedMatcher<MethodMatcher> versions) implements VersionedRuleFactory {
 
         @Override
-        public RewriteRule createRule(final ApiVersion apiVersion) {
+        public RewriteRule createRule(final ApiVersion<?> apiVersion) {
             return this.versions.ruleForVersion(apiVersion, match -> new DirectStaticRewrite(this.owners(), this.staticMethodName(), match, this.staticRedirectOwner()));
         }
     }

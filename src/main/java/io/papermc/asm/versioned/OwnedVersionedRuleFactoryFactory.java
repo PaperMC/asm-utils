@@ -21,7 +21,7 @@ public interface OwnedVersionedRuleFactoryFactory {
     }
 
     //<editor-fold desc="changeParamToSuper" defaultstate="collapsed">
-    default void plainStaticRewrite(final ClassDesc newOwner, final @Nullable String staticMethodName, final ApiVersion apiVersion, final MethodMatcher matcher) {
+    default void plainStaticRewrite(final ClassDesc newOwner, final @Nullable String staticMethodName, final ApiVersion<?> apiVersion, final MethodMatcher matcher) {
         this.plainStaticRewrite(newOwner, staticMethodName, VersionedMatcher.single(apiVersion, matcher));
     }
 
@@ -29,11 +29,11 @@ public interface OwnedVersionedRuleFactoryFactory {
     //</editor-fold>
 
     //<editor-fold desc="changeParamToSuper" defaultstate="collapsed">
-    default void changeParamToSuper(final Class<?> newParamType, final ApiVersion apiVersion, final TargetedMethodMatcher methodMatcher) {
+    default void changeParamToSuper(final Class<?> newParamType, final ApiVersion<?> apiVersion, final TargetedMethodMatcher methodMatcher) {
         this.changeParamToSuper(desc(newParamType), apiVersion, methodMatcher);
     }
 
-    default void changeParamToSuper(final ClassDesc newParamType, final ApiVersion apiVersion, final TargetedMethodMatcher methodMatcher) {
+    default void changeParamToSuper(final ClassDesc newParamType, final ApiVersion<?> apiVersion, final TargetedMethodMatcher methodMatcher) {
         this.changeParamToSuper(newParamType, VersionedMatcher.single(apiVersion, methodMatcher));
     }
 
@@ -45,11 +45,11 @@ public interface OwnedVersionedRuleFactoryFactory {
     //</editor-fold>
 
     //<editor-fold desc="changeParamFuzzy" defaultstate="collapsed">
-    default void changeParamFuzzy(final Class<?> newParamType, final ApiVersion apiVersion, final Method staticHandler, final TargetedMethodMatcher targetedMethodMatcher) {
+    default void changeParamFuzzy(final Class<?> newParamType, final ApiVersion<?> apiVersion, final Method staticHandler, final TargetedMethodMatcher targetedMethodMatcher) {
         this.changeParamFuzzy(desc(newParamType), apiVersion, staticHandler, targetedMethodMatcher);
     }
 
-    default void changeParamFuzzy(final ClassDesc newParamType, final ApiVersion apiVersion, final Method staticHandler, final TargetedMethodMatcher targetedMethodMatcher) {
+    default void changeParamFuzzy(final ClassDesc newParamType, final ApiVersion<?> apiVersion, final Method staticHandler, final TargetedMethodMatcher targetedMethodMatcher) {
         this.changeParamFuzzy(newParamType, VersionedMatcher.single(apiVersion, new TargetedMethodMatcherWithHandler(targetedMethodMatcher, staticHandler)));
     }
 
@@ -61,11 +61,11 @@ public interface OwnedVersionedRuleFactoryFactory {
     //</editor-fold>
 
     //<editor-fold desc="changeParamDirect" defaultstate="collapsed">
-    default void changeParamDirect(final Class<?> newParamType, final ApiVersion apiVersion, final Method staticHandler, final TargetedMethodMatcher methodMatcher) {
+    default void changeParamDirect(final Class<?> newParamType, final ApiVersion<?> apiVersion, final Method staticHandler, final TargetedMethodMatcher methodMatcher) {
         this.changeParamDirect(desc(newParamType), apiVersion, staticHandler, methodMatcher);
     }
 
-    default void changeParamDirect(final ClassDesc newParamType, final ApiVersion apiVersion, final Method staticHandler, final TargetedMethodMatcher methodMatcher) {
+    default void changeParamDirect(final ClassDesc newParamType, final ApiVersion<?> apiVersion, final Method staticHandler, final TargetedMethodMatcher methodMatcher) {
         this.changeParamDirect(newParamType, VersionedMatcher.single(apiVersion, new TargetedMethodMatcherWithHandler(methodMatcher, staticHandler)));
     }
 
@@ -77,11 +77,11 @@ public interface OwnedVersionedRuleFactoryFactory {
     //</editor-fold>
 
     //<editor-fold desc="changeReturnTypeToSub" defaultstate="collapsed">
-    default void changeReturnTypeToSub(final Class<?> newReturnType, final ApiVersion apiVersion, final TargetedMethodMatcher methodMatcher) {
+    default void changeReturnTypeToSub(final Class<?> newReturnType, final ApiVersion<?> apiVersion, final TargetedMethodMatcher methodMatcher) {
         this.changeReturnTypeToSub(desc(newReturnType), apiVersion, methodMatcher);
     }
 
-    default void changeReturnTypeToSub(final ClassDesc newReturnType, final ApiVersion apiVersion, final TargetedMethodMatcher methodMatcher) {
+    default void changeReturnTypeToSub(final ClassDesc newReturnType, final ApiVersion<?> apiVersion, final TargetedMethodMatcher methodMatcher) {
         this.changeReturnTypeToSub(newReturnType, VersionedMatcher.single(apiVersion, methodMatcher));
     }
 
@@ -93,11 +93,11 @@ public interface OwnedVersionedRuleFactoryFactory {
     //</editor-fold>
 
     //<editor-fold desc="changeReturnTypeDirect" defaultstate="collapsed">
-    default void changeReturnTypeDirect(final Class<?> newReturnType, final ApiVersion apiVersion, final Method staticHandler, final TargetedMethodMatcher methodMatcher) {
+    default void changeReturnTypeDirect(final Class<?> newReturnType, final ApiVersion<?> apiVersion, final Method staticHandler, final TargetedMethodMatcher methodMatcher) {
         this.changeReturnTypeDirect(desc(newReturnType), apiVersion, staticHandler, methodMatcher);
     }
 
-    default void changeReturnTypeDirect(final ClassDesc newReturnType, final ApiVersion apiVersion, final Method staticHandler, final TargetedMethodMatcher methodMatcher) {
+    default void changeReturnTypeDirect(final ClassDesc newReturnType, final ApiVersion<?> apiVersion, final Method staticHandler, final TargetedMethodMatcher methodMatcher) {
         this.changeReturnTypeDirect(newReturnType, VersionedMatcher.single(apiVersion, new TargetedMethodMatcherWithHandler(methodMatcher, staticHandler)));
     }
 
@@ -109,11 +109,11 @@ public interface OwnedVersionedRuleFactoryFactory {
     //</editor-fold>
 
     //<editor-fold desc="changeReturnTypeDirectWithContext" defaultstate="collapsed">
-    default void changeReturnTypeDirectWithContext(final Class<?> newReturnType, final ApiVersion apiVersion, final Method staticHandler, final TargetedMethodMatcher methodMatcher) {
+    default void changeReturnTypeDirectWithContext(final Class<?> newReturnType, final ApiVersion<?> apiVersion, final Method staticHandler, final TargetedMethodMatcher methodMatcher) {
         this.changeReturnTypeDirectWithContext(desc(newReturnType), apiVersion, staticHandler, methodMatcher);
     }
 
-    default void changeReturnTypeDirectWithContext(final ClassDesc newReturnType, final ApiVersion apiVersion, final Method staticHandler, final TargetedMethodMatcher methodMatcher) {
+    default void changeReturnTypeDirectWithContext(final ClassDesc newReturnType, final ApiVersion<?> apiVersion, final Method staticHandler, final TargetedMethodMatcher methodMatcher) {
         this.changeReturnTypeDirectWithContext(newReturnType, VersionedMatcher.single(apiVersion, new TargetedMethodMatcherWithHandler(methodMatcher, staticHandler)));
     }
 
@@ -125,7 +125,7 @@ public interface OwnedVersionedRuleFactoryFactory {
     //</editor-fold>
 
     //<editor-fold desc="changeFieldToMethod" defaultstate="collapsed">
-    default void changeFieldToMethod(final @Nullable String getterName, final @Nullable String setterName, final boolean isInterfaceMethod, final ApiVersion apiVersion, final FieldMatcher matcher) {
+    default void changeFieldToMethod(final @Nullable String getterName, final @Nullable String setterName, final boolean isInterfaceMethod, final ApiVersion<?> apiVersion, final FieldMatcher matcher) {
         this.changeFieldToMethod(getterName, setterName, isInterfaceMethod, VersionedMatcher.single(apiVersion, matcher));
     }
 
@@ -133,11 +133,11 @@ public interface OwnedVersionedRuleFactoryFactory {
     //</editor-fold>
 
     //<editor-fold desc="moveInstanceMethod" defaultstate="collapsed">
-    default void moveInstanceMethod(final Class<?> newOwner, final String newMethodName, final ApiVersion apiVersion, final MethodMatcher matcher) {
+    default void moveInstanceMethod(final Class<?> newOwner, final String newMethodName, final ApiVersion<?> apiVersion, final MethodMatcher matcher) {
         this.moveInstanceMethod(desc(newOwner), newMethodName, apiVersion, matcher);
     }
 
-    default void moveInstanceMethod(final ClassDesc newOwner, final String newMethodName, final ApiVersion apiVersion, final MethodMatcher matcher) {
+    default void moveInstanceMethod(final ClassDesc newOwner, final String newMethodName, final ApiVersion<?> apiVersion, final MethodMatcher matcher) {
         this.moveInstanceMethod(newOwner, newMethodName, VersionedMatcher.single(apiVersion, matcher));
     }
 
@@ -148,9 +148,9 @@ public interface OwnedVersionedRuleFactoryFactory {
     void moveInstanceMethod(ClassDesc newOwner, String newMethodName, VersionedMatcher<MethodMatcher> versions);
     //</editor-fold>
 
-    <R extends RewriteRule & Mergeable<R>> void addMergeableRuleFactory(NavigableMap<ApiVersion, R> versions);
+    <R extends RewriteRule & Mergeable<R>> void addMergeableRuleFactory(NavigableMap<ApiVersion<?>, R> versions);
 
-    void addChainableRuleFactory(NavigableMap<ApiVersion, ? extends RewriteRule> versions);
+    void addChainableRuleFactory(NavigableMap<ApiVersion<?>, ? extends RewriteRule> versions);
 
     void addRuleFactory(VersionedRuleFactory factory);
 

@@ -8,9 +8,9 @@ import org.jetbrains.annotations.Contract;
 public interface VersionedTargetedMethodMatcherWithHandlerBuilder extends VersionedMatcherBuilder<TargetedMethodMatcherWithHandler> {
 
     @Contract(value = "_, _, _ -> this", mutates = "this")
-    VersionedTargetedMethodMatcherWithHandlerBuilder with(ApiVersion apiVersion, TargetedMethodMatcher matcher, Method staticHandler);
+    VersionedTargetedMethodMatcherWithHandlerBuilder with(ApiVersion<?> apiVersion, TargetedMethodMatcher matcher, Method staticHandler);
 
     @Override
-    VersionedTargetedMethodMatcherWithHandlerBuilder with(ApiVersion apiVersion, TargetedMethodMatcherWithHandler context);
+    VersionedTargetedMethodMatcherWithHandlerBuilder with(ApiVersion<?> apiVersion, TargetedMethodMatcherWithHandler context);
 
 }

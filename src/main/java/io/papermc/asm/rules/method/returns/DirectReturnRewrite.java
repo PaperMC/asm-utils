@@ -39,7 +39,7 @@ public record DirectReturnRewrite(Set<ClassDesc> owners, ClassDesc existingType,
     public record Versioned(Set<ClassDesc> owners, ClassDesc existingType, VersionedMatcher<TargetedMethodMatcherWithHandler> versions, boolean includeOwnerContext) implements VersionedRuleFactory {
 
         @Override
-        public RewriteRule createRule(final ApiVersion apiVersion) {
+        public RewriteRule createRule(final ApiVersion<?> apiVersion) {
             return this.versions.ruleForVersion(apiVersion, pair -> new DirectReturnRewrite(this.owners(), this.existingType(), pair.matcher(), pair.staticHandler(), this.includeOwnerContext()));
         }
     }

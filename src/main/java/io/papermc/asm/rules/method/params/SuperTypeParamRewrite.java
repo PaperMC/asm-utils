@@ -42,7 +42,7 @@ public record SuperTypeParamRewrite(Set<ClassDesc> owners, TargetedMethodMatcher
     public record Versioned(Set<ClassDesc> owners, ClassDesc newParamType, VersionedMatcher<TargetedMethodMatcher> versions) implements VersionedRuleFactory {
 
         @Override
-        public RewriteRule createRule(final ApiVersion apiVersion) {
+        public RewriteRule createRule(final ApiVersion<?> apiVersion) {
             return this.versions.ruleForVersion(apiVersion, matcher -> new SuperTypeParamRewrite(this.owners(), matcher, this.newParamType()));
         }
     }

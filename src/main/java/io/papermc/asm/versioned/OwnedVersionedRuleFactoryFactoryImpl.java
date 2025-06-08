@@ -76,12 +76,12 @@ public class OwnedVersionedRuleFactoryFactoryImpl implements OwnedVersionedRuleF
     }
 
     @Override
-    public <R extends RewriteRule & Mergeable<R>> void addMergeableRuleFactory(final NavigableMap<ApiVersion, R> versions) {
+    public <R extends RewriteRule & Mergeable<R>> void addMergeableRuleFactory(final NavigableMap<ApiVersion<?>, R> versions) {
         this.factories.add(new MappedVersionRuleFactory<>(versions, Mergeable::merge));
     }
 
     @Override
-    public void addChainableRuleFactory(final NavigableMap<ApiVersion, ? extends RewriteRule> versions) {
+    public void addChainableRuleFactory(final NavigableMap<ApiVersion<?>, ? extends RewriteRule> versions) {
         this.factories.add(new MappedVersionRuleFactory<RewriteRule>(versions, RewriteRule::chain));
     }
 

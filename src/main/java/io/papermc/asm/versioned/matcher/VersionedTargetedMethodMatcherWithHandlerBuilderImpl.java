@@ -9,12 +9,12 @@ public final class VersionedTargetedMethodMatcherWithHandlerBuilderImpl
     implements VersionedTargetedMethodMatcherWithHandlerBuilder {
 
     @Override
-    public VersionedTargetedMethodMatcherWithHandlerBuilder with(final ApiVersion apiVersion, final TargetedMethodMatcherWithHandler context) {
+    public VersionedTargetedMethodMatcherWithHandlerBuilder with(final ApiVersion<?> apiVersion, final TargetedMethodMatcherWithHandler context) {
         return (VersionedTargetedMethodMatcherWithHandlerBuilder) super.with(apiVersion, context);
     }
 
     @Override
-    public VersionedTargetedMethodMatcherWithHandlerBuilder with(final ApiVersion apiVersion, final TargetedMethodMatcher matcher, final Method staticHandler) {
+    public VersionedTargetedMethodMatcherWithHandlerBuilder with(final ApiVersion<?> apiVersion, final TargetedMethodMatcher matcher, final Method staticHandler) {
         return this.with(apiVersion, new TargetedMethodMatcherWithHandler(matcher, staticHandler));
     }
 }

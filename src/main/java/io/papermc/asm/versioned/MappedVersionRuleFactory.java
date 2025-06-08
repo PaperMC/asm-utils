@@ -7,14 +7,14 @@ import java.util.List;
 import java.util.NavigableMap;
 import java.util.function.BinaryOperator;
 
-public record MappedVersionRuleFactory<R extends RewriteRule>(NavigableMap<ApiVersion, ? extends R> versions, BinaryOperator<R> mergeFunction) implements VersionedRuleFactory {
+public record MappedVersionRuleFactory<R extends RewriteRule>(NavigableMap<ApiVersion<?>, ? extends R> versions, BinaryOperator<R> mergeFunction) implements VersionedRuleFactory {
 
-    public static <M extends RewriteRule & Mergeable<M>> MappedVersionRuleFactory<M> mergeable(final NavigableMap<ApiVersion, M> versions) {
+    public static <M extends RewriteRule & Mergeable<M>> MappedVersionRuleFactory<M> mergeable(final NavigableMap<ApiVersion<?>, M> versions) {
         return new MappedVersionRuleFactory<>(versions, Mergeable::merge);
     }
 
     @Override
-    public RewriteRule createRule(final ApiVersion apiVersion) {
+    public RewriteRule createRule(final ApiVersion<?> apiVersion) {
         final List<R> toMerge = new ArrayList<>(this.versions.tailMap(apiVersion, true).values());
         if (toMerge.isEmpty()) {
             return RewriteRule.EMPTY;

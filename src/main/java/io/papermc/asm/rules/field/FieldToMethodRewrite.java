@@ -105,7 +105,7 @@ public record FieldToMethodRewrite(Set<ClassDesc> owners, FieldMatcher fieldMatc
         }
 
         @Override
-        public RewriteRule createRule(final ApiVersion apiVersion) {
+        public RewriteRule createRule(final ApiVersion<?> apiVersion) {
             return this.versions.ruleForVersion(apiVersion, matcher -> new FieldToMethodRewrite(this.owners(), matcher, this.getterName(), this.setterName(), this.isInterfaceMethod()));
         }
     }

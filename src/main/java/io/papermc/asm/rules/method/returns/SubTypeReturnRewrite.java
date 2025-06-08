@@ -43,7 +43,7 @@ public record SubTypeReturnRewrite(Set<ClassDesc> owners, TargetedMethodMatcher 
     public record Versioned(Set<ClassDesc> owners, ClassDesc newReturnType, VersionedMatcher<TargetedMethodMatcher> versions) implements VersionedRuleFactory {
 
         @Override
-        public RewriteRule createRule(final ApiVersion apiVersion) {
+        public RewriteRule createRule(final ApiVersion<?> apiVersion) {
             return this.versions.ruleForVersion(apiVersion, matcher -> new SubTypeReturnRewrite(this.owners(), matcher, this.newReturnType()));
         }
     }

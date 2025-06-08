@@ -11,7 +11,7 @@ import org.jetbrains.annotations.ApiStatus;
  */
 public abstract class CachingVersionedRuleFactory implements VersionedRuleFactory {
 
-    private final Map<ApiVersion, RewriteRule> cache = new ConcurrentHashMap<>();
+    private final Map<ApiVersion<?>, RewriteRule> cache = new ConcurrentHashMap<>();
     private @MonotonicNonNull VersionedRuleFactory rootFactory;
 
     @ApiStatus.OverrideOnly
@@ -25,7 +25,7 @@ public abstract class CachingVersionedRuleFactory implements VersionedRuleFactor
     }
 
     @Override
-    public final RewriteRule createRule(final ApiVersion apiVersion) {
+    public final RewriteRule createRule(final ApiVersion<?> apiVersion) {
         return this.cache.computeIfAbsent(apiVersion, this.rootFactory()::createRule);
     }
 }

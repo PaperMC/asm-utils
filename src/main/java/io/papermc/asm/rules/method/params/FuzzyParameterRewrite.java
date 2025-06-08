@@ -63,7 +63,7 @@ public record FuzzyParameterRewrite(Set<ClassDesc> owners, ClassDesc existingTyp
     public record Versioned(Set<ClassDesc> owners, ClassDesc existingType, VersionedMatcher<TargetedMethodMatcherWithHandler> versions) implements VersionedRuleFactory {
 
         @Override
-        public RewriteRule createRule(final ApiVersion apiVersion) {
+        public RewriteRule createRule(final ApiVersion<?> apiVersion) {
             return this.versions.ruleForVersion(apiVersion, pair -> new FuzzyParameterRewrite(this.owners, this.existingType, pair.matcher(), pair.staticHandler()));
         }
     }

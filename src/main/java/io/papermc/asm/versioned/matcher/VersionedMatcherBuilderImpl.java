@@ -6,10 +6,10 @@ import java.util.TreeMap;
 
 public class VersionedMatcherBuilderImpl<C> implements VersionedMatcherBuilder<C> {
 
-    protected final NavigableMap<ApiVersion, C> versions = new TreeMap<>();
+    protected final NavigableMap<ApiVersion<?>, C> versions = new TreeMap<>();
 
     @Override
-    public VersionedMatcherBuilder<C> with(final ApiVersion apiVersion, final C context) {
+    public VersionedMatcherBuilder<C> with(final ApiVersion<?> apiVersion, final C context) {
         if (this.versions.containsKey(apiVersion)) {
             throw new IllegalArgumentException("Duplicate version: " + apiVersion);
         }

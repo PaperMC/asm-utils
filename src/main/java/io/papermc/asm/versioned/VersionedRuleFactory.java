@@ -59,7 +59,7 @@ public interface VersionedRuleFactory {
         return new Chain(List.copyOf(factories));
     }
 
-    RewriteRule createRule(ApiVersion apiVersion);
+    RewriteRule createRule(ApiVersion<?> apiVersion);
 
     record Chain(List<VersionedRuleFactory> factories) implements VersionedRuleFactory {
 
@@ -68,7 +68,7 @@ public interface VersionedRuleFactory {
         }
 
         @Override
-        public RewriteRule createRule(final ApiVersion apiVersion) {
+        public RewriteRule createRule(final ApiVersion<?> apiVersion) {
             final List<RewriteRule> rules = new ArrayList<>();
             for (final VersionedRuleFactory factory : this.factories) {
                 final @Nullable RewriteRule rule = factory.createRule(apiVersion);

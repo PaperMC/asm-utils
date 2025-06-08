@@ -7,5 +7,5 @@ import org.jetbrains.annotations.Contract;
 public interface VersionedMatcherBuilder<C> extends Builder<VersionedMatcher<C>> {
 
     @Contract(value = "_, _ -> this", mutates = "this")
-    VersionedMatcherBuilder<C> with(ApiVersion apiVersion, C context);
+    VersionedMatcherBuilder<C> with(ApiVersion<?> apiVersion, C context);
 }

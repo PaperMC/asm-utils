@@ -64,7 +64,7 @@ public record MoveInstanceMethod(
     public record Versioned(Set<ClassDesc> owners, ClassDesc newOwner, String newMethodName, VersionedMatcher<MethodMatcher> versions) implements VersionedRuleFactory {
 
         @Override
-        public RewriteRule createRule(final ApiVersion apiVersion) {
+        public RewriteRule createRule(final ApiVersion<?> apiVersion) {
             return this.versions.ruleForVersion(apiVersion, match -> new MoveInstanceMethod(this.owners(), match, this.newOwner(), this.newMethodName()));
         }
     }

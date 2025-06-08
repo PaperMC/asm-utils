@@ -13,7 +13,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class VersionedMatcher<C> {
 
-    public static <C> VersionedMatcher<C> single(final ApiVersion apiVersion, final C context) {
+    public static <C> VersionedMatcher<C> single(final ApiVersion<?> apiVersion, final C context) {
         return new VersionedMatcher<>(new TreeMap<>(Map.of(apiVersion, context)));
     }
 
@@ -33,18 +33,18 @@ public class VersionedMatcher<C> {
         return new VersionedMatcherBuilderImpl<>();
     }
 
-    private final NavigableMap<ApiVersion, C> map;
+    private final NavigableMap<ApiVersion<?>, C> map;
 
-    public VersionedMatcher(final NavigableMap<ApiVersion, C> map) {
+    public VersionedMatcher(final NavigableMap<ApiVersion<?>, C> map) {
         this.map = map;
     }
 
-    public RewriteRule ruleForVersion(final ApiVersion version, final Function<C, ? extends RewriteRule> creator) {
+    public RewriteRule ruleForVersion(final ApiVersion<?> version, final Function<C, ? extends RewriteRule> creator) {
         return ruleForVersion(this.map, version, creator);
     }
 
-    public static <P> RewriteRule ruleForVersion(final NavigableMap<ApiVersion, P> versions, final ApiVersion version, final Function<P, ? extends RewriteRule> creator) {
-        final Map.@Nullable Entry<ApiVersion, P> entry = versions.ceilingEntry(version);
+    public static <P> RewriteRule ruleForVersion(final NavigableMap<ApiVersion<?>, P> versions, final ApiVersion<?> version, final Function<P, ? extends RewriteRule> creator) {
+        final Map.@Nullable Entry<ApiVersion<?>, P> entry = versions.ceilingEntry(version);
         if (entry == null) {
             return RewriteRule.EMPTY;
         }
