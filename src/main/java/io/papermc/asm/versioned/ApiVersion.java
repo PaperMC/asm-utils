@@ -3,21 +3,21 @@ package io.papermc.asm.versioned;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.OverrideOnly
-public interface ApiVersion extends Comparable<ApiVersion> {
+public interface ApiVersion<I extends ApiVersion<I>> extends Comparable<I> {
 
-    default boolean isNewerThan(final ApiVersion apiVersion) {
+    default boolean isNewerThan(final I apiVersion) {
         return this.compareTo(apiVersion) > 0;
     }
 
-    default boolean isOlderThan(final ApiVersion apiVersion) {
+    default boolean isOlderThan(final I apiVersion) {
         return this.compareTo(apiVersion) < 0;
     }
 
-    default boolean isNewerThanOrSameAs(final ApiVersion apiVersion) {
+    default boolean isNewerThanOrSameAs(final I apiVersion) {
         return this.compareTo(apiVersion) >= 0;
     }
 
-    default boolean isOlderThanOrSameAs(final ApiVersion apiVersion) {
+    default boolean isOlderThanOrSameAs(final I apiVersion) {
         return this.compareTo(apiVersion) <= 0;
     }
 }

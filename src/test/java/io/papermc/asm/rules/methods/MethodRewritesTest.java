@@ -3,7 +3,7 @@ package io.papermc.asm.rules.methods;
 import data.methods.Methods;
 import data.types.hierarchy.Entity;
 import data.types.hierarchy.Player;
-import io.papermc.asm.ApiVersion;
+import io.papermc.asm.ApiVersions;
 import io.papermc.asm.TransformerTest;
 import io.papermc.asm.checks.TransformerCheck;
 import io.papermc.asm.rules.RewriteRule;
@@ -50,16 +50,16 @@ class MethodRewritesTest {
             builder.changeParamToSuper(
                 String.class,
                 VersionedMatcher.targetedMethodBuilder()
-                    .with(ApiVersion.ONE, method1)
-                    .with(ApiVersion.THREE, method3)
+                    .with(ApiVersions.ONE, method1)
+                    .with(ApiVersions.THREE, method3)
                     .build()
             );
         });
 
-        final VersionedTester tester = new VersionedTester(factory, ApiVersion.ALL_VERSIONS);
+        final VersionedTester tester = new VersionedTester(factory, ApiVersions.ALL_VERSIONS);
         tester.test(SuperTypeParamRewrite::oldParamType, Map.of(
-            ApiVersion.ONE, ConstantDescs.CD_int,
-            ApiVersion.THREE, ConstantDescs.CD_long
+            ApiVersions.ONE, ConstantDescs.CD_int,
+            ApiVersions.THREE, ConstantDescs.CD_long
         ));
     }
 
@@ -88,16 +88,16 @@ class MethodRewritesTest {
             builder.changeReturnTypeToSub(
                 String.class,
                 VersionedMatcher.targetedMethodBuilder()
-                    .with(ApiVersion.ONE, method1)
-                    .with(ApiVersion.THREE, method3)
+                    .with(ApiVersions.ONE, method1)
+                    .with(ApiVersions.THREE, method3)
                     .build()
             );
         });
 
-        final VersionedTester tester = new VersionedTester(factory, ApiVersion.ALL_VERSIONS);
+        final VersionedTester tester = new VersionedTester(factory, ApiVersions.ALL_VERSIONS);
         tester.test(SubTypeReturnRewrite::oldReturnType, Map.of(
-            ApiVersion.ONE, ConstantDescs.CD_int,
-            ApiVersion.THREE, ConstantDescs.CD_long
+            ApiVersions.ONE, ConstantDescs.CD_int,
+            ApiVersions.THREE, ConstantDescs.CD_long
         ));
     }
 }

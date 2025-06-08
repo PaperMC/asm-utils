@@ -1,3 +1,4 @@
+import org.incendo.cloudbuildlogic.javadoclinks.JavadocLinksExtension
 import org.incendo.cloudbuildlogic.jmp
 import java.nio.file.Files
 import kotlin.io.path.copyTo
@@ -93,6 +94,10 @@ dependencies {
     testImplementation(testDataNewTargets.output)
 
     testDataNewTargets.implementationConfigurationName(mainForNewTargets.output)
+}
+
+javadocLinks {
+    override(startsWithAnyOf("org.ow2.asm:"), JavadocLinksExtension.LinkOverride.Simple("https://asm.ow2.io/javadoc"))
 }
 
 abstract class FilterTestClasspath : DefaultTask() {

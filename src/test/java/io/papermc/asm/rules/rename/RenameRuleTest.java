@@ -2,7 +2,8 @@ package io.papermc.asm.rules.rename;
 
 import data.types.rename.RenamedTestEnum;
 import data.types.rename.TestAnnotation;
-import io.papermc.asm.ApiVersion;
+import io.papermc.asm.ApiVersions;
+import io.papermc.asm.TestApiVersionImpl;
 import io.papermc.asm.TransformerTest;
 import io.papermc.asm.checks.TransformerCheck;
 import io.papermc.asm.versioned.MappedVersionRuleFactory;
@@ -45,15 +46,15 @@ class RenameRuleTest {
 
     @Test
     void testVersionedRenamerRule() {
-        final Map<ApiVersion, RenameRule> versions = new HashMap<>();
-        versions.put(ApiVersion.ONE, RenameRule.builder()
+        final Map<TestApiVersionImpl, RenameRule> versions = new HashMap<>();
+        versions.put(ApiVersions.ONE, RenameRule.builder()
             .methodByClass(TestAnnotation.class, "single", methodDesc("()Ldata/types/rename/TestEnum;"), "value")
             .editEnum(TEST_ENUM, builder -> builder
                 .rename("A", "ONE")
             )
             .build()
         );
-        versions.put(ApiVersion.THREE, RenameRule.builder()
+        versions.put(ApiVersions.THREE, RenameRule.builder()
             .methodByClass(TestAnnotation.class, "newValue", methodDesc("()Ldata/types/rename/TestEnum;"), "value")
             .annotationAttribute(TestAnnotation.class, "newValue", "value")
             .editEnum(TEST_ENUM, builder -> builder
@@ -64,8 +65,8 @@ class RenameRuleTest {
         );
 
         final VersionedRuleFactory factory = MappedVersionRuleFactory.mergeable(new TreeMap<>(versions));
-        final RenameRule ruleOne = (RenameRule) factory.createRule(ApiVersion.ONE);
-        final RenameRule ruleTwo = (RenameRule) factory.createRule(ApiVersion.TWO);
+        final RenameRule ruleOne = (RenameRule) factory.createRule(ApiVersions.ONE);
+        final RenameRule ruleTwo = (RenameRule) factory.createRule(ApiVersions.TWO);
         assertEquals("value", annotationMethod("single").apply(ruleOne));
         assertEquals("value", annotationMethod("newValue").apply(ruleOne));
 
