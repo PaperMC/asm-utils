@@ -75,6 +75,7 @@ allprojects {
         testImplementation(rootProject.libs.jupiterApi)
         testImplementation(rootProject.libs.jupiterParams)
         testRuntimeOnly(rootProject.libs.jupiterEngine)
+        testRuntimeOnly(rootProject.libs.platformLauncher)
     }
 
     javadocLinks {
