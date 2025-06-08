@@ -1,3 +1,4 @@
+import org.incendo.cloudbuildlogic.javadoclinks.JavadocLinksExtension
 import org.incendo.cloudbuildlogic.jmp
 import java.nio.file.Files
 import kotlin.io.path.copyTo
@@ -75,6 +76,11 @@ allprojects {
         testImplementation(rootProject.libs.jupiterParams)
         testRuntimeOnly(rootProject.libs.jupiterEngine)
     }
+
+    javadocLinks {
+        override(startsWithAnyOf("org.ow2.asm:asm"), JavadocLinksExtension.LinkOverride.Simple("https://asm.ow2.io/javadoc"))
+        override(rootProject.libs.checkerQual, "https://checkerframework.org/api/")
+    }
 }
 val mainForNewTargets = sourceSets.create("mainForNewTargets")
 
@@ -89,11 +95,12 @@ val filtered = tasks.register<FilterTestClasspath>("filteredTestClasspath") {
 
 dependencies {
     implementation(mainForNewTargets.output)
-    testImplementation(files(filtered.flatMap { it.outputDir }))
+    testRuntimeOnly(files(filtered.flatMap { it.outputDir })) // only have access to old targets at runtime, don't use them in actual tests
     testImplementation(testDataNewTargets.output)
 
     testDataNewTargets.implementationConfigurationName(mainForNewTargets.output)
 }
+
 
 abstract class FilterTestClasspath : DefaultTask() {
     @get:InputFiles
