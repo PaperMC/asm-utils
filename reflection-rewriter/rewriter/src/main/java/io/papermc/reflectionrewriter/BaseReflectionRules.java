@@ -58,7 +58,7 @@ public final class BaseReflectionRules {
     }
 
     private static final MethodMatcher CLASS_RULE = MethodMatcher.builder()
-        .match("forName", b -> b.desc("(Ljava/lang/String;)Ljava/lang/Class;", "(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;"))
+        .match("forName", b -> b.desc("(Ljava/lang/String;)Ljava/lang/Class;", "(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;", "(Ljava/lang/Module;Ljava/lang/String;)Ljava/lang/Class;"))
         .match(Set.of("getField", "getDeclaredField"), b -> b.desc("(Ljava/lang/String;)Ljava/lang/reflect/Field;"))
         .match(Set.of("getMethod", "getDeclaredMethod"), b -> b.desc("(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;"))
         .build();
