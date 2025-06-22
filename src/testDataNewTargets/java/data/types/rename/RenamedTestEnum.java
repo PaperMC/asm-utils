@@ -7,4 +7,10 @@ public enum RenamedTestEnum {
     FOUR,
     FIVE,
     ;
+
+    public void renamed_method1(final int param1) {
+    }
+
+    public void renamed_method2(final int param1) {
+    }
 }

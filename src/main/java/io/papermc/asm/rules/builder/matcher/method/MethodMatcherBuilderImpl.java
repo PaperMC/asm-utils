@@ -6,12 +6,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
-import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 class MethodMatcherBuilderImpl implements MethodMatcherBuilder {
-    private MethodMatcher matcher = (o, isInvokeDynamic, n, d) -> false;
+    private MethodMatcher matcher = MethodMatcher.falseMatcher();
 
     MethodMatcherBuilderImpl() {
     }
@@ -34,8 +33,7 @@ class MethodMatcherBuilderImpl implements MethodMatcherBuilder {
 
     @Override
     public MethodMatcherBuilder match(final Collection<String> names, final Consumer<MatchBuilder> matchBuilderConsumer) {
-        final Collection<String> namesCopy = Set.copyOf(names);
-        final SpecificMatchBuilder matchBuilder = new SpecificMatchBuilder(namesCopy::contains);
+        final SpecificMatchBuilder matchBuilder = new SpecificMatchBuilder(names);
         matchBuilderConsumer.accept(matchBuilder);
         matchBuilder.apply();
         return this;
@@ -49,18 +47,20 @@ class MethodMatcherBuilderImpl implements MethodMatcherBuilder {
 
     final class SpecificMatchBuilder implements MatchBuilder {
 
-        private final Predicate<String> namePredicate;
+        private final Collection<String> methodNames;
         private Predicate<? super MethodTypeDesc> bytecodeDescPredicate = $ -> true;
-        private BiPredicate<Integer, Boolean> opcodePredicate = ($, $$) -> true;
+        private OpcodePredicate opcodePredicate = ($, $$) -> true;
 
-        private SpecificMatchBuilder(final Predicate<String> namePredicate) {
-            this.namePredicate = namePredicate;
+        private SpecificMatchBuilder(final Collection<String> methodNames) {
+            this.methodNames = Set.copyOf(methodNames);
         }
 
         private void apply() {
-            MethodMatcherBuilderImpl.this.matcher = MethodMatcherBuilderImpl.this.matcher.or((o, isInvokeDynamic, n, d) -> {
-                return this.namePredicate.test(n) && this.opcodePredicate.test(o, isInvokeDynamic) && this.bytecodeDescPredicate.test(MethodTypeDesc.ofDescriptor(d));
-            });
+            MethodMatcherBuilderImpl.this.matcher = MethodMatcherBuilderImpl.this.matcher.or(MethodMatcher.create(
+                this.methodNames,
+                this.bytecodeDescPredicate,
+                this.opcodePredicate
+            ));
         }
 
         @Override

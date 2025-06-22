@@ -14,17 +14,12 @@ public class TargetedMethodMatcherImpl implements TargetedMethodMatcher {
     }
 
     @Override
-    public boolean matches(final int opcode, final boolean isInvokeDynamic, final String name, final String descriptor) {
-        return this.wrapped.matches(opcode, isInvokeDynamic, name, descriptor);
-    }
-
-    @Override
-    public MethodMatcher negate() {
-        return new TargetedMethodMatcherImpl(this.wrapped.negate(), this.oldType);
-    }
-
-    @Override
     public ClassDesc targetType() {
         return this.oldType;
+    }
+
+    @Override
+    public MethodMatcher wrapped() {
+        return this.wrapped;
     }
 }

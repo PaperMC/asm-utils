@@ -2,6 +2,7 @@ package io.papermc.asm.rules.method.returns;
 
 import io.papermc.asm.ClassProcessingContext;
 import io.papermc.asm.rules.RewriteRule;
+import io.papermc.asm.rules.builder.matcher.method.MethodMatcher;
 import io.papermc.asm.rules.builder.matcher.method.targeted.TargetedMethodMatcher;
 import io.papermc.asm.rules.method.OwnableMethodRewriteRule;
 import io.papermc.asm.rules.method.rewrite.MethodRewrite;
@@ -19,18 +20,23 @@ import org.jspecify.annotations.Nullable;
  * We just change the return type in the descriptor and move on.
  *
  * @param owners        owners of the methods to change
- * @param methodMatcher method matcher to find methods with (target is the type to be found in bytecode that needs to be transformed)
+ * @param targetedMethodMatcher method matcher to find methods with (target is the type to be found in bytecode that needs to be transformed)
  * @param newReturnType the return type that is valid for existing method
  */
-public record SubTypeReturnRewrite(Set<ClassDesc> owners, TargetedMethodMatcher methodMatcher, ClassDesc newReturnType) implements OwnableMethodRewriteRule.Filtered {
+public record SubTypeReturnRewrite(Set<ClassDesc> owners, TargetedMethodMatcher targetedMethodMatcher, ClassDesc newReturnType) implements OwnableMethodRewriteRule.Filtered {
+
+    @Override
+    public MethodMatcher methodMatcher() {
+        return this.targetedMethodMatcher.wrapped();
+    }
 
     public ClassDesc oldReturnType() {
-        return this.methodMatcher.targetType();
+        return this.targetedMethodMatcher.targetType();
     }
 
     @Override
     public @Nullable MethodRewrite<?> rewrite(final ClassProcessingContext context, final boolean isInvokeDynamic, final int opcode, final ClassDesc owner, final String name, final MethodTypeDesc descriptor, final boolean isInterface) {
-        if (descriptor.returnType().equals(this.methodMatcher().targetType())) {
+        if (descriptor.returnType().equals(this.targetedMethodMatcher().targetType())) {
             return new SimpleRewrite(opcode, owner, name, this.modifyMethodDescriptor(descriptor), isInterface, isInvokeDynamic);
         }
         return null;

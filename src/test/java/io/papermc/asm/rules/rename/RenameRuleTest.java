@@ -6,11 +6,14 @@ import io.papermc.asm.ApiVersions;
 import io.papermc.asm.TestApiVersionImpl;
 import io.papermc.asm.TransformerTest;
 import io.papermc.asm.checks.TransformerCheck;
-import io.papermc.asm.versioned.MappedVersionRuleFactory;
+import io.papermc.asm.rules.builder.matcher.method.MethodMatcher;
+import io.papermc.asm.versioned.MergingVersionRuleFactory;
 import io.papermc.asm.versioned.VersionedRuleFactory;
 import java.lang.constant.ClassDesc;
+import java.lang.constant.ConstantDescs;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Function;
 import org.jetbrains.annotations.Nullable;
@@ -39,6 +42,7 @@ class RenameRuleTest {
             })
             .annotationAttribute(TestAnnotation.class, "single", "value")
             .methodByClass(TestAnnotation.class, "single", methodDesc("()Ldata/types/rename/TestEnum;"), "value")
+            .methodPredicate(TEST_ENUM, MethodMatcher.create(Set.of("method1", "method2"), b -> b.returnType().equals(ConstantDescs.CD_void) && b.parameterList().contains(ConstantDescs.CD_int)), s -> "renamed_" + s)
             .build();
 
         check.run(rule);
@@ -64,7 +68,7 @@ class RenameRuleTest {
             .build()
         );
 
-        final VersionedRuleFactory factory = MappedVersionRuleFactory.mergeable(new TreeMap<>(versions));
+        final VersionedRuleFactory factory = MergingVersionRuleFactory.mergeable(new TreeMap<>(versions));
         final RenameRule ruleOne = (RenameRule) factory.createRule(ApiVersions.ONE);
         final RenameRule ruleTwo = (RenameRule) factory.createRule(ApiVersions.TWO);
         assertEquals("value", annotationMethod("single").apply(ruleOne));

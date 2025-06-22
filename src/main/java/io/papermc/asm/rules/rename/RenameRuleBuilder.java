@@ -1,10 +1,13 @@
 package io.papermc.asm.rules.rename;
 
+import io.papermc.asm.rules.builder.matcher.method.MethodMatcher;
 import io.papermc.asm.util.Builder;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 
 import static io.papermc.asm.util.DescriptorUtils.desc;
 
@@ -32,7 +35,20 @@ public interface RenameRuleBuilder extends Builder<RenameRule> {
     RenameRuleBuilder method(ClassDesc owner, String legacyMethodName, MethodTypeDesc methodDesc, final String newMethodName);
     //</editor-fold>
 
+    default RenameRuleBuilder methodPredicate(final Class<?> owner, final MethodMatcher matcher, final UnaryOperator<String> newMethodName) {
+        return this.methodPredicate(desc(owner), matcher, newMethodName);
+    }
+
+    RenameRuleBuilder methodPredicate(ClassDesc owner, final MethodMatcher matcher, final UnaryOperator<String> newMethodName);
+
     //<editor-fold desc="fields" defaultstate="collapsed">
+    default RenameRuleBuilder fieldsByClass(final Set<Class<?>> owners, final Map<String, String> legacyToNewFieldNames) {
+        legacyToNewFieldNames.forEach((legacyName, newName) -> {
+            this.fieldByClass(owners, legacyName, newName);
+        });
+        return this;
+    }
+
     default RenameRuleBuilder fieldByClass(final Set<Class<?>> owners, final String legacyFieldName, final String newFieldName) {
         for (final Class<?> owner : owners) {
             this.fieldByClass(owner, legacyFieldName, newFieldName);
@@ -40,14 +56,35 @@ public interface RenameRuleBuilder extends Builder<RenameRule> {
         return this;
     }
 
+    default RenameRuleBuilder fieldsByClass(final Class<?> owner, final Map<String, String> legacyToNewFieldNames) {
+        legacyToNewFieldNames.forEach((legacyName, newName) -> {
+            this.fieldByClass(owner, legacyName, newName);
+        });
+        return this;
+    }
+
     default RenameRuleBuilder fieldByClass(final Class<?> owner, final String legacyFieldName, final String newFieldName) {
         return this.field(desc(owner), legacyFieldName, newFieldName);
+    }
+
+    default RenameRuleBuilder fields(final Set<ClassDesc> owners, final Map<String, String> legacyToNewFieldNames) {
+        legacyToNewFieldNames.forEach((legacyName, newName) -> {
+            this.field(owners, legacyName, newName);
+        });
+        return this;
     }
 
     default RenameRuleBuilder field(final Set<ClassDesc> owners, final String legacyFieldName, final String newFieldName) {
         for (final ClassDesc owner : owners) {
             this.field(owner, legacyFieldName, newFieldName);
         }
+        return this;
+    }
+
+    default RenameRuleBuilder fields(final ClassDesc owner, final Map<String, String> legacyToNewFieldNames) {
+        legacyToNewFieldNames.forEach((legacyName, newName) -> {
+            this.field(owner, legacyName, newName);
+        });
         return this;
     }
 

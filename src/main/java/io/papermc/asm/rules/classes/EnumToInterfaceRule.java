@@ -3,6 +3,7 @@ package io.papermc.asm.rules.classes;
 import io.papermc.asm.ClassProcessingContext;
 import io.papermc.asm.rules.RewriteRule;
 import io.papermc.asm.rules.builder.matcher.method.MethodMatcher;
+import io.papermc.asm.rules.builder.matcher.method.targeted.MethodMatcherPredicate;
 import io.papermc.asm.rules.method.DirectStaticRewrite;
 import io.papermc.asm.rules.method.OwnableMethodRewriteRule;
 import io.papermc.asm.rules.method.generated.GeneratedStaticRewrite;
@@ -36,19 +37,19 @@ public class EnumToInterfaceRule implements RewriteRule.Delegate {
         .match("getDeclaringClass", b -> b.virtual().desc(MethodTypeDesc.of(ConstantDescs.CD_Class)))
         .match("describeConstable", b -> b.virtual().desc(MethodTypeDesc.of(desc(Optional.class))))
         .build();
-    private static final MethodMatcher NOT_ENUM_METHODS_BASE = ENUM_VIRTUAL_METHODS.negate();
+    private static final MethodMatcherPredicate NOT_ENUM_METHODS_BASE = ENUM_VIRTUAL_METHODS.negate();
 
     private static final ClassDesc LEGACY_ENUM = desc(LegacyEnum.class);
 
     private final Map<ClassDesc, ClassDesc> enums;
     private final RewriteRule rule;
-    private final MethodMatcher notEnumMethods;
+    private final MethodMatcherPredicate notEnumMethods;
 
     public EnumToInterfaceRule(final Map<ClassDesc, ClassDesc> enums) {
         this.enums = enums;
         final List<RewriteRule> rules = new ArrayList<>();
         rules.add(new EnumVirtualMethods());
-        MethodMatcher notEnums = NOT_ENUM_METHODS_BASE;
+        MethodMatcherPredicate notEnums = NOT_ENUM_METHODS_BASE;
         for (final Map.Entry<ClassDesc, ClassDesc> entry : enums.entrySet()) {
             final MethodMatcher matcher = createStaticMatcher(entry.getKey());
             notEnums = notEnums.and(matcher.negate());
@@ -115,7 +116,7 @@ public class EnumToInterfaceRule implements RewriteRule.Delegate {
     final class NotEnumMethods implements OwnableMethodRewriteRule.Filtered {
 
         @Override
-        public MethodMatcher methodMatcher() {
+        public MethodMatcherPredicate methodMatcher() {
             return EnumToInterfaceRule.this.notEnumMethods;
         }
 

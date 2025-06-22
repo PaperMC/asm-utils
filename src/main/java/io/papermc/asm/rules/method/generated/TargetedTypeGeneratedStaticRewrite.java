@@ -25,13 +25,13 @@ public interface TargetedTypeGeneratedStaticRewrite extends GeneratedStaticRewri
          *
          * @return the targeted method matcher
          */
-        TargetedMethodMatcher methodMatcher();
+        TargetedMethodMatcher targetedMethodMatcher();
 
         @Override
         default MethodTypeDesc transformInvokedDescriptor(final MethodTypeDesc original, final Set<Integer> context) {
             // To create the generated method descriptor from the existing (in source) descriptor, we replace the
             // legacy param with the new param
-            return replaceParameters(original, isEqual(this.methodMatcher().targetType()), this.existingType(), context);
+            return replaceParameters(original, isEqual(this.targetedMethodMatcher().targetType()), this.existingType(), context);
         }
     }
 
