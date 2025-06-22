@@ -2,6 +2,7 @@ package io.papermc.asm.rules.method.params;
 
 import io.papermc.asm.ClassProcessingContext;
 import io.papermc.asm.rules.RewriteRule;
+import io.papermc.asm.rules.builder.matcher.method.MethodMatcher;
 import io.papermc.asm.rules.builder.matcher.method.targeted.TargetedMethodMatcher;
 import io.papermc.asm.rules.method.OwnableMethodRewriteRule;
 import io.papermc.asm.rules.method.generated.TargetedTypeGeneratedStaticRewrite;
@@ -27,15 +28,20 @@ import static java.util.function.Predicate.isEqual;
  *
  * @param owners        the owners to target
  * @param existingType  the type to convert to
- * @param methodMatcher the method matcher to use which targets the legacy param type
+ * @param targetedMethodMatcher the method matcher to use which targets the legacy param type
  * @param staticHandler the method which will be used to convert the legacy type to the new type
  */
-public record FuzzyParameterRewrite(Set<ClassDesc> owners, ClassDesc existingType, TargetedMethodMatcher methodMatcher, Method staticHandler) implements TargetedTypeGeneratedStaticRewrite.Parameter, OwnableMethodRewriteRule.Filtered {
+public record FuzzyParameterRewrite(Set<ClassDesc> owners, ClassDesc existingType, TargetedMethodMatcher targetedMethodMatcher, Method staticHandler) implements TargetedTypeGeneratedStaticRewrite.Parameter, OwnableMethodRewriteRule.Filtered {
+
+    @Override
+    public MethodMatcher methodMatcher() {
+        return this.targetedMethodMatcher().wrapped();
+    }
 
     @Override
     public MethodTypeDesc transformToRedirectDescriptor(final MethodTypeDesc intermediateDescriptor) {
         // We need to replace the parameters in the bytecode descriptor that match the target with the fuzzy param
-        return replaceParameters(intermediateDescriptor, isEqual(this.methodMatcher().targetType()), ConstantDescs.CD_Object);
+        return replaceParameters(intermediateDescriptor, isEqual(this.targetedMethodMatcher().targetType()), ConstantDescs.CD_Object);
     }
 
     @Override

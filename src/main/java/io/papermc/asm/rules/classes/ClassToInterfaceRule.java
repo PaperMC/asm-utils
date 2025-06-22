@@ -8,6 +8,7 @@ import io.papermc.asm.rules.method.rewrite.MethodRewrite;
 import io.papermc.asm.rules.method.rewrite.SimpleRewrite;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
+import java.util.Optional;
 import java.util.Set;
 import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.ClassVisitor;
@@ -24,6 +25,16 @@ public final class ClassToInterfaceRule implements RewriteRule.Delegate {
     private final ClassDesc owner;
     private final @Nullable ClassDesc redirectExtension;
     private final RewriteRule rule;
+
+    /**
+     * Rewrites all methods on a target class to be interface methods.
+     *
+     * @param owner the class to target
+     * @param redirectExtension an optional new owner for the methods to maintain more compatibility if the bytecode extended the owner type
+     */
+    public ClassToInterfaceRule(final Class<?> owner, final @Nullable Class<?> redirectExtension) {
+        this(owner.describeConstable().orElseThrow(), Optional.ofNullable(redirectExtension).flatMap(Class::describeConstable).orElse(null));
+    }
 
     /**
      * Rewrites all methods on a target class to be interface methods.
