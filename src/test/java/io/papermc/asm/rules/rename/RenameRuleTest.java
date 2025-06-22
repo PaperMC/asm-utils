@@ -6,7 +6,7 @@ import io.papermc.asm.ApiVersions;
 import io.papermc.asm.TestApiVersionImpl;
 import io.papermc.asm.TransformerTest;
 import io.papermc.asm.checks.TransformerCheck;
-import io.papermc.asm.versioned.MappedVersionRuleFactory;
+import io.papermc.asm.versioned.MergingVersionRuleFactory;
 import io.papermc.asm.versioned.VersionedRuleFactory;
 import java.lang.constant.ClassDesc;
 import java.util.HashMap;
@@ -64,7 +64,7 @@ class RenameRuleTest {
             .build()
         );
 
-        final VersionedRuleFactory factory = MappedVersionRuleFactory.mergeable(new TreeMap<>(versions));
+        final VersionedRuleFactory factory = MergingVersionRuleFactory.mergeable(new TreeMap<>(versions));
         final RenameRule ruleOne = (RenameRule) factory.createRule(ApiVersions.ONE);
         final RenameRule ruleTwo = (RenameRule) factory.createRule(ApiVersions.TWO);
         assertEquals("value", annotationMethod("single").apply(ruleOne));
