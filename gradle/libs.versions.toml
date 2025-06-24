@@ -1,6 +1,6 @@
 [versions]
 asm = "9.8"
-junit = "5.13.1"
+junit = "5.13.2"
 junitPlatform = "1.13.1"
 indra = "3.1.3"
 
