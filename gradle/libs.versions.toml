@@ -9,7 +9,7 @@ jbAnnos = "26.0.2"
 [libraries]
 asm = { module = "org.ow2.asm:asm", version.ref = "asm" }
 asmCommons = { module = "org.ow2.asm:asm-commons", version.ref = "asm" }
-checkerQual = "org.checkerframework:checker-qual:3.49.4"
+checkerQual = "org.checkerframework:checker-qual:3.49.5"
 jetbrainsAnnotations = { module = "org.jetbrains:annotations", version.ref = "jbAnnos" }
 
 jupiterApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
