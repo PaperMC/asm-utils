@@ -1,5 +1,4 @@
-@DefaultQualifier(NonNull.class)
+@NullMarked
 package io.papermc.asm.versioned;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.framework.qual.DefaultQualifier;
+import org.jspecify.annotations.NullMarked;

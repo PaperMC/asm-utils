@@ -10,7 +10,7 @@ import java.lang.constant.ClassDesc;
 import java.lang.reflect.Method;
 import java.util.NavigableMap;
 import java.util.Set;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static io.papermc.asm.util.DescriptorUtils.desc;
 

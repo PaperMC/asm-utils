@@ -4,7 +4,7 @@ import java.lang.constant.ClassDesc;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public record EnumRenamer(ClassDesc typeDesc, @Nullable ClassDesc alternateValueOfOwner, Map<String, String> fieldRenames) {
 

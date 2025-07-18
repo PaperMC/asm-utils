@@ -3,11 +3,8 @@ package io.papermc.asm;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.framework.qual.DefaultQualifier;
+import org.jspecify.annotations.Nullable;
 
-@DefaultQualifier(NonNull.class)
 @FunctionalInterface
 public interface ClassInfoProvider {
     @Nullable ClassInfo info(String className);
@@ -45,8 +42,8 @@ public interface ClassInfoProvider {
 
             @Override
             public @Nullable ClassInfo info(final String className) {
-                final @Nullable ClassInfo info = this.classInfoCache.computeIfAbsent(className, cls -> {
-                    final @Nullable ClassInfo find = backing.info(cls);
+                final ClassInfo info = this.classInfoCache.computeIfAbsent(className, cls -> {
+                    final ClassInfo find = backing.info(cls);
                     return find == null && cacheMisses ? NULL_INFO : find;
                 });
                 return info == NULL_INFO ? null : info;

@@ -3,8 +3,8 @@ package io.papermc.asm.versioned;
 import io.papermc.asm.rules.RewriteRule;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.jetbrains.annotations.ApiStatus;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Caches creating {@link RewriteRule}s for each {@link ApiVersion}.
@@ -12,7 +12,7 @@ import org.jetbrains.annotations.ApiStatus;
 public abstract class CachingVersionedRuleFactory implements VersionedRuleFactory {
 
     private final Map<ApiVersion<?>, RewriteRule> cache = new ConcurrentHashMap<>();
-    private @MonotonicNonNull VersionedRuleFactory rootFactory;
+    private @Nullable VersionedRuleFactory rootFactory;
 
     @ApiStatus.OverrideOnly
     public abstract VersionedRuleFactory createRootFactory();

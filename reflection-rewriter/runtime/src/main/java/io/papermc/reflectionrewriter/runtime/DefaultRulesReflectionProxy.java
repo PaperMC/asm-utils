@@ -8,8 +8,6 @@ import java.lang.invoke.MethodType;
 import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.framework.qual.DefaultQualifier;
 
 /**
  * Interface with all the methods needed for the default rules to function.
@@ -18,7 +16,6 @@ import org.checkerframework.framework.qual.DefaultQualifier;
  * should be used to generate a class with a static field holding an instance
  * of your proxy, and static methods redirecting to that instance.</p>
  */
-@DefaultQualifier(NonNull.class)
 @SuppressWarnings("checkstyle:MethodName") // These methods have their names copied from the method we are proxying
 public interface DefaultRulesReflectionProxy {
     // Begin standard reflection

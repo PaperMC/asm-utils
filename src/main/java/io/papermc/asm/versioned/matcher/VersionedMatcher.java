@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.function.Function;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class VersionedMatcher<C> {
 
@@ -44,7 +43,7 @@ public class VersionedMatcher<C> {
     }
 
     public static <P> RewriteRule ruleForVersion(final NavigableMap<ApiVersion<?>, P> versions, final ApiVersion<?> version, final Function<P, ? extends RewriteRule> creator) {
-        final Map.@Nullable Entry<ApiVersion<?>, P> entry = versions.ceilingEntry(version);
+        final Map.Entry<ApiVersion<?>, P> entry = versions.ceilingEntry(version);
         if (entry == null) {
             return RewriteRule.EMPTY;
         }

@@ -12,7 +12,7 @@ import io.papermc.asm.versioned.matcher.VersionedMatcher;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.util.Set;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Changes a return type to a subtype of the old type. This isn't a compile break as subtypes inherit everything, but it is an ABI break.

@@ -3,7 +3,7 @@ package io.papermc.asm.rules.method.rewrite;
 import io.papermc.asm.rules.RewriteRule;
 import io.papermc.asm.rules.generate.GeneratedMethodHolder;
 import java.util.function.Consumer;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.tree.MethodNode;

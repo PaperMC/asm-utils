@@ -10,7 +10,7 @@ import java.lang.constant.ClassDesc;
 import java.lang.constant.ConstantDescs;
 import java.lang.constant.MethodTypeDesc;
 import java.util.Set;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 
 /**
@@ -84,7 +84,7 @@ public record FieldToMethodRewrite(Set<ClassDesc> owners, FieldMatcher fieldMatc
             case Opcodes.PUTFIELD, Opcodes.PUTSTATIC -> Type.SETTER;
             default -> throw new IllegalArgumentException("Unexpected opcode: " + opcode);
         };
-        final @Nullable String methodName = switch (type) {
+        final String methodName = switch (type) {
             case GETTER -> this.getterName;
             case SETTER -> this.setterName;
         };

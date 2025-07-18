@@ -10,16 +10,13 @@ import io.papermc.asm.rules.method.rewrite.SimpleRewrite;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.util.Set;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.framework.qual.DefaultQualifier;
+import org.jspecify.annotations.Nullable;
 
 import static io.papermc.asm.util.DescriptorUtils.fromOwner;
 import static io.papermc.asm.util.DescriptorUtils.toOwner;
 import static io.papermc.asm.util.OpcodeUtils.isStatic;
 import static io.papermc.asm.util.OpcodeUtils.staticOp;
 
-@DefaultQualifier(NonNull.class)
 public final class DefineClassRule implements MethodRewriteRule {
     private static final Set<String> CLASS_LOADER_DESCS = Set.of(
         "([BII)Ljava/lang/Class;",
@@ -66,7 +63,7 @@ public final class DefineClassRule implements MethodRewriteRule {
             descriptor = descriptor.insertParameterTypes(0, fromOwner("java/lang/invoke/MethodHandles$Lookup"));
             new SimpleRewrite(staticOp(isInvokeDynamic), this.proxy, name, descriptor, false, isInvokeDynamic);
         }
-        final @Nullable String superName = context.processingClassSuperClassName();
+        final String superName = context.processingClassSuperClassName();
         if (superName != null) {
             if (CLASS_LOADER_DESCS.contains(descriptor.descriptorString())
                 && this.isClassLoader(context.classInfoProvider(), superName)
@@ -120,9 +117,9 @@ public final class DefineClassRule implements MethodRewriteRule {
         if (className.equals(checkForName)) {
             return true;
         }
-        final @Nullable ClassInfo info = classInfoProvider.info(className);
+        final ClassInfo info = classInfoProvider.info(className);
         if (info != null) {
-            final @Nullable String superName = info.superClassName();
+            final String superName = info.superClassName();
             if (superName != null) {
                 return is(classInfoProvider, superName, checkForName, assumeClassLoader);
             } else {

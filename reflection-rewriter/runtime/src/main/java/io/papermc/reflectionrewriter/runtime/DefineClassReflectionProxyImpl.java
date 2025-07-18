@@ -10,7 +10,7 @@ import java.security.SecureClassLoader;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 final class DefineClassReflectionProxyImpl implements DefineClassReflectionProxy {
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();

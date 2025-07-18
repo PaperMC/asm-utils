@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.commons.Remapper;
 import org.objectweb.asm.commons.SimpleRemapper;
 
@@ -20,7 +20,7 @@ public final class RenameRule implements RewriteRule.Delegate, Mergeable<RenameR
 
     private final Map<String, String> renames;
     private final Map<ClassDesc, EnumRenamer> enumFieldRenames;
-    private @MonotonicNonNull RewriteRule rule;
+    private @Nullable RewriteRule rule;
 
     public RenameRule(final Map<String, String> renames, final Map<ClassDesc, EnumRenamer> enumFieldRenames) {
         this.renames = Map.copyOf(renames);

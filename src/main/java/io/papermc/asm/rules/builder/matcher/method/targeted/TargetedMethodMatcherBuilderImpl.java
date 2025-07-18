@@ -12,13 +12,13 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.jspecify.annotations.Nullable;
 
 class TargetedMethodMatcherBuilderImpl implements TargetedMethodMatcherBuilder {
 
     private MethodMatcher matcher = (opcode, isInvokeDynamic, name, descriptor) -> false;
     private Predicate<MethodTypeDesc> byDesc = $ -> true;
-    private @MonotonicNonNull ClassDesc oldType;
+    private @Nullable ClassDesc oldType;
 
     TargetedMethodMatcherBuilderImpl() {
     }

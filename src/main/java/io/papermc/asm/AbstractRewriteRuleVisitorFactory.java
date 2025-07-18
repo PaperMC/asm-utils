@@ -1,17 +1,13 @@
 package io.papermc.asm;
 
 import io.papermc.asm.rules.RewriteRule;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.framework.qual.DefaultQualifier;
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.ClassVisitor;
 
-@DefaultQualifier(NonNull.class)
 public abstract class AbstractRewriteRuleVisitorFactory implements RewriteRuleVisitorFactory {
 
     private final int api;
-    private volatile @MonotonicNonNull RewriteRule rule;
+    private volatile @Nullable RewriteRule rule;
     private final ClassInfoProvider classInfoProvider;
 
     protected AbstractRewriteRuleVisitorFactory(
@@ -33,7 +29,7 @@ public abstract class AbstractRewriteRuleVisitorFactory implements RewriteRuleVi
     }
 
     protected final RewriteRule rule() {
-        @Nullable RewriteRule rule = this.rule;
+        RewriteRule rule = this.rule;
         if (rule != null) {
             return rule;
         }
@@ -52,7 +48,7 @@ public abstract class AbstractRewriteRuleVisitorFactory implements RewriteRuleVi
     private final class MutableProcessingContext implements ClassProcessingContext {
         private static final String NULL = "null";
 
-        private @MonotonicNonNull String name = null;
+        private @Nullable String name = null;
         private @Nullable String superName = NULL;
 
         @Override

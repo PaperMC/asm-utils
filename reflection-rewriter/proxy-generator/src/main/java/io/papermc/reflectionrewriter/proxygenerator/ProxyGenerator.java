@@ -8,10 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.framework.qual.DefaultQualifier;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -41,7 +39,7 @@ import static org.objectweb.asm.Opcodes.V17;
 /**
  * Generates holder classes for reflection proxy instances.
  */
-@DefaultQualifier(NonNull.class)
+@NullMarked
 public final class ProxyGenerator {
     private ProxyGenerator() {
     }
@@ -164,7 +162,7 @@ public final class ProxyGenerator {
     }
 
     private static void findParents(final Set<Class<?>> ret, final Class<?> clazz) {
-        final @Nullable Class<?> superClass = clazz.getSuperclass();
+        final Class<?> superClass = clazz.getSuperclass();
         if (superClass != null && superClass != Object.class) {
             ret.add(superClass);
             findParents(ret, superClass);
@@ -176,7 +174,7 @@ public final class ProxyGenerator {
     }
 
     private static ClassReader classReader(final String className) {
-        try (final @Nullable InputStream is = ProxyGenerator.class.getClassLoader().getResourceAsStream(className.replace('.', '/') + ".class")) {
+        try (final InputStream is = ProxyGenerator.class.getClassLoader().getResourceAsStream(className.replace('.', '/') + ".class")) {
             Objects.requireNonNull(is, () -> "Class '" + className + "'");
             return new ClassReader(is);
         } catch (final Exception ex) {
@@ -217,7 +215,7 @@ public final class ProxyGenerator {
 
     private static final class DiscoverMethodsVisitor extends ClassVisitor {
         private final List<MethodInfo> methods;
-        private @MonotonicNonNull String name;
+        private @Nullable String name;
 
         DiscoverMethodsVisitor(final int api, final @Nullable ClassVisitor visitor) {
             super(api, visitor);

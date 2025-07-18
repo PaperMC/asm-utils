@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A factory for {@link RewriteRule} that are determined
@@ -71,7 +70,7 @@ public interface VersionedRuleFactory {
         public RewriteRule createRule(final ApiVersion<?> apiVersion) {
             final List<RewriteRule> rules = new ArrayList<>();
             for (final VersionedRuleFactory factory : this.factories) {
-                final @Nullable RewriteRule rule = factory.createRule(apiVersion);
+                final RewriteRule rule = factory.createRule(apiVersion);
                 if (rule != RewriteRule.EMPTY) {
                     rules.add(rule);
                 }

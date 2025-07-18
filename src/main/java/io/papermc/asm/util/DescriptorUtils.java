@@ -7,7 +7,7 @@ import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.Set;
 import java.util.function.Predicate;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.Type;
 
 public final class DescriptorUtils {

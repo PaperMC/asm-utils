@@ -11,10 +11,7 @@ import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Objects;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.framework.qual.DefaultQualifier;
 
-@DefaultQualifier(NonNull.class)
 public abstract class AbstractDefaultRulesReflectionProxy implements DefaultRulesReflectionProxy {
     protected AbstractDefaultRulesReflectionProxy() {
     }
@@ -166,7 +163,7 @@ public abstract class AbstractDefaultRulesReflectionProxy implements DefaultRule
 
     @Override
     public CallSite altMetafactory(final MethodHandles.Lookup caller, final String interfaceMethodName, final MethodType factoryType, final Object... args) throws LambdaConversionException {
-        if (args.length < 3 || !(args[2] instanceof MethodType dynamicMethodType)) {
+        if (args.length < 3 || !(args[2] instanceof final MethodType dynamicMethodType)) {
             throw new IllegalArgumentException("illegal or missing argument");
         }
         return LambdaMetafactory.altMetafactory(caller, this.mapMethodName(factoryType.returnType(), interfaceMethodName, dynamicMethodType.parameterArray()), factoryType, args);

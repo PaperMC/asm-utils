@@ -8,7 +8,6 @@ import io.papermc.asm.rules.builder.matcher.method.MethodMatcher;
 import java.lang.constant.ClassDesc;
 import java.lang.invoke.ConstantBootstraps;
 import java.util.function.Predicate;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -102,7 +101,7 @@ public final class EnumRule {
         public void visitMethodInsn(final int opcode, final String owner, final String name, final String descriptor, final boolean isInterface) {
             if (this.ownerPredicate.test(owner) && name.equals("valueOf") && descriptor.equals("(Ljava/lang/String;)L" + owner + ";")) {
                 // Rewrite SomeEnum.valueOf(String)
-                final @Nullable ClassInfo info = this.classInfoProvider.info(owner);
+                final ClassInfo info = this.classInfoProvider.info(owner);
                 if (info != null && info.isEnum()) {
                     // Increase max stack size for this method by one for the class parameter
                     // Note that in some cases this does not actually have to be increased (which we cannot track here),
@@ -128,7 +127,7 @@ public final class EnumRule {
             if (owner.equals("java/lang/Enum")) {
                 return true;
             }
-            final @Nullable ClassInfo info = this.classInfoProvider.info(owner);
+            final ClassInfo info = this.classInfoProvider.info(owner);
             return info != null && info.isEnum();
         }
     }

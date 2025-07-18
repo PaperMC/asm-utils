@@ -3,7 +3,7 @@ package io.papermc.asm.rules.rename;
 import java.lang.constant.ClassDesc;
 import java.util.HashMap;
 import java.util.Map;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static io.papermc.asm.util.DescriptorUtils.desc;
 

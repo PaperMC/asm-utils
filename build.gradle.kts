@@ -67,8 +67,8 @@ allprojects {
             testImplementation(rootProject.libs.asmCommons)
         }
 
-        compileOnlyApi(rootProject.libs.checkerQual)
-        testCompileOnly(rootProject.libs.checkerQual)
+        compileOnlyApi(rootProject.libs.jspecify)
+        testCompileOnly(rootProject.libs.jspecify)
         compileOnly(rootProject.libs.jetbrainsAnnotations)
         testCompileOnly(rootProject.libs.jetbrainsAnnotations)
 
@@ -80,7 +80,7 @@ allprojects {
 
     javadocLinks {
         override(startsWithAnyOf("org.ow2.asm:asm"), JavadocLinksExtension.LinkOverride.Simple("https://asm.ow2.io/javadoc"))
-        override(rootProject.libs.checkerQual, "https://checkerframework.org/api/")
+        override(rootProject.libs.jspecify, "https://jspecify.dev/docs/api/")
     }
 }
 val mainForNewTargets = sourceSets.create("mainForNewTargets")

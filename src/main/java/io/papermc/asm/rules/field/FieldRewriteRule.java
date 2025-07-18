@@ -3,7 +3,7 @@ package io.papermc.asm.rules.field;
 import io.papermc.asm.ClassProcessingContext;
 import io.papermc.asm.rules.RewriteRule;
 import java.lang.constant.ClassDesc;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 
@@ -24,7 +24,7 @@ public interface FieldRewriteRule extends RewriteRule {
                     @Override
                     public void visitFieldInsn(final int opcode, final String owner, final String name, final String descriptor) {
                         if (FieldRewriteRule.this.shouldProcess(context, opcode, owner, name, descriptor)) {
-                            final @Nullable Rewrite rewrite = FieldRewriteRule.this.rewrite(context, opcode, owner, name, classDesc(descriptor));
+                            final Rewrite rewrite = FieldRewriteRule.this.rewrite(context, opcode, owner, name, classDesc(descriptor));
                             if (rewrite != null) {
                                 rewrite.apply(this.getDelegate());
                                 return;

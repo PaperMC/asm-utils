@@ -17,9 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.spi.ToolProvider;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.framework.qual.DefaultQualifier;
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
@@ -29,7 +27,6 @@ import org.objectweb.asm.tree.InnerClassNode;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DefaultQualifier(NonNull.class)
 public final class TestUtil {
     private TestUtil() {
     }

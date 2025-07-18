@@ -8,7 +8,7 @@ import java.lang.constant.MethodTypeDesc;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.MethodVisitor;
@@ -78,10 +78,10 @@ public interface MethodRewriteRule extends RewriteRule {
                         if (MethodRewriteRule.this.shouldProcess(context, opcode, owner, name, descriptor, isInterface, false)) {
                             final ClassDesc methodOwner = fromOwner(owner);
                             final MethodTypeDesc methodDesc = methodDesc(descriptor);
-                            final @Nullable MethodRewrite<?> rewrite = MethodRewriteRule.this.rewrite(context, false, opcode, methodOwner, name, methodDesc, isInterface);
+                            final MethodRewrite<?> rewrite = MethodRewriteRule.this.rewrite(context, false, opcode, methodOwner, name, methodDesc, isInterface);
                             if (rewrite != null) {
                                 rewrite.apply(this.getDelegate(), mn);
-                                final MethodRewrite.@Nullable MethodGenerator willGenerate = rewrite.createMethodGenerator();
+                                final MethodRewrite.MethodGenerator willGenerate = rewrite.createMethodGenerator();
                                 if (willGenerate != null) {
                                     methodsToGenerate.put(new MethodKey(owner, name, methodDesc), willGenerate);
                                 }
@@ -97,10 +97,10 @@ public interface MethodRewriteRule extends RewriteRule {
                             if (MethodRewriteRule.this.shouldProcess(context, handle.getTag(), handle.getOwner(), handle.getName(), handle.getDesc(), handle.isInterface(), true)) {
                                 final ClassDesc handleOwner = fromOwner(handle.getOwner());
                                 final MethodTypeDesc handleDesc = methodDesc(handle.getDesc());
-                                final @Nullable MethodRewrite<?> rewrite = MethodRewriteRule.this.rewrite(context, true, handle.getTag(), handleOwner, handle.getName(), handleDesc, handle.isInterface());
+                                final MethodRewrite<?> rewrite = MethodRewriteRule.this.rewrite(context, true, handle.getTag(), handleOwner, handle.getName(), handleDesc, handle.isInterface());
                                 if (rewrite != null) {
                                     rewrite.applyToBootstrapArguments(bootstrapMethodArguments);
-                                    final MethodRewrite.@Nullable MethodGenerator willGenerate = rewrite.createMethodGenerator();
+                                    final MethodRewrite.MethodGenerator willGenerate = rewrite.createMethodGenerator();
                                     if (willGenerate != null) {
                                         methodsToGenerate.put(new MethodKey(handle.getOwner(), handle.getName(), handleDesc), willGenerate);
                                     }

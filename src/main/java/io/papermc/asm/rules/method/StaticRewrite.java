@@ -7,7 +7,7 @@ import io.papermc.asm.rules.method.rewrite.MethodRewrite;
 import io.papermc.asm.rules.method.rewrite.SimpleRewrite;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static io.papermc.asm.util.DescriptorUtils.toOwner;
 import static io.papermc.asm.util.OpcodeUtils.isInterface;

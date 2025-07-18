@@ -1,4 +1,4 @@
 @NullMarked
-package io.papermc.asm.rules.rename.asm;
+package io.papermc.asm;
 
 import org.jspecify.annotations.NullMarked;
