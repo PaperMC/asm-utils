@@ -14,12 +14,14 @@ import static io.papermc.asm.util.DescriptorUtils.toOwner;
 
 final class RenameRuleBuilderImpl implements RenameRuleBuilder {
 
-    RenameRuleBuilderImpl() {
-    }
-
+    private final int api;
     final Map<String, String> mappings = new HashMap<>();
     final Map<ClassDesc, EnumRenamer> enumValueOfFieldRenames = new HashMap<>();
     final Map<String, Map<String, List<PredicateMethodRemapper.MatcherPair>>> predicateMethodRenames = new HashMap<>();
+
+    RenameRuleBuilderImpl(final int api) {
+        this.api = api;
+    }
 
     @Override
     public RenameRuleBuilder method(final ClassDesc owner, final String legacyMethodName, final MethodTypeDesc methodDesc, final String newMethodName) {
@@ -79,6 +81,6 @@ final class RenameRuleBuilderImpl implements RenameRuleBuilder {
 
     @Override
     public RenameRule build() {
-        return new RenameRule(this.mappings, this.enumValueOfFieldRenames, this.predicateMethodRenames);
+        return new RenameRule(this.api, this.mappings, this.enumValueOfFieldRenames, this.predicateMethodRenames);
     }
 }

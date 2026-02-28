@@ -18,6 +18,7 @@ import java.util.TreeMap;
 import java.util.function.Function;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
+import org.objectweb.asm.Opcodes;
 
 import static io.papermc.asm.util.DescriptorUtils.fromOwner;
 import static io.papermc.asm.util.DescriptorUtils.methodDesc;
@@ -30,7 +31,7 @@ class RenameRuleTest {
 
     @TransformerTest("data.rename.RenameTest")
     void testRenamerRule(final TransformerCheck check) {
-        final RenameRule rule = RenameRule.builder()
+        final RenameRule rule = RenameRule.builder(Opcodes.ASM9)
             .type("data/types/rename/TestEnum", RenamedTestEnum.class)
             .editEnum(TEST_ENUM, builder -> {
                 builder
@@ -51,14 +52,14 @@ class RenameRuleTest {
     @Test
     void testVersionedRenamerRule() {
         final Map<TestApiVersionImpl, RenameRule> versions = new HashMap<>();
-        versions.put(ApiVersions.ONE, RenameRule.builder()
+        versions.put(ApiVersions.ONE, RenameRule.builder(Opcodes.ASM9)
             .methodByClass(TestAnnotation.class, "single", methodDesc("()Ldata/types/rename/TestEnum;"), "value")
             .editEnum(TEST_ENUM, builder -> builder
                 .rename("A", "ONE")
             )
             .build()
         );
-        versions.put(ApiVersions.THREE, RenameRule.builder()
+        versions.put(ApiVersions.THREE, RenameRule.builder(Opcodes.ASM9)
             .methodByClass(TestAnnotation.class, "newValue", methodDesc("()Ldata/types/rename/TestEnum;"), "value")
             .annotationAttribute(TestAnnotation.class, "newValue", "value")
             .editEnum(TEST_ENUM, builder -> builder

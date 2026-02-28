@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TestRuleScanner {
 
@@ -28,7 +27,7 @@ class TestRuleScanner {
         DirectStaticRewrite convert = null;
         DirectStaticRewrite notTheName = null;
 
-        for (RewriteRule r : chain.rules()) {
+        for (final RewriteRule r : chain.rules()) {
             final DirectStaticRewrite rewrite = (DirectStaticRewrite) r;
             assertEquals(ClassDesc.of(DUMMY_CLASS), rewrite.owners().iterator().next());
 

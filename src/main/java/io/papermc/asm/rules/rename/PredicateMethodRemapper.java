@@ -10,7 +10,8 @@ public class PredicateMethodRemapper extends Remapper {
 
     private final Map<String, Map<String, List<MatcherPair>>> methodRemaps;
 
-    public PredicateMethodRemapper(final Map<String, Map<String, List<MatcherPair>>> methodRemaps) {
+    public PredicateMethodRemapper(final int api, final Map<String, Map<String, List<MatcherPair>>> methodRemaps) {
+        super(api);
         this.methodRemaps = methodRemaps;
     }
 

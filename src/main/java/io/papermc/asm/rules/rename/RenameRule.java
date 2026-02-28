@@ -14,16 +14,18 @@ import org.objectweb.asm.commons.SimpleRemapper;
 
 public final class RenameRule implements RewriteRule.Delegate, Mergeable<RenameRule> {
 
-    public static RenameRuleBuilder builder() {
-        return new RenameRuleBuilderImpl();
+    public static RenameRuleBuilder builder(final int api) {
+        return new RenameRuleBuilderImpl(api);
     }
 
+    private final int api;
     private final Map<String, String> renames;
     private final Map<ClassDesc, EnumRenamer> enumFieldRenames;
     private final Map<String, Map<String, List<PredicateMethodRemapper.MatcherPair>>> predicateMethodRemaps;
     private @Nullable RewriteRule rule;
 
-    public RenameRule(final Map<String, String> renames, final Map<ClassDesc, EnumRenamer> enumFieldRenames, final Map<String, Map<String, List<PredicateMethodRemapper.MatcherPair>>> predicateMethodRemaps) {
+    public RenameRule(final int api, final Map<String, String> renames, final Map<ClassDesc, EnumRenamer> enumFieldRenames, final Map<String, Map<String, List<PredicateMethodRemapper.MatcherPair>>> predicateMethodRemaps) {
+        this.api = api;
         this.renames = Map.copyOf(renames);
         this.enumFieldRenames = Map.copyOf(enumFieldRenames);
         this.predicateMethodRemaps = Map.copyOf(predicateMethodRemaps);
@@ -40,8 +42,8 @@ public final class RenameRule implements RewriteRule.Delegate, Mergeable<RenameR
     @Override
     public RewriteRule delegate() {
         if (this.rule == null) {
-            final Remapper remapper = new SimpleRemapper(Map.copyOf(this.renames));
-            final Remapper predicateRemapper = new PredicateMethodRemapper(this.predicateMethodRemaps);
+            final Remapper remapper = new SimpleRemapper(this.api, Map.copyOf(this.renames));
+            final Remapper predicateRemapper = new PredicateMethodRemapper(this.api, this.predicateMethodRemaps);
 
             final List<RewriteRule> rules = new ArrayList<>(this.enumFieldRenames.size() + 1);
             this.enumFieldRenames.forEach((classDesc, enumRenamer) -> {
@@ -57,6 +59,9 @@ public final class RenameRule implements RewriteRule.Delegate, Mergeable<RenameR
 
     @Override
     public RenameRule merge(final RenameRule other) {
+        if (this.api != other.api) {
+            throw new IllegalArgumentException("Cannot merge rules with different API versions");
+        }
         final Map<String, String> regularRenames = new HashMap<>(this.renames);
         regularRenames.putAll(other.renames);
 
@@ -76,6 +81,6 @@ public final class RenameRule implements RewriteRule.Delegate, Mergeable<RenameR
             newPredicateRenames.put(s, Map.copyOf(newMethods));
         });
 
-        return new RenameRule(regularRenames, enumFieldRenames, newPredicateRenames);
+        return new RenameRule(this.api, regularRenames, enumFieldRenames, newPredicateRenames);
     }
 }
