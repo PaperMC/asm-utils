@@ -8,6 +8,7 @@ import org.objectweb.asm.Opcodes;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -24,15 +25,22 @@ class TestRuleScanner {
         final RewriteRule.Chain chain = (RewriteRule.Chain) rule;
         assertEquals(2, chain.rules().size());
 
-        final DirectStaticRewrite convert = (DirectStaticRewrite) chain.rules().get(0);
-        assertEquals(ClassDesc.of(DUMMY_CLASS), convert.owners().iterator().next());
-        final boolean matches1 = convert.methodMatcher().matches(Opcodes.INVOKEVIRTUAL, false, "convert", "(Ljava/lang/String;)Ljava/lang/String;");
-        assertTrue(matches1);
+        DirectStaticRewrite convert = null;
+        DirectStaticRewrite notTheName = null;
 
-        final DirectStaticRewrite notTheName = (DirectStaticRewrite) chain.rules().get(1);
-        assertEquals(ClassDesc.of(DUMMY_CLASS), notTheName.owners().iterator().next());
-        final boolean matches2 = notTheName.methodMatcher().matches(Opcodes.INVOKESTATIC, false, "getById", "(Ljava/lang/Integer;)Ljava/lang/String;");
-        assertTrue(matches2);
+        for (RewriteRule r : chain.rules()) {
+            final DirectStaticRewrite rewrite = (DirectStaticRewrite) r;
+            assertEquals(ClassDesc.of(DUMMY_CLASS), rewrite.owners().iterator().next());
+
+            if (rewrite.methodMatcher().matches(Opcodes.INVOKEVIRTUAL, false, "convert", "(Ljava/lang/String;)Ljava/lang/String;")) {
+                convert = rewrite;
+            } else if (rewrite.methodMatcher().matches(Opcodes.INVOKESTATIC, false, "getById", "(Ljava/lang/Integer;)Ljava/lang/String;")) {
+                notTheName = rewrite;
+            }
+        }
+
+        assertNotNull(convert, "Missing convert method rewrite");
+        assertNotNull(notTheName, "Missing getById method rewrite");
     }
 
     @Test

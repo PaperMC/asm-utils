@@ -22,7 +22,7 @@ allprojects {
 
     indra {
         javaVersions {
-            target(17)
+            target(21)
             strictVersions(true)
         }
 
