@@ -5,6 +5,7 @@ import java.util.Optional;
 /**
  * This type needs to be implemented by the implementation of the
  * type that was previously an enum and is now an interface.
+ *
  * <p>
  * Types need to have static methods for {@code values()}
  * and {@code valueOf(String)}.

@@ -22,6 +22,9 @@ public final class RenameTest {
         System.out.println(fb);
         final TestEnum ea = TestEnum.valueOf("Ea");
         System.out.println(ea);
+
+        a.method1(1);
+        fb.method2(2);
     }
 
     private static void checkAnnotation(final AnnotatedElement element) {

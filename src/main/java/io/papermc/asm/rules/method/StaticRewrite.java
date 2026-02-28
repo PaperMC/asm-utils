@@ -25,6 +25,7 @@ public interface StaticRewrite extends MethodRewriteRule {
     /**
      * Transforms the intermediate descriptor to the final
      * descriptor that will be used in the rewritten bytecode.
+     *
      * <p>
      * Intermediate means that it has been modified from the
      * original accounting for the virtual/interface/static/constructor-ness

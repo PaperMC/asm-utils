@@ -2,6 +2,7 @@ package io.papermc.asm.rules.method.params;
 
 import io.papermc.asm.ClassProcessingContext;
 import io.papermc.asm.rules.RewriteRule;
+import io.papermc.asm.rules.builder.matcher.method.MethodMatcher;
 import io.papermc.asm.rules.builder.matcher.method.targeted.TargetedMethodMatcher;
 import io.papermc.asm.rules.method.OwnableMethodRewriteRule;
 import io.papermc.asm.rules.method.rewrite.MethodRewrite;
@@ -21,13 +22,18 @@ import static java.util.function.Predicate.isEqual;
  * offending parameter in the descriptor and move on.
  *
  * @param owners        owners of the methods to change
- * @param methodMatcher method matcher to find methods with (target is the type to be found in bytecode that needs to be transformed)
+ * @param targetedMethodMatcher method matcher to find methods with (target is the type to be found in bytecode that needs to be transformed)
  * @param newParamType  the parameter type that is valid for existing method
  */
-public record SuperTypeParamRewrite(Set<ClassDesc> owners, TargetedMethodMatcher methodMatcher, ClassDesc newParamType) implements OwnableMethodRewriteRule.Filtered {
+public record SuperTypeParamRewrite(Set<ClassDesc> owners, TargetedMethodMatcher targetedMethodMatcher, ClassDesc newParamType) implements OwnableMethodRewriteRule.Filtered {
+
+    @Override
+    public MethodMatcher methodMatcher() {
+        return this.targetedMethodMatcher.wrapped();
+    }
 
     public ClassDesc oldParamType() {
-        return this.methodMatcher.targetType();
+        return this.targetedMethodMatcher.targetType();
     }
 
     @Override
@@ -36,7 +42,7 @@ public record SuperTypeParamRewrite(Set<ClassDesc> owners, TargetedMethodMatcher
     }
 
     private MethodTypeDesc modifyMethodDescriptor(final MethodTypeDesc methodDescriptor) {
-        return replaceParameters(methodDescriptor, isEqual(this.methodMatcher().targetType()), this.newParamType());
+        return replaceParameters(methodDescriptor, isEqual(this.targetedMethodMatcher.targetType()), this.newParamType());
     }
 
     public record Versioned(Set<ClassDesc> owners, ClassDesc newParamType, VersionedMatcher<TargetedMethodMatcher> versions) implements VersionedRuleFactory {

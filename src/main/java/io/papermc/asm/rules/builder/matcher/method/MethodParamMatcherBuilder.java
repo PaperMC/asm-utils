@@ -15,6 +15,10 @@ public interface MethodParamMatcherBuilder<B> {
         return this.desc(d -> d.parameterType(paramIdx).equals(paramClassDesc));
     }
 
+    default B doesntHaveParam(final ClassDesc paramClassDesc) {
+        return this.desc(d -> !d.parameterList().contains(paramClassDesc));
+    }
+
     default B hasReturn(final ClassDesc returnClassDesc) {
         return this.desc(d -> d.returnType().equals(returnClassDesc));
     }

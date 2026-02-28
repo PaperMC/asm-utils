@@ -2,26 +2,25 @@ package io.papermc.asm.versioned;
 
 import io.papermc.asm.rules.RewriteRule;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NavigableMap;
-import java.util.function.BinaryOperator;
+import java.util.TreeMap;
 
-public record MappedVersionRuleFactory<R extends RewriteRule>(NavigableMap<ApiVersion<?>, ? extends R> versions, BinaryOperator<R> mergeFunction) implements VersionedRuleFactory {
+public record MappedVersionRuleFactory(NavigableMap<ApiVersion<?>, RewriteRule> versions) implements VersionedRuleFactory {
 
-    public static <M extends RewriteRule & Mergeable<M>> MappedVersionRuleFactory<M> mergeable(final NavigableMap<ApiVersion<?>, M> versions) {
-        return new MappedVersionRuleFactory<>(versions, Mergeable::merge);
+    public static MappedVersionRuleFactory create(final Map<? extends ApiVersion<?>, List<RewriteRule>> rules) {
+        final Map<ApiVersion<?>, RewriteRule> map = new HashMap<>();
+        rules.forEach((apiVersion, rewriteRules) -> {
+            map.put(apiVersion, RewriteRule.chain(rewriteRules));
+        });
+        return new MappedVersionRuleFactory(new TreeMap<>(map));
     }
 
     @Override
     public RewriteRule createRule(final ApiVersion<?> apiVersion) {
-        final List<R> toMerge = new ArrayList<>(this.versions.tailMap(apiVersion, true).values());
-        if (toMerge.isEmpty()) {
-            return RewriteRule.EMPTY;
-        } else if (toMerge.size() == 1) {
-            return toMerge.get(0);
-        }
-        Collections.reverse(toMerge);
-        return toMerge.stream().reduce(this.mergeFunction).orElseThrow();
+        final List<RewriteRule> toMerge = new ArrayList<>(this.versions.tailMap(apiVersion, true).values());
+        return RewriteRule.chain(toMerge);
     }
 }

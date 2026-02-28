@@ -22,12 +22,12 @@ allprojects {
 
     indra {
         javaVersions {
-            target(17)
+            target(21)
             strictVersions(true)
         }
 
-        publishSnapshotsTo("paperSnapshots", "https://repo.papermc.io/repository/maven-snapshots/")
-        publishReleasesTo("paperReleases", "https://repo.papermc.io/repository/maven-releases/")
+        publishSnapshotsTo("paperSnapshots", "https://artifactory.papermc.io/artifactory/snapshots/")
+        publishReleasesTo("paperReleases", "https://artifactory.papermc.io/artifactory/releases/")
         signWithKeyFromProperties("signingKey", "signingPassword")
 
         apache2License()
