@@ -1,7 +1,6 @@
 [versions]
 asm = "9.9.1"
 junit = "6.0.3"
-junitPlatform = "6.0.3"
 indra = "3.2.0"
 
 jbAnnos = "26.1.0"
@@ -15,7 +14,7 @@ jetbrainsAnnotations = { module = "org.jetbrains:annotations", version.ref = "jb
 jupiterApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 jupiterEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
 jupiterParams = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit" }
-platformLauncher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junitPlatform" }
+platformLauncher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit" }
 
 [plugins]
 indra = { id = "net.kyori.indra", version.ref = "indra" }
