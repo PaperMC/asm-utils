@@ -1,7 +1,7 @@
 [versions]
 asm = "9.9.1"
 junit = "6.0.3"
-indra = "3.2.0"
+indra = "4.0.0"
 
 jbAnnos = "26.1.0"
 
