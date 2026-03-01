@@ -16,7 +16,7 @@ jupiterEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref
 jupiterParams = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit" }
 platformLauncher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit" }
 
-gradle-kotlin-dsl = "org.gradle.kotlin.kotlin-dsl:org.gradle.kotlin.kotlin-dsl.gradle.plugin:6.4.2"
+gradle-kotlin-dsl = "org.gradle.kotlin.kotlin-dsl:org.gradle.kotlin.kotlin-dsl.gradle.plugin:6.5.3"
 gradle-plugin-kotlin = { module = "org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin" }
 gradle-plugin-indra = { module = "net.kyori.indra:net.kyori.indra.gradle.plugin", version.ref = "indra" }
 gradle-plugin-publish = { module = "net.kyori.indra.publishing:net.kyori.indra.publishing.gradle.plugin", version.ref = "indra" }
