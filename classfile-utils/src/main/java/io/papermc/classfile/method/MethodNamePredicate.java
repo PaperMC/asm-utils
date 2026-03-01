@@ -1,23 +1,20 @@
 package io.papermc.classfile.method;
 
+import io.papermc.classfile.ClassFiles;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 
-import static io.papermc.classfile.ClassfileUtils.startsWith;
+import static io.papermc.classfile.ClassFiles.startsWith;
 
 public sealed interface MethodNamePredicate extends Predicate<CharSequence> {
 
-    static MethodNamePredicate anyNonConstructors() {
+    static MethodNamePredicate constructor() {
         final class Holder {
-            static final MethodNamePredicate INSTANCE = new Any();
+            static final MethodNamePredicate INSTANCE = new Constructor();
         }
         return Holder.INSTANCE;
-    }
-
-    static MethodNamePredicate constructor() {
-        return exact("<init>");
     }
 
     static MethodNamePredicate exact(final String name, final String... otherNames) {
@@ -38,6 +35,9 @@ public sealed interface MethodNamePredicate extends Predicate<CharSequence> {
     record ExactMatch(List<String> names) implements MethodNamePredicate {
 
         public ExactMatch {
+            if (names.stream().anyMatch(s -> s.equals(ClassFiles.CONSTRUCTOR_METHOD_NAME))) {
+                throw new IllegalArgumentException("Cannot use <init> as a method name, use the dedicated construtor predicate");
+            }
             names = List.copyOf(names);
         }
 
@@ -47,19 +47,25 @@ public sealed interface MethodNamePredicate extends Predicate<CharSequence> {
         }
     }
 
+    record Constructor() implements MethodNamePredicate {
+
+        @Override
+        public boolean test(final CharSequence charSequence) {
+            return ClassFiles.CONSTRUCTOR_METHOD_NAME.contentEquals(charSequence);
+        }
+    }
+
     record PrefixMatch(char[] prefix) implements MethodNamePredicate {
+
+        public PrefixMatch {
+            if (ClassFiles.startsWith(ClassFiles.CONSTRUCTOR_METHOD_NAME, prefix)) {
+                throw new IllegalArgumentException("Cannot use <init> as a method name, use the dedicated construtor predicate");
+            }
+        }
 
         @Override
         public boolean test(final CharSequence s) {
             return startsWith(s, this.prefix);
-        }
-    }
-
-    record Any() implements MethodNamePredicate {
-
-        @Override
-        public boolean test(final CharSequence charSequence) {
-            return true;
         }
     }
 }

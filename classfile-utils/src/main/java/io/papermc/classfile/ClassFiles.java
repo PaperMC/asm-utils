@@ -1,10 +1,16 @@
 package io.papermc.classfile;
 
 import java.lang.constant.ClassDesc;
+import java.lang.invoke.LambdaMetafactory;
 
-public final class ClassfileUtils {
+public final class ClassFiles {
 
-    private ClassfileUtils() {
+    public static final int BOOTSTRAP_HANDLE_IDX = 1;
+    public static final int DYNAMIC_TYPE_IDX = 2;
+    public static final String CONSTRUCTOR_METHOD_NAME = "<init>";
+    public static final ClassDesc LAMBDA_METAFACTORY = desc(LambdaMetafactory.class);
+
+    private ClassFiles() {
     }
 
     public static ClassDesc desc(final Class<?> clazz) {

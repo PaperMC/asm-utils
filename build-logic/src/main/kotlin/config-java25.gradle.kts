@@ -49,16 +49,29 @@ repositories {
     mavenCentral()
 }
 
+val mockitoAgent = configurations.create("mockitoAgent")
+
 dependencies {
     compileOnlyApi(libs.jspecify)
     testCompileOnly(libs.jspecify)
     compileOnly(libs.jetbrainsAnnotations)
     testCompileOnly(libs.jetbrainsAnnotations)
 
+    mockitoAgent(libs.mockito.core) { isTransitive = false }
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.junit)
+    testImplementation(libs.assertj)
     testImplementation(libs.jupiterApi)
     testImplementation(libs.jupiterParams)
     testRuntimeOnly(libs.jupiterEngine)
     testRuntimeOnly(libs.platformLauncher)
+}
+
+tasks {
+    test {
+        useJUnitPlatform()
+        jvmArgs("-javaagent:${mockitoAgent.asPath}")
+    }
 }
 
 javadocLinks {
