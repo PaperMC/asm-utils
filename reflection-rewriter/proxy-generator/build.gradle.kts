@@ -2,7 +2,3 @@ plugins {
     id("config-java")
     id("config-asm")
 }
-
-dependencies {
-    api(project(":"))
-}

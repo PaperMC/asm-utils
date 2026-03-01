@@ -4,6 +4,8 @@ plugins {
 
 rootProject.name = "asm-utils"
 
+includeBuild("build-logic")
+
 include("reflection-rewriter/rewriter")
 project(":reflection-rewriter/rewriter").name = "reflection-rewriter"
 
