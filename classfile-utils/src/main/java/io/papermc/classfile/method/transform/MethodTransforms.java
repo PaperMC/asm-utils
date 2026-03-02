@@ -1,6 +1,7 @@
 package io.papermc.classfile.method.transform;
 
 import io.papermc.classfile.method.MethodRewrite;
+import io.papermc.classfile.transform.TransformContext;
 import java.lang.classfile.CodeElement;
 import java.lang.classfile.constantpool.ConstantPoolBuilder;
 import java.lang.classfile.instruction.InvokeDynamicInstruction;
@@ -8,6 +9,7 @@ import java.lang.classfile.instruction.InvokeInstruction;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.ConstantDesc;
 import java.lang.constant.DirectMethodHandleDesc;
+import java.lang.constant.MethodTypeDesc;
 import java.util.List;
 import java.util.function.Consumer;
 import org.jspecify.annotations.Nullable;
@@ -36,14 +38,16 @@ public final class MethodTransforms {
         }
     }
 
-    static @Nullable BoundRewrite setupRewrite(final CodeElement element) {
+    static @Nullable BoundRewrite setupRewrite(final CodeElement element, final TransformContext context) {
         final ClassDesc owner;
         final String methodName;
+        final MethodTypeDesc descriptor;
         final Writer rewriter;
         if (element instanceof final InvokeInstruction invoke) {
             owner = invoke.owner().asSymbol();
             methodName = invoke.name().stringValue();
-            rewriter = (emit, poolBuilder, rewrite) -> rewrite.transformInvoke(emit, poolBuilder, owner, methodName, invoke);
+            descriptor = invoke.typeSymbol();
+            rewriter = (methodContext, rewrite) -> rewrite.transformInvoke(methodContext, invoke.opcode());
         } else if (element instanceof final InvokeDynamicInstruction invokeDynamic) {
             final DirectMethodHandleDesc bootstrapMethod = invokeDynamic.bootstrapMethod();
             final List<ConstantDesc> args = invokeDynamic.bootstrapArgs();
@@ -56,22 +60,29 @@ public final class MethodTransforms {
             }
             owner = methodHandle.owner();
             methodName = methodHandle.methodName();
-            rewriter = (emit, poolBuilder, rewrite) -> rewrite.transformInvokeDynamic(emit, poolBuilder, bootstrapMethod, methodHandle, args, invokeDynamic);
+            // for VIRTUAL, VIRTUAL_INTERFACE, this descriptor has the receiver type as the first param.
+            // we remove it later just for purposes of descriptor matching, method actions are expected to handle it accordingly
+            descriptor = methodHandle.invocationType();
+            rewriter = (methodContext, rewrite) -> rewrite.transformInvokeDynamic(methodContext, bootstrapMethod, methodHandle, args, invokeDynamic);
         } else {
             return null;
         }
-        return new BoundRewrite(rewriter, owner, methodName);
+        final MethodTransformContext.MethodInfo info = new MethodTransformContext.MethodInfo(owner, methodName, descriptor);
+        return new BoundRewrite(rewriter, info, context);
     }
 
-    record BoundRewrite(Writer writer, ClassDesc owner, String methodName) {
+    record BoundRewrite(Writer writer, MethodTransformContext.MethodInfo methodInfo, TransformContext context) {
 
         public boolean tryWrite(final Consumer<CodeElement> emit, final ConstantPoolBuilder poolBuilder, final MethodRewrite methodRewrite) {
-            return this.writer.write(emit, poolBuilder, methodRewrite);
+            final TrackingConsumer<CodeElement> checkedEmit = new TrackingConsumer<>(emit);
+            final MethodTransformContext methodContext = MethodTransformContext.create(this.context, poolBuilder, this.methodInfo, checkedEmit, methodRewrite);
+            return this.writer.write(methodContext, methodRewrite);
         }
     }
 
     @FunctionalInterface
     interface Writer {
-        boolean write(Consumer<CodeElement> emit, ConstantPoolBuilder poolBuilder, MethodRewrite rewrite);
+        boolean write(MethodTransformContext context, MethodRewrite rewrite);
     }
+
 }

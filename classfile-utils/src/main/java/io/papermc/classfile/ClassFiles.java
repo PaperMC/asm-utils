@@ -1,7 +1,11 @@
 package io.papermc.classfile;
 
 import java.lang.constant.ClassDesc;
+import java.lang.constant.MethodTypeDesc;
 import java.lang.invoke.LambdaMetafactory;
+import java.util.Set;
+import java.util.function.Predicate;
+import org.jspecify.annotations.Nullable;
 
 public final class ClassFiles {
 
@@ -17,16 +21,12 @@ public final class ClassFiles {
         return clazz.describeConstable().orElseThrow();
     }
 
-    public static boolean startsWith(final CharSequence text, final char[] prefix) {
-        final int len = prefix.length;
-        if (text.length() < len) {
-            return false;
-        }
-        for (int i = 0; i < len; i++) {
-            if (text.charAt(i) != prefix[i]) {
-                return false;
+    public static MethodTypeDesc replaceParameters(MethodTypeDesc descriptor, final Predicate<ClassDesc> oldParam, final ClassDesc newParam) {
+        for (int i = 0; i < descriptor.parameterCount(); i++) {
+            if (oldParam.test(descriptor.parameterType(i))) {
+                descriptor = descriptor.changeParameterType(i, newParam);
             }
         }
-        return true;
+        return descriptor;
     }
 }

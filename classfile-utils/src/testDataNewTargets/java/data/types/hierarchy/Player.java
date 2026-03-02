@@ -1,6 +1,8 @@
 package data.types.hierarchy;
 
-@SuppressWarnings("unused")
+import org.jspecify.annotations.Nullable;
+
+@SuppressWarnings({"unused", "DataFlowIssue"})
 public class Player implements Entity {
 
     public Player() {
@@ -37,5 +39,32 @@ public class Player implements Entity {
     @Override
     public String toString() {
         return this.data + super.toString();
+    }
+
+    private @Nullable Entity owner;
+
+    @Override
+    public void setOwnerNew(final @Nullable Entity entity) {
+        System.out.println("Set owner to " + entity + " on Player");
+        this.owner = entity;
+        if (this.owner != null) {
+            this.owner.getName();
+            assert this.owner instanceof Entity;
+        }
+    }
+
+    @Override
+    public void setOwner(final @Nullable Player player) {
+        System.out.println("Set player owner to " + player + " on Player");
+        this.owner = player;
+        if (this.owner != null) {
+            this.owner.getName();
+            assert this.owner instanceof Player;
+        }
+    }
+
+    @Override
+    public @Nullable Entity getOwner() {
+        return this.owner;
     }
 }

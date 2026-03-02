@@ -1,9 +1,10 @@
 package io.papermc.classfile.method.action;
 
 import io.papermc.classfile.ClassFiles;
-import java.lang.classfile.CodeElement;
+import io.papermc.classfile.method.MethodDescriptorPredicate;
+import io.papermc.classfile.method.MethodNamePredicate;
+import io.papermc.classfile.method.transform.MethodTransformContext;
 import java.lang.classfile.Opcode;
-import java.lang.classfile.constantpool.ConstantPoolBuilder;
 import java.lang.classfile.instruction.InvokeDynamicInstruction;
 import java.lang.classfile.instruction.InvokeInstruction;
 import java.lang.constant.ClassDesc;
@@ -11,7 +12,7 @@ import java.lang.constant.ConstantDesc;
 import java.lang.constant.DirectMethodHandleDesc;
 import java.lang.constant.MethodHandleDesc;
 import java.lang.constant.MethodTypeDesc;
-import java.util.function.Consumer;
+import java.util.Optional;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -32,6 +33,11 @@ public record DirectStaticCall(ClassDesc newOwner, @Nullable String staticMethod
         this(newOwner, null);
     }
 
+    @Override
+    public Optional<String> isValidFor(final MethodNamePredicate namePredicate, final MethodDescriptorPredicate descriptorPredicate) {
+        return Optional.empty();
+    }
+
     private String constructorStaticMethodName(final ClassDesc owner) {
         if (this.staticMethodName != null) {
             return this.staticMethodName;
@@ -49,21 +55,17 @@ public record DirectStaticCall(ClassDesc newOwner, @Nullable String staticMethod
     }
 
     @Override
-    public void rewriteInvoke(
-        final Consumer<CodeElement> emit,
-        final ConstantPoolBuilder poolBuilder,
-        final Opcode opcode,
-        final ClassDesc owner,
-        final String name,
-        final MethodTypeDesc descriptor
-    ) {
+    public void rewriteInvoke(final MethodTransformContext context, final Opcode opcode) {
+        final MethodTypeDesc descriptor = context.methodInfo().descriptor();
+        final ClassDesc owner = context.methodInfo().owner();
+        final String name = context.methodInfo().name();
         MethodTypeDesc newDescriptor = descriptor;
         if (opcode == Opcode.INVOKEVIRTUAL || opcode == Opcode.INVOKEINTERFACE) {
             newDescriptor = descriptor.insertParameterTypes(0, owner);
         } else if (opcode == Opcode.INVOKESPECIAL) {
             if (ClassFiles.CONSTRUCTOR_METHOD_NAME.equals(name)) {
                 newDescriptor = newDescriptor.changeReturnType(owner);
-                emit.accept(InvokeInstruction.of(Opcode.INVOKESTATIC, poolBuilder.methodRefEntry(this.newOwner(), this.constructorStaticMethodName(owner), newDescriptor)));
+                context.emit(InvokeInstruction.of(Opcode.INVOKESTATIC, context.constantPool().methodRefEntry(this.newOwner(), this.constructorStaticMethodName(owner), newDescriptor)));
                 return;
             } else {
                 throw new UnsupportedOperationException("Unhandled static rewrite: " + opcode + " " + owner + " " + name + " " + descriptor);
@@ -71,24 +73,17 @@ public record DirectStaticCall(ClassDesc newOwner, @Nullable String staticMethod
         } else if (opcode != Opcode.INVOKESTATIC) {
             throw new UnsupportedOperationException("Unhandled static rewrite: " + opcode + " " + owner + " " + name + " " + descriptor);
         }
-        emit.accept(InvokeInstruction.of(Opcode.INVOKESTATIC, poolBuilder.methodRefEntry(this.newOwner(), this.staticMethodName(name), newDescriptor)));
+        context.emit(InvokeInstruction.of(Opcode.INVOKESTATIC, context.constantPool().methodRefEntry(this.newOwner(), this.staticMethodName(name), newDescriptor)));
     }
 
     @Override
-    public void rewriteInvokeDynamic(
-        final Consumer<CodeElement> emit,
-        final ConstantPoolBuilder poolBuilder,
-        final DirectMethodHandleDesc.Kind kind,
-        final ClassDesc owner,
-        final String name,
-        final MethodTypeDesc descriptor,
-        final BootstrapInfo bootstrapInfo
-    ) {
+    public void rewriteInvokeDynamic(final MethodTransformContext context, final DirectMethodHandleDesc.Kind kind, final BootstrapInfo bootstrapInfo) {
+        final MethodTypeDesc descriptor = context.methodInfo().descriptor();
+        final ClassDesc owner = context.methodInfo().owner();
+        final String name = context.methodInfo().name();
         MethodTypeDesc newDescriptor = descriptor;
         final ConstantDesc[] newBootstrapArgs = bootstrapInfo.args().toArray(new ConstantDesc[0]);
         if (kind == DirectMethodHandleDesc.Kind.INTERFACE_VIRTUAL || kind == DirectMethodHandleDesc.Kind.VIRTUAL) {
-            // TODO make sure we don't need this. The descriptor already seems to always have the "instance" as the first param if it exists
-            // newDescriptor = descriptor.insertParameterTypes(0, owner);
             newBootstrapArgs[ClassFiles.BOOTSTRAP_HANDLE_IDX] = MethodHandleDesc.ofMethod(DirectMethodHandleDesc.Kind.STATIC, this.newOwner(), this.staticMethodName(name), newDescriptor);
         } else if (kind == DirectMethodHandleDesc.Kind.SPECIAL || kind == DirectMethodHandleDesc.Kind.INTERFACE_SPECIAL || kind == DirectMethodHandleDesc.Kind.CONSTRUCTOR) {
             if (ClassFiles.CONSTRUCTOR_METHOD_NAME.equals(name)) {
@@ -105,6 +100,6 @@ public record DirectStaticCall(ClassDesc newOwner, @Nullable String staticMethod
             // is a static method
             newBootstrapArgs[ClassFiles.BOOTSTRAP_HANDLE_IDX] = MethodHandleDesc.ofMethod(DirectMethodHandleDesc.Kind.STATIC, this.newOwner(), this.staticMethodName(name), newDescriptor);
         }
-        emit.accept(InvokeDynamicInstruction.of(poolBuilder.invokeDynamicEntry(bootstrapInfo.create(newBootstrapArgs))));
+        context.emit(InvokeDynamicInstruction.of(context.constantPool().invokeDynamicEntry(bootstrapInfo.create(newBootstrapArgs))));
     }
 }

@@ -3,6 +3,7 @@ package io.papermc.classfile.method.transform;
 import io.papermc.classfile.ClassFiles;
 import io.papermc.classfile.method.MethodRewrite;
 import io.papermc.classfile.method.MethodRewriteIndex;
+import io.papermc.classfile.transform.TransformContext;
 import java.lang.classfile.CodeBuilder;
 import java.lang.classfile.CodeElement;
 import java.lang.classfile.CodeTransform;
@@ -27,10 +28,12 @@ public class ConstructorAwareCodeTransform implements CodeTransform {
     private final Deque<Level> bufferStack = new ArrayDeque<>();
     private final MethodRewriteIndex index;
     private final CodeTransform fallbackTransform;
+    private final TransformContext context;
 
-    public ConstructorAwareCodeTransform(final MethodRewriteIndex index, final CodeTransform fallbackTransform) {
+    public ConstructorAwareCodeTransform(final MethodRewriteIndex index, final CodeTransform fallbackTransform, final TransformContext context) {
         this.index = index;
         this.fallbackTransform = fallbackTransform;
+        this.context = context;
     }
 
     @Override
@@ -50,7 +53,7 @@ public class ConstructorAwareCodeTransform implements CodeTransform {
                 // end of a constructor level
                 final InvokeInstruction invoke = (InvokeInstruction) element;
                 final Level level = this.bufferStack.pop();
-                final MethodTransforms.BoundRewrite boundRewrite = MethodTransforms.setupRewrite(invoke);
+                final MethodTransforms.BoundRewrite boundRewrite = MethodTransforms.setupRewrite(invoke, this.context);
                 if (boundRewrite == null) {
                     // should rarely happen, if ever. Only for some different form of LambdaMetafactory call
                     level.add(element);

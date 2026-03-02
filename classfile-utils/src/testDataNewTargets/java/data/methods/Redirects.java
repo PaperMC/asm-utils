@@ -53,6 +53,10 @@ public final class Redirects {
     public static void wrapObject(final Object object) {
     }
 
+    public static void setOwner(final Entity root, final Entity target) {
+        root.setOwnerNew(target);
+    }
+
     private Redirects() {
     }
 }

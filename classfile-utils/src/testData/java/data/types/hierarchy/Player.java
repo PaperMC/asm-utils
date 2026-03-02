@@ -1,7 +1,11 @@
 package data.types.hierarchy;
 
+import org.jspecify.annotations.Nullable;
+
 @SuppressWarnings("unused")
 public class Player implements Entity {
+
+    private @Nullable Entity owner = null;
 
     @Override
     public String getName() {
@@ -27,5 +31,20 @@ public class Player implements Entity {
     }
 
     void test() {
+    }
+
+    @Override
+    public void setOwner(final @Nullable Entity entity) {
+        this.owner = entity;
+    }
+
+    @Override
+    public void setOwner(final @Nullable Player player) {
+        this.owner = player;
+    }
+
+    @Override
+    public @Nullable Entity getOwner() {
+        return this.owner;
     }
 }

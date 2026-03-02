@@ -31,6 +31,10 @@ class TestDirectStaticCall {
         for (final String methodName : methodNames) {
             rewriteList.add(new MethodRewrite(PLAYER, MethodNamePredicate.exact(methodName), MethodDescriptorPredicate.hasParameter(ENTITY), new DirectStaticCall(NEW_OWNER)));
         }
+        final List<String> entityMethodNames = List.of("setOwner");
+        for (final String entityMethodName : entityMethodNames) {
+            rewriteList.add(new MethodRewrite(ENTITY, MethodNamePredicate.exact(entityMethodName), MethodDescriptorPredicate.hasParameter(ENTITY), new DirectStaticCall(NEW_OWNER)));
+        }
 
         rewriteList.add(new MethodRewrite(METHODS_WRAPPER, MethodNamePredicate.constructor(), MethodDescriptorPredicate.hasParameter(PLAYER), new DirectStaticCall(NEW_OWNER)));
         final RewriteProcessor rewriteProcessor = new RewriteProcessor(rewriteList);
