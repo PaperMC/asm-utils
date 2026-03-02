@@ -2,7 +2,6 @@ package io.papermc.classfile.method.action;
 
 import io.papermc.classfile.method.MethodDescriptorPredicate;
 import io.papermc.classfile.method.MethodNamePredicate;
-import io.papermc.classfile.method.MethodRewrite;
 import io.papermc.classfile.method.transform.MethodTransformContext;
 import java.lang.classfile.Opcode;
 import java.lang.constant.ConstantDesc;
@@ -12,7 +11,7 @@ import java.lang.constant.MethodTypeDesc;
 import java.util.List;
 import java.util.Optional;
 
-public sealed interface MethodRewriteAction permits DirectStaticCall, SubtypeReturn, WrapReturnValue {
+public sealed interface MethodRewriteAction permits DirectStaticCall, SubtypeReturn, SupertypeParam, WrapParamValue, WrapReturnValue {
 
     /**
      * Check that the specified rewrite is configured correctly for this action.

@@ -9,14 +9,14 @@ public sealed interface MethodDescriptorPredicate extends Predicate<MethodTypeDe
     ClassDesc targetType();
 
     static MethodDescriptorPredicate hasReturn(final ClassDesc returnType) {
-        return new ReturnType(returnType);
+        return new HasReturn(returnType);
     }
 
     static MethodDescriptorPredicate hasParameter(final ClassDesc parameterType) {
         return new HasParameter(parameterType);
     }
 
-    record ReturnType(ClassDesc targetType) implements MethodDescriptorPredicate {
+    record HasReturn(ClassDesc targetType) implements MethodDescriptorPredicate {
 
         @Override
         public boolean test(final MethodTypeDesc methodTypeDesc) {

@@ -42,11 +42,13 @@ public final class MethodTransforms {
         final ClassDesc owner;
         final String methodName;
         final MethodTypeDesc descriptor;
+        final boolean isInterface;
         final Writer rewriter;
         if (element instanceof final InvokeInstruction invoke) {
             owner = invoke.owner().asSymbol();
             methodName = invoke.name().stringValue();
             descriptor = invoke.typeSymbol();
+            isInterface = invoke.isInterface();
             rewriter = (methodContext, rewrite) -> rewrite.transformInvoke(methodContext, invoke.opcode());
         } else if (element instanceof final InvokeDynamicInstruction invokeDynamic) {
             final DirectMethodHandleDesc bootstrapMethod = invokeDynamic.bootstrapMethod();
@@ -60,14 +62,14 @@ public final class MethodTransforms {
             }
             owner = methodHandle.owner();
             methodName = methodHandle.methodName();
-            // for VIRTUAL, VIRTUAL_INTERFACE, this descriptor has the receiver type as the first param.
-            // we remove it later just for purposes of descriptor matching, method actions are expected to handle it accordingly
-            descriptor = methodHandle.invocationType();
+            // we parse a descriptor ourselves that is the real method, not including the receiver for virtual/interface methods
+            descriptor = MethodTypeDesc.ofDescriptor(methodHandle.lookupDescriptor());
+            isInterface = methodHandle.isOwnerInterface();
             rewriter = (methodContext, rewrite) -> rewrite.transformInvokeDynamic(methodContext, bootstrapMethod, methodHandle, args, invokeDynamic);
         } else {
             return null;
         }
-        final MethodTransformContext.MethodInfo info = new MethodTransformContext.MethodInfo(owner, methodName, descriptor);
+        final MethodTransformContext.MethodInfo info = new MethodTransformContext.MethodInfo(owner, methodName, descriptor, isInterface);
         return new BoundRewrite(rewriter, info, context);
     }
 

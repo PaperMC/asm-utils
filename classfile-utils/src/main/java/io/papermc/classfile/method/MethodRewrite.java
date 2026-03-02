@@ -14,23 +14,24 @@ import java.lang.classfile.instruction.InvokeDynamicInstruction;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.ConstantDesc;
 import java.lang.constant.DirectMethodHandleDesc;
-import java.lang.constant.MethodTypeDesc;
 import java.util.List;
 
 public record MethodRewrite(ClassDesc owner, MethodNamePredicate methodName, MethodDescriptorPredicate descriptor, MethodRewriteAction action) {
 
     public MethodRewrite {
-        action.isValidFor(methodName, descriptor).ifPresent(IllegalArgumentException::new);
+        action.isValidFor(methodName, descriptor).ifPresent(s -> {
+            throw new IllegalArgumentException(s);
+        });
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    private boolean doesMatch(final String name, final MethodTypeDesc descriptor) {
-        return this.methodName.test(name) && this.descriptor.test(descriptor);
+    private boolean doesMatch(final MethodTransformContext.MethodInfo info) {
+        return this.methodName.test(info.name()) && this.descriptor.test(info.descriptor());
     }
 
     public boolean transformInvoke(final MethodTransformContext context, final Opcode opcode) {
         // owner validated by caller
-        if (!this.doesMatch(context.methodInfo().name(), context.methodInfo().descriptor())) {
+        if (!this.doesMatch(context.methodInfo())) {
             return false;
         }
         try (TrackingConsumer<CodeElement>.Instance _ = context.prime()) {
@@ -47,14 +48,7 @@ public record MethodRewrite(ClassDesc owner, MethodNamePredicate methodName, Met
         final InvokeDynamicInstruction invokeDynamic
     ) {
         // owner validated by caller
-
-        // For VIRTUAL/INTERFACE_VIRTUAL, the descriptor includes the receiver as this first param.
-        // we need to remove that so that the descriptor matches a non-dynamic invocation, which is what our API expects for matching
-        final MethodTypeDesc descriptorForMatching = switch (methodHandle.kind()) {
-            case VIRTUAL, INTERFACE_VIRTUAL -> methodHandle.invocationType().dropParameterTypes(0, 1);
-            default -> methodHandle.invocationType();
-        };
-        if (!this.doesMatch(context.methodInfo().name(), descriptorForMatching)) {
+        if (!this.doesMatch(context.methodInfo())) {
             return false;
         }
         final MethodRewriteAction.BootstrapInfo info = new MethodRewriteAction.BootstrapInfo(bootstrapMethod, invokeDynamic.name().stringValue(), invokeDynamic.typeSymbol(), args);

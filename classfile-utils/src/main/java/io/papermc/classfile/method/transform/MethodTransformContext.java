@@ -8,6 +8,8 @@ import java.lang.classfile.constantpool.ConstantPoolBuilder;
 import java.lang.classfile.constantpool.MemberRefEntry;
 import java.lang.classfile.instruction.InvokeInstruction;
 import java.lang.constant.ClassDesc;
+import java.lang.constant.DirectMethodHandleDesc;
+import java.lang.constant.MethodHandleDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.util.function.Consumer;
 
@@ -28,6 +30,21 @@ public interface MethodTransformContext extends TransformContext {
             ? this.constantPool().interfaceMethodRefEntry(this.methodInfo().owner(), this.methodInfo().name(), newDescriptor)
             : this.constantPool().methodRefEntry(this.methodInfo().owner(), this.methodInfo().name(), newDescriptor);
         this.emit(InvokeInstruction.of(opcode, ref));
+    }
+
+    default void emitToBridgeMethod(final String name, final MethodTypeDesc descriptor) {
+        this.emit(InvokeInstruction.of(
+            Opcode.INVOKESTATIC, this.constantPool().methodRefEntry(this.currentClass(), name, descriptor)
+        ));
+    }
+
+    default DirectMethodHandleDesc createBridgeHandle(final String name, final MethodTypeDesc descriptor) {
+        return MethodHandleDesc.ofMethod(
+            DirectMethodHandleDesc.Kind.STATIC,
+            this.currentClass(),
+            name,
+            descriptor
+        );
     }
 
     /**
@@ -68,7 +85,7 @@ public interface MethodTransformContext extends TransformContext {
      * This is just for method matching, combining method information from both
      * INVOKE* and INVOKEDYNAMIC instructions.
      */
-    record MethodInfo(ClassDesc owner, String name, MethodTypeDesc descriptor) {
+    record MethodInfo(ClassDesc owner, String name, MethodTypeDesc descriptor, boolean isInterface) {
     }
 
     /**
