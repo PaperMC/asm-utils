@@ -14,3 +14,6 @@ project(":reflection-rewriter/proxy-generator").name = "reflection-rewriter-prox
 
 include("reflection-rewriter/runtime")
 project(":reflection-rewriter/runtime").name = "reflection-rewriter-runtime"
+
+include("classfile-utils")
+project(":classfile-utils").name = "classfile-utils"
