@@ -11,37 +11,48 @@ jobs:
   build:
     # Only run on PRs if the source branch is on someone else's repo
     if: ${{ github.event_name != 'pull_request' || github.repository != github.event.pull_request.head.repo.full_name }}
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        java: [ 21 ]
-      fail-fast: true
+    runs-on: namespace-profile-linux-default
     steps:
-      - uses: actions/checkout@v6
-      - name: JDK ${{ matrix.java }}
-        uses: actions/setup-java@v5
+      - uses: namespacelabs/nscloud-checkout-action@v9
+      - name: Set up cache
+        uses: namespacelabs/nscloud-cache-action@v1
         with:
-          java-version: ${{ matrix.java }}
+          cache: gradle
+
+      - name: Setup gradle build cache
+        run: |
+          nsc cache gradle setup --init-gradle /tmp/init.gradle
+
+      - name: Setup gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-disabled: true # namespace handles this
+
+      - name: "setup java"
+        uses: actions/setup-java@v6
+        with:
           distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v5
+          java-version: 21
+          cache: "" # namespace handles this
+
       - name: Build
-        run: ./gradlew build --stacktrace
+        run: ./gradlew --init-script=/tmp/init.gradle build --stacktrace
       - name: Determine Status
         run: |
-          if [ "$(./gradlew properties | awk '/^version:/ { print $2; }' | grep '\-SNAPSHOT')" ]; then
+          if [ "$(./gradlew --init-script=/tmp/init.gradle properties | awk '/^version:/ { print $2; }' | grep '\-SNAPSHOT')" ]; then
             echo "STATUS=snapshot" >> $GITHUB_ENV
           else
             echo "STATUS=release" >> $GITHUB_ENV
           fi
       - name: Publish Snapshot
         if: "${{ env.STATUS != 'release' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}"
-        run: ./gradlew publish
+        run: ./gradlew --init-script=/tmp/init.gradle publish
         env:
           ORG_GRADLE_PROJECT_paperSnapshotsUsername: "${{ secrets.ARTIFACTORY_USERNAME }}"
           ORG_GRADLE_PROJECT_paperSnapshotsPassword: "${{ secrets.ARTIFACTORY_PASSWORD }}"
       - name: Publish Release
         if: "${{ env.STATUS == 'release' && github.event_name == 'release' }}"
-        run: ./gradlew publish
+        run: ./gradlew --init-script=/tmp/init.gradle publish
         env:
           ORG_GRADLE_PROJECT_paperReleasesUsername: "${{ secrets.ARTIFACTORY_USERNAME }}"
           ORG_GRADLE_PROJECT_paperReleasesPassword: "${{ secrets.ARTIFACTORY_PASSWORD }}"
