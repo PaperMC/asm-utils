@@ -13,4 +13,4 @@ reflection-rewriter is composed of three components:
 - runtime: implements targets for redirected reflection calls
 - proxy-generator: generates static proxies for runtime
 
-<img src="https://papermc.io/assets/misc/namespace-oss-badge.svg?project=asm-utils" alt="CI powered by namespace badge" />
+[![CI powered by namespace badge](https://papermc.io/assets/misc/namespace-oss-badge.svg?project=asm-utils)](https://namespace.so/github-actions/?utm_source=oss&utm_campaign=papermc)
