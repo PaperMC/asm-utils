@@ -21,7 +21,7 @@ gradle-plugin-kotlin = { module = "org.jetbrains.kotlin.jvm:org.jetbrains.kotlin
 gradle-plugin-indra = { module = "net.kyori.indra:net.kyori.indra.gradle.plugin", version.ref = "indra" }
 gradle-plugin-publish = { module = "net.kyori.indra.publishing:net.kyori.indra.publishing.gradle.plugin", version.ref = "indra" }
 gradle-plugin-checkstyle = { module = "net.kyori.indra.checkstyle:net.kyori.indra.checkstyle.gradle.plugin", version.ref = "indra" }
-gradle-plugin-javadocLinks = "org.incendo.cloud-build-logic.javadoc-links:org.incendo.cloud-build-logic.javadoc-links.gradle.plugin:0.0.18"
+gradle-plugin-javadocLinks = "org.incendo.cloud-build-logic.javadoc-links:org.incendo.cloud-build-logic.javadoc-links.gradle.plugin:0.0.23"
 
 
 [plugins]
