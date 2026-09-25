@@ -1,5 +1,5 @@
 [versions]
-asm = "9.9.1"
+asm = "9.10.1"
 junit = "6.0.3"
 indra = "3.2.0"
 
